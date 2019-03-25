@@ -8,6 +8,14 @@ intention of making it easier for multi-language projects to use NPZ and
 NPY files for data storage, given their simplicity and support across
 most Python deep learning frameworks.
 
+The implementations in this library are based upon the following file
+format documents:
+- **NPY**: The NPY file format is documented by the NumPy developers
+           in [this note](https://docs.scipy.org/doc/numpy/reference/generated/numpy.lib.format.html)
+- **NPZ**: While not explicitly documented, the NPZ format is a
+           a PKZIP archive of NPY files, and thus is documented
+           here: https://pkware.cachefly.net/webdocs/casestudies/APPNOTE.TXT.
+
 ## Getting Started
 
 There are two main ways to use the library: as a statically linked C++
