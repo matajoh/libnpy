@@ -1,0 +1,16 @@
+dist: xenial
+language: cpp
+
+addons:
+  apt:
+    update: true
+
+before_install:
+  - sudo apt-get install -y zlib1g-dev swig doxygen
+
+script:
+  - mkdir build
+  - cd build
+  - cmake -DCMAKE_BUILD_TYPE=RelWithDebInfo ..
+  - cmake --build .
+  - ctest -C RelWithDebInfo
