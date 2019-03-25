@@ -1,7 +1,8 @@
 #include "libnpy_tests.h"
 #include "npy_read.h"
 
-int test_npy_read(){
+int test_npy_read()
+{
     int result = EXIT_SUCCESS;
 
     test_read<std::uint8_t>(result, "uint8");
@@ -15,7 +16,7 @@ int test_npy_read(){
     test_read<std::uint64_t>(result, "uint64");
     test_read<std::int64_t>(result, "int64");
     test_read<float>(result, "float32");
-    test_read<double>(result, "float64");    
+    test_read<double>(result, "float64");
 
     return result;
 }

@@ -2,11 +2,19 @@
 
 [![Build Status](https://travis-ci.com/matajoh/libnpy.svg?token=mQKh8ae3m6BDSeGHqxyY&branch=master)](https://travis-ci.com/matajoh/libnpy)
 
-`libnpy` is a multi-platform C++ library for reading and writing NPY files,
-with an additional .NET interface. It was built with the intention of
-making it easier for multi-language projects to use NPZ and NPY files
-for data storage, given their simplicity and support across most Python
-deep learning frameworks.
+`libnpy` is a multi-platform C++ library for reading and writing NPY and
+NPZ files, with an additional .NET interface. It was built with the 
+intention of making it easier for multi-language projects to use NPZ and
+NPY files for data storage, given their simplicity and support across
+most Python deep learning frameworks.
+
+The implementations in this library are based upon the following file
+format documents:
+- **NPY**: The NPY file format is documented by the NumPy developers
+           in [this note](https://docs.scipy.org/doc/numpy/reference/generated/numpy.lib.format.html)
+- **NPZ**: While not explicitly documented, the NPZ format is a
+           a PKZIP archive of NPY files, and thus is documented
+           here: https://pkware.cachefly.net/webdocs/casestudies/APPNOTE.TXT.
 
 ## Getting Started
 
@@ -18,7 +26,7 @@ work for other platforms as well (the codebase is written to be clean,
 portable C++ 11). If you have problems on your platform, please raise
 it as an [issue](https://github.com/matajoh/libnpy/issues).
 
-### Ubuntu 18.04 [gcc 7.3.0]
+### Ubuntu 18.04 [gcc 7.3.0], Ubuntu 16.04 [gcc 5.4.0]
 
 First, install all of the necessary dependencies:
 
@@ -32,43 +40,58 @@ You may also find that `cmake` is easier to use via the curses GUI:
 
     sudo apt-get install cmake-curses-gui
 
-Once everything is in place, you can clone the repository and generate the makefiles:
+Once everything is in place, you can clone the repository and generate the
+makefiles:
 
     git clone https://github.com/matajoh/libnpy.git
     mkdir libnpy/build
     cd libnpy/build
     cmake -DCMAKE_BUILD_TYPE=Debug ..
 
-Your other build options are `Release` and `RelWithDebInfo`. You can now build the library:
+Your other build options are `Release` and `RelWithDebInfo`.
 
 ### Windows 10 [Visual Studio 2017]
 
-On Windows, you can download and install the dependencies from the following locations:
+On Windows, you can download and install the dependencies from the following
+locations:
 
 #### Install CMake
-Download and run e.g. `v3.11/cmake-3.11.0-win64-x64.msi` from https://cmake.org/files/.
+Download and run e.g. `v3.11/cmake-3.11.0-win64-x64.msi` from
+https://cmake.org/files/.
 
 #### Install git and Visual Studio.
-Get the latest Windows git from https://git-scm.com/downloads. Download a version of Visual Studio from https://visualstudio.microsoft.com/vs/. You will need the C++ and C# compilers.
+Get the latest Windows git from https://git-scm.com/downloads. Download a
+version of Visual Studio from https://visualstudio.microsoft.com/vs/. You
+will need the C++ and C# compilers.
 
 #### Build and install ZLib 
-Download e.g. `zlib-1.2.11.zip` from http://zlib.net/ and extract to `C:\zlib-1.2.11\`. Then, open a command prompt aith Admin rights ([How-To](https://technet.microsoft.com/en-us/library/cc947813(v=ws.10).aspx)) to run the following commands:
+Download e.g. `zlib-1.2.11.zip` from http://zlib.net/ and extract to
+`C:\zlib-1.2.11\`. Then, open a command prompt aith Admin rights
+([How-To](https://technet.microsoft.com/en-us/library/cc947813(v=ws.10).aspx))
+to run the following commands:
 
     cd C:\zlib-1.2.11\
     cmake -G "Visual Studio 15 2017 Win64" ..
     cmake --build . --config Debug --target install
     cmake --build . --config Release --target install
 
-This will build and install zlib on your system. Then, add `C:\Program Files\zlib\bin` to your PATH ([How To](https://support.microsoft.com/en-us/kb/310519)).
+This will build and install zlib on your system. Then, add
+`C:\Program Files\zlib\bin` to your PATH
+([How To](https://support.microsoft.com/en-us/kb/310519)).
 
 #### Install SWIG
-Browse to http://swig.org/download.html and download the latest version of `swigwin`. Unzip the directory and copy it to your `C:\` drive. Add (e.g.) `C:\swigwin-3.0.12` to your PATH. CMake should then find swig automatically.
+Browse to http://swig.org/download.html and download the latest version of
+`swigwin`. Unzip the directory and copy it to your `C:\` drive. Add (e.g.)
+`C:\swigwin-3.0.12` to your PATH. CMake should then find swig automatically.
 
 #### Download and install Doxygen (optional)
-If you want to build the documentation, you should also download [Doxygen](http://www.doxygen.nl/). 
+If you want to build the documentation, you should also download
+[Doxygen](http://www.doxygen.nl/). 
 
 #### Generate MSBuild
-Now that everything is ready, cmake can generate the MSBuild files necessary for the project. Run the following commands in a command prompt once you have navigated to your desired source code folder:
+Now that everything is ready, cmake can generate the MSBuild files necessary
+for the project. Run the following commands in a command prompt once you have
+navigated to your desired source code folder:
 
     git clone https://github.com/matajoh/libnpy.git
     mkdir libnpy\build
@@ -77,18 +100,25 @@ Now that everything is ready, cmake can generate the MSBuild files necessary for
     cmake --build . --target NumpyIONative
     cmake ..
 
-The reason for the above is that SWIG autogenerates the C# files for the interface in the first pass, after which CMake needs to scan the generated directory to build the wrapper library.
+The reason for the above is that SWIG autogenerates the C# files for the
+interface in the first pass, after which CMake needs to scan the generated
+directory to build the wrapper library.
 
 ### Build and Test
-You are now able to build the test the library. Doing so is the same regardless of your platform. First, navigate to the `build` folder you created above. Then run the following commands:
+You are now able to build the test the library. Doing so is the same
+regardless of your platform. First, navigate to the `build` folder you
+created above. Then run the following commands:
 
     cmake --build . --config <CONFIG>
 
-Where `<CONFIG>` is one of `Release|Debug|RelWithDebInfo`. This will build the project, including the tests and (if selected) the documentation. You can then do the following:
+Where `<CONFIG>` is one of `Release|Debug|RelWithDebInfo`. This will build
+the project, including the tests and (if selected) the documentation. You
+can then do the following:
 
     ctest -C <CONFIG>
 
-Where again you replace `<CONFIG>` as above will run all of the tests. If you want to install the library, run:
+Where again you replace `<CONFIG>` as above will run all of the tests.
+If you want to install the library, run:
 
     cmake --build . --config <CONFIG> --target INSTALL
 
@@ -96,11 +126,18 @@ If you would rather package up the library for distribution, run:
 
     cpack -C <CONFIG>
 
-Which will create a distribution package similar to the ones we have produced for your platform.
+Which will create a distribution package similar to the ones we have
+produced, but for your platform.
 
 ## Creating a tensor
 
-Once the library has been built and installed, you can begin to use it in your code. We have provided some [sample programs](https://github.com/matajoh/libnpy/tree/master/samples) (and naturally the [tests](https://github.com/matajoh/libnpy/tree/master/test) as well) which show how to use the library, but the basic concepts are as follows. For the purpose of this sample code we will use the built-in [tensor](src/tensor.h) class, but you should use your own tensor class as appropriate.
+Once the library has been built and installed, you can begin to use it
+in your code. We have provided some
+[sample programs](https://github.com/matajoh/libnpy/tree/master/samples)
+(and naturally the [tests](https://github.com/matajoh/libnpy/tree/master/test)
+as well) which show how to use the library, but the basic concepts are as follows.
+For the purpose of this sample code we will use the built-in [tensor](src/tensor.h)
+class, but you should use your own tensor class as appropriate.
 
 ```C++
 #include "tensor.h"
@@ -161,4 +198,8 @@ Once the library has been built and installed, you can begin to use it in your c
     }
 ```
 
-The generated documentation contains more details on all of the functionality. We hope you find that the library fulfills your needs and is easy to use, but if you have any difficulties please create [issues](https://github.com/matajoh/libnpy/issues) so the maintainers can make the library even better. Thanks!
+The generated documentation contains more details on all of the functionality.
+We hope you find that the library fulfills your needs and is easy to use, but
+if you have any difficulties please create
+[issues](https://github.com/matajoh/libnpy/issues) so the maintainers can make
+the library even better. Thanks!
