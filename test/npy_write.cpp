@@ -4,7 +4,8 @@
 #include "npy.h"
 #include "tensor.h"
 
-int test_npy_write(){
+int test_npy_write()
+{
     int result = EXIT_SUCCESS;
 
     std::string expected, actual;
