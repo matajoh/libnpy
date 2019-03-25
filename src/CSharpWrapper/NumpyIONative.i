@@ -74,6 +74,18 @@ public:
 
     tensor(const std::vector<size_t>& shape, bool fortran_order=false);
 
+    %exception save(const std::string& path, endian endian = endian::NATIVE) %{
+        try{
+            $action
+        } catch (std::invalid_argument e) {
+            SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentException, "Invalid path location", e.what());
+            return $null;            
+        } catch (std::logic_error e) {
+            SWIG_CSharpSetPendingException(SWIG_CSharpIOException, e.what());
+            return $null;
+        }
+    %}
+
     %csmethodmodifiers save "public override";
     %rename(Save) save;
     void save(const std::string& path, endian endian = endian::NATIVE);

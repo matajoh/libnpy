@@ -5,6 +5,7 @@
 #include <memory>
 #include <iostream>
 #include <cassert>
+#include <stdexcept>
 
 #include "npz.h"
 #include "zip.h"
@@ -241,7 +242,7 @@ void onpzstream::write_file(const std::string &filename,
     }
     else
     {
-        throw std::logic_error("Not implemented");
+        throw std::invalid_argument("m_compression_method");
     }
 
     file_entry entry = {
@@ -298,7 +299,7 @@ std::string inpzstream::read_file(const std::string &filename)
 {
     if (this->m_entries.count(filename) == 0)
     {
-        throw std::invalid_argument("Key not found");
+        throw std::invalid_argument("filename");
     }
 
     const file_entry &entry = this->m_entries[filename];

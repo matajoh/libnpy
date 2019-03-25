@@ -41,7 +41,7 @@ std::string read_file(const std::string &path)
     std::ifstream file(path, std::ios::in | std::ios::binary);
     if (!file.is_open())
     {
-        throw new std::logic_error("failed to open asset file");
+        throw new std::invalid_argument("path");
     }
 
     std::ostringstream stream;

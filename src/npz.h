@@ -13,6 +13,7 @@
 #ifndef _NPZ_H_
 #define _NPZ_H_
 
+#include <stdexcept>
 #include <sstream>
 #include <fstream>
 #include <iostream>
