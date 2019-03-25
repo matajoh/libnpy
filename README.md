@@ -1,5 +1,7 @@
 # libnpy
 
+[![Build Status](https://travis-ci.com/matajoh/libnpy.svg?token=mQKh8ae3m6BDSeGHqxyY&branch=master)](https://travis-ci.com/matajoh/libnpy)
+
 `libnpy` is a multi-platform C++ library for reading and writing NPY files,
 with an additional .NET interface. It was built with the intention of
 making it easier for multi-language projects to use NPZ and NPY files
