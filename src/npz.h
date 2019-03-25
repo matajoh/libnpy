@@ -1,7 +1,8 @@
 // ----------------------------------------------------------------------------
 //
 // npz.h -- methods for reading and writing the numpy archive (NPZ) file
-//          format
+//          format. The implementation here is based upon the PKZIP Application
+//          note: https://pkware.cachefly.net/webdocs/casestudies/APPNOTE.TXT.
 //
 // Copyright (C) 2019 Matthew Johnson
 //

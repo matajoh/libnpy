@@ -1,6 +1,8 @@
 // ----------------------------------------------------------------------------
 //
-// npy.h -- methods for reading and writing the numpy lib (NPY) format
+// npy.h -- methods for reading and writing the numpy lib (NPY) format. The
+//          implementation is based upon the description available at:
+// https://docs.scipy.org/doc/numpy/reference/generated/numpy.lib.format.html
 //
 // Copyright (C) 2019 Matthew Johnson
 //
