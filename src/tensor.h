@@ -15,7 +15,7 @@
 #include <cstdint>
 #include <numeric>
 
-#include "dtype.h"
+#include "core.h"
 #include "npy.h"
 
 namespace npy
@@ -32,7 +32,7 @@ namespace npy
  * 
  *  As long as these are present and have the same semantics, the library should
  *  handle them in the same was as this implementation. Only certain type of
- *  tensor objects are natively supported (see \link npy::data_type \endlink).
+ *  tensor objects are natively supported (see \link npy::data_type_t \endlink).
  */
 template <typename T>
 class tensor
@@ -111,7 +111,7 @@ class tensor
     }
 
     /** The data type of the tensor. */
-    const data_type dtype() const
+    const data_type_t dtype() const
     {
         return this->m_dtype;
     }
@@ -219,7 +219,7 @@ class tensor
      *  \param path a valid location on disk
      *  \param endianness the endianness to use in writing the tensor
      */
-    void save(const std::string &path, endian endianness = npy::endian::NATIVE)
+    void save(const std::string &path, endian_t endianness = npy::endian_t::NATIVE)
     {
         npy::save(path, *this, endianness);
     }
@@ -273,11 +273,11 @@ class tensor
     std::vector<size_t> m_shape;
     std::vector<size_t> m_ravel_strides;
     bool m_fortran_order;
-    data_type m_dtype;
+    data_type_t m_dtype;
     std::vector<T> m_values;
 
     /** Returns the data type for this tensor. */
-    static data_type get_dtype();
+    static data_type_t get_dtype();
 
     /** Gets the size of a tensor given its shape */
     static size_t get_size(const std::vector<size_t> &shape)

@@ -208,10 +208,10 @@ bool file_entry::check(const file_entry &other) const
 
 onpzstream::onpzstream(const std::string &path,
                        compression_method method,
-                       endian endianness) : m_output(path, std::ios::out | std::ios::binary),
-                                            m_compression_method(method),
-                                            m_endianness(endianness),
-                                            m_closed(false)
+                       endian_t endianness) : m_output(path, std::ios::out | std::ios::binary),
+                                              m_compression_method(method),
+                                              m_endianness(endianness),
+                                              m_closed(false)
 {
 }
 

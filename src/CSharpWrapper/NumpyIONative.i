@@ -13,9 +13,9 @@
 %include "typemaps.i"
 %include "attribute.i"
 
-%rename(DataType) data_type;
-%typemap(csbase) data_type "byte";
-enum class data_type : std::uint8_t {
+%rename(DataType) data_type_t;
+%typemap(csbase) data_type_t "byte";
+enum class data_type_t : std::uint8_t {
     INT8,
     UINT8,
     INT16,
@@ -28,9 +28,9 @@ enum class data_type : std::uint8_t {
     FLOAT64
 };
 
-%rename(Endian) endian;
-%typemap(csbase) endian "byte";
-enum class endian : std::uint8_t {
+%rename(Endian) endian_t;
+%typemap(csbase) endian_t "byte";
+enum class endian_t : std::uint8_t {
     NATIVE,
     BIG,
     LITTLE
@@ -76,7 +76,7 @@ public:
 
     %csmethodmodifiers save "public override";
     %rename(Save) save;
-    void save(const std::string& path, endian endian = endian::NATIVE);
+    void save(const std::string& path, endian_t endian = endian_t::NATIVE);
 
     %csmethodmodifiers copy_from "public unsafe override";
     %rename(CopyFrom) copy_from;
@@ -96,7 +96,7 @@ public:
 
     %csmethodmodifiers dtype "protected override"
     %rename(getDataType) dtype;
-    data_type dtype() const;
+    data_type_t dtype() const;
 
     %csmethodmodifiers size "protected override"
     %rename(getSize) size;
@@ -135,7 +135,7 @@ public:
 %rename(NPZOutputStream) onpzstream;
 class onpzstream {
 public:
-    onpzstream(const std::string& path, compression_method compression=compression_method::STORED, endian endian=endian::NATIVE);
+    onpzstream(const std::string& path, compression_method compression=compression_method::STORED, endian_t endian=endian_t::NATIVE);
 
     %rename(Close) close;
     void close();

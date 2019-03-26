@@ -5,9 +5,9 @@
 #include <iostream>
 #include <cassert>
 #include <cctype>
+#include <tuple>
 
 #include "npy.h"
-#include "dtype.h"
 
 namespace
 {
