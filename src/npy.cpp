@@ -68,7 +68,7 @@ bool read_bool(std::istream &input)
         return false;
     }
 
-    throw std::logic_error("Boolean not found");
+    throw std::logic_error("Dictionary value is not a boolean");
 }
 
 std::vector<size_t> read_shape(std::istream &input)

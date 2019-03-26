@@ -3,6 +3,7 @@ set( CSHARP_TEST_SOURCES
   test_npy_write.cs 
   test_npz_read.cs
   test_npz_write.cs
+  test_exceptions.cs
 )
 
 if( WIN32 )

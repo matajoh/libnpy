@@ -41,7 +41,7 @@ std::string read_file(const std::string &path)
     std::ifstream file(path, std::ios::in | std::ios::binary);
     if (!file.is_open())
     {
-        throw new std::logic_error("failed to open asset file");
+        throw std::invalid_argument("path");
     }
 
     std::ostringstream stream;
@@ -63,6 +63,7 @@ int main(int argc, char **argv)
 {
     std::map<std::string, TestFunction> tests;
 
+    tests["exceptions"] = test_exceptions;
     tests["npy_write"] = test_npy_write;
     tests["npy_read"] = test_npy_read;
     tests["npz_write"] = test_npz_write;

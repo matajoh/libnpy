@@ -36,9 +36,9 @@ enum class endian_t : std::uint8_t {
     LITTLE
 };
 
-%rename(CompressionMethod) compression_method;
-%typemap(csbase) compression_method "ushort";
-enum class compression_method : std::uint16_t {
+%rename(CompressionMethod) compression_method_t;
+%typemap(csbase) compression_method_t "ushort";
+enum class compression_method_t : std::uint16_t {
     STORED = 0,
     DEFLATED = 8
 };
@@ -70,17 +70,50 @@ public:
     %apply float FIXED[] {const float *source};
     %apply double FIXED[] {const double *source};
 
+    %exception tensor(const std::string& path) %{
+        try{
+            $action
+        } catch( std::invalid_argument& e) {
+            SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentException, "Invalid path location", e.what());
+            return $null;
+        } catch( std::logic_error& e) {
+            SWIG_CSharpSetPendingException(SWIG_CSharpIOException, e.what());
+            return $null;
+        }
+    %}
+
     tensor(const std::string& path);
 
     tensor(const std::vector<size_t>& shape, bool fortran_order=false);
+
+    %exception save(const std::string& path, endian_t endian = endian_t::NATIVE) %{
+        try{
+            $action
+        } catch (std::invalid_argument& e) {
+            SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentException, "Invalid path location", e.what());
+            return $null;            
+        } catch (std::logic_error& e) {
+            SWIG_CSharpSetPendingException(SWIG_CSharpIOException, e.what());
+            return $null;
+        }
+    %}
 
     %csmethodmodifiers save "public override";
     %rename(Save) save;
     void save(const std::string& path, endian_t endian = endian_t::NATIVE);
 
+    %exception copy_from(const T* source, size_t nitems) %{
+        try{
+            $action
+        } catch (std::invalid_argument& e){
+            SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentException, "Incorrect number of items", e.what());
+            return $null;
+        }
+    %}
+
     %csmethodmodifiers copy_from "public unsafe override";
     %rename(CopyFrom) copy_from;
-    void copy_from(const T* source, size_t nitems);
+    void copy_from(const T* source, size_t itemCount);
 
     %csmethodmodifiers values "protected override"
     %rename(getValues) values;
@@ -102,8 +135,32 @@ public:
     %rename(getSize) size;
     size_t size() const;
 
+    %exception get(const std::vector<size_t>& index) const %{
+        try{
+            $action
+        }catch(std::invalid_argument& e){
+            SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentException, "incorrect index size", e.what());
+            return $null;
+        }catch(std::out_of_range& e){
+            SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentOutOfRangeException, "index out of range", e.what());
+            return $null;
+        }
+    %}
+
     %csmethodmodifiers get "protected override"
     const T& get(const std::vector<size_t>& index) const;
+
+    %exception set(const std::vector<size_t>& index, const T& value) const %{
+        try{
+            $action
+        }catch(std::invalid_argument& e){
+            SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentException, "incorrect index size", e.what());
+            return $null;
+        }catch(std::out_of_range& e){
+            SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentOutOfRangeException, "index out of range", e.what());
+            return $null;
+        }
+    %}
 
     %csmethodmodifiers set "protected override"
     void set(const std::vector<size_t>& index, const T& value);
@@ -135,10 +192,22 @@ public:
 %rename(NPZOutputStream) onpzstream;
 class onpzstream {
 public:
-    onpzstream(const std::string& path, compression_method compression=compression_method::STORED, endian_t endian=endian_t::NATIVE);
+    onpzstream(const std::string& path, compression_method_t compression=compression_method_t::STORED, endian_t endian=endian_t::NATIVE);
 
     %rename(Close) close;
     void close();
+
+    %exception write(const std::string& filename, const tensor<T>& tensor) %{
+        try{
+            $action
+        }catch(std::invalid_argument& e){
+            SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentException, "Unsupported compression method", e.what());
+            return $null;
+        }catch(std::logic_error& e){
+            SWIG_CSharpSetPendingException(SWIG_CSharpIOException, e.what());
+            return $null;
+        }
+    %}
 
     template <typename T>
     void write(const std::string& filename, const tensor<T>& tensor);
@@ -160,7 +229,31 @@ public:
 %rename(NPZInputStream) inpzstream;
 class inpzstream {
 public:
+    %exception inpzstream(const std::string& path) %{
+        try{
+            $action
+        }catch(std::invalid_argument& e){
+            SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentException, "File does not exist", e.what());
+            return $null;
+        }catch(std::logic_error& e){
+            SWIG_CSharpSetPendingException(SWIG_CSharpIOException, e.what());
+            return $null;
+        }
+    %}
+
     inpzstream(const std::string& path);
+
+    %exception read(const std::string& filename) %{
+        try{
+            $action
+        }catch(std::invalid_argument& e){
+            SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentException, "Filename does not exist in archive", e.what());
+            return $null;
+        }catch(std::logic_error& e){
+            SWIG_CSharpSetPendingException(SWIG_CSharpIOException, e.what());
+            return $null;
+        }
+    %}
 
     template <typename T>
     tensor<T> read(const std::string& filename);

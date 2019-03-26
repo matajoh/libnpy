@@ -5,6 +5,7 @@
 #include <memory>
 #include <iostream>
 #include <cassert>
+#include <stdexcept>
 
 #include "npz.h"
 #include "zip.h"
@@ -207,7 +208,7 @@ bool file_entry::check(const file_entry &other) const
 }
 
 onpzstream::onpzstream(const std::string &path,
-                       compression_method method,
+                       compression_method_t method,
                        endian_t endianness) : m_output(path, std::ios::out | std::ios::binary),
                                               m_compression_method(method),
                                               m_endianness(endianness),
@@ -229,19 +230,19 @@ void onpzstream::write_file(const std::string &filename,
     std::uint32_t uncompressed_size = static_cast<std::uint32_t>(bytes.length());
     std::uint32_t compressed_size = 0;
     std::string compressed_bytes;
-    if (this->m_compression_method == compression_method::STORED)
+    if (this->m_compression_method == compression_method_t::STORED)
     {
         compressed_bytes = bytes;
         compressed_size = uncompressed_size;
     }
-    else if (this->m_compression_method == compression_method::DEFLATED)
+    else if (this->m_compression_method == compression_method_t::DEFLATED)
     {
         compressed_bytes = zip::deflate(bytes);
         compressed_size = static_cast<std::uint32_t>(compressed_bytes.length());
     }
     else
     {
-        throw std::logic_error("Not implemented");
+        throw std::invalid_argument("m_compression_method");
     }
 
     file_entry entry = {
@@ -282,6 +283,10 @@ inpzstream::inpzstream(const std::string &path) : m_input(path, std::ios::out | 
 
 void inpzstream::read_entries()
 {
+    if(!this->m_input.is_open()){
+        throw std::invalid_argument("path");
+    }
+
     this->m_input.seekg(-CD_END_SIZE, std::ios::end);
     CentralDirectory dir = read_end_of_central_directory(this->m_input);
 
@@ -298,7 +303,7 @@ std::string inpzstream::read_file(const std::string &filename)
 {
     if (this->m_entries.count(filename) == 0)
     {
-        throw std::invalid_argument("Key not found");
+        throw std::invalid_argument("filename");
     }
 
     const file_entry &entry = this->m_entries[filename];
@@ -312,10 +317,10 @@ std::string inpzstream::read_file(const std::string &filename)
 
     std::vector<char> buffer(entry.compressed_size);
     this->m_input.read(buffer.data(), buffer.size());
-    compression_method cmethod = static_cast<compression_method>(entry.compression_method);
+    compression_method_t cmethod = static_cast<compression_method_t>(entry.compression_method);
     std::string bytes = std::string(buffer.begin(), buffer.end());
     std::string uncompressed_bytes = bytes;
-    if (cmethod == compression_method::DEFLATED)
+    if (cmethod == compression_method_t::DEFLATED)
     {
         uncompressed_bytes = zip::inflate(bytes);
     }

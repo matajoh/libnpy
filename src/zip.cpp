@@ -1,5 +1,6 @@
 #include <sstream>
 #include <cassert>
+#include <stdexcept>
 #include "zlib.h"
 
 #include "zip.h"

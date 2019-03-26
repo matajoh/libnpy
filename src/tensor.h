@@ -14,6 +14,7 @@
 #include <vector>
 #include <cstdint>
 #include <numeric>
+#include <stdexcept>
 
 #include "core.h"
 #include "npy.h"
@@ -130,7 +131,7 @@ class tensor
     {
         if (nitems != this->size())
         {
-            throw std::invalid_argument("Incorrect number of items for copy");
+            throw std::invalid_argument("nitems");
         }
 
         std::copy(source, source + nitems, this->m_values.begin());
@@ -143,7 +144,7 @@ class tensor
     {
         if (source.size() != this->size())
         {
-            throw std::invalid_argument("Incorrect size for copy");
+            throw std::invalid_argument("source.size");
         }
 
         std::copy(source.begin(), source.end(), this->m_values.begin());
@@ -156,7 +157,7 @@ class tensor
     {
         if (source.size() != this->size)
         {
-            throw std::invalid_argument("Incorrect size for move");
+            throw std::invalid_argument("source.size");
         }
 
         this->m_values = std::move(source);
@@ -241,7 +242,7 @@ class tensor
         {
             if (*index >= *shape)
             {
-                throw std::invalid_argument("Index value is too large");
+                throw std::out_of_range("multi_index");
             }
 
             ravel += *index * *stride;
@@ -258,7 +259,7 @@ class tensor
     {
         if (multi_index.size() != this->m_shape.size())
         {
-            throw std::invalid_argument("Incorrect number of indices");
+            throw std::invalid_argument("multi_index");
         }
 
         if (this->m_fortran_order)

@@ -15,6 +15,7 @@ int test_npy_read();
 int test_npz_write();
 int test_npz_read();
 int test_tensor();
+int test_exceptions();
 
 namespace test
 {
@@ -82,6 +83,20 @@ inline void assert_equal<std::string>(const std::string &expected,
                 break;
             }
         }
+    }
+}
+
+template <class EXCEPTION>
+void assert_throws(void (*function)(), int& result, const std::string& tag)
+{
+    try{
+        function();
+        result = EXIT_FAILURE;
+        std::cout << tag << " did not throw an exception" << std::endl;
+    }catch(EXCEPTION&){
+    }catch(std::exception& e){
+        result = EXIT_FAILURE;
+        std::cout << tag << " threw unexpected exception: " << e.what() << std::endl;
     }
 }
 

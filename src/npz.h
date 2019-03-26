@@ -13,6 +13,7 @@
 #ifndef _NPZ_H_
 #define _NPZ_H_
 
+#include <stdexcept>
 #include <sstream>
 #include <fstream>
 #include <iostream>
@@ -30,7 +31,7 @@ using namespace std;
 namespace npy
 {
 /** Enumeration indicating the compression method to use for data in the NPZ archive. */
-enum class compression_method : std::uint16_t
+enum class compression_method_t : std::uint16_t
 {
     /** Store the data with no compression */
     STORED = 0,
@@ -71,7 +72,7 @@ class onpzstream
      *  \param endianness the endianness to use in writing the entries
      */
     onpzstream(const std::string &path,
-               compression_method compression = compression_method::STORED,
+               compression_method_t compression = compression_method_t::STORED,
                endian_t endianness = npy::endian_t::NATIVE);
 
     /** Closes this stream. This will write the directory and close 
@@ -124,7 +125,7 @@ class onpzstream
 
     bool m_closed;
     std::ofstream m_output;
-    compression_method m_compression_method;
+    compression_method_t m_compression_method;
     endian_t m_endianness;
     std::vector<file_entry> m_entries;
 };

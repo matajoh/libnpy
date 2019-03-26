@@ -4,6 +4,7 @@ set( CPP_TEST_SOURCES
 )
 
 set( TESTS
+   exceptions
    npy_write
    npy_read
    npz_write

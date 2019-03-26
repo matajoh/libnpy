@@ -45,6 +45,24 @@ namespace Testing
             AssertEqual<T, IList<T>>(expected.Values, actual.Values, ref result, tag);
         }
 
+        public static void AssertThrows<E>(Action action, ref int result, string tag) where E:Exception
+        {
+            try
+            {
+                action();
+                result = EXIT_FAILURE;
+                Console.WriteLine("{0} did not throw an exception", tag);
+            }
+            catch (E)
+            {                
+            }
+            catch(Exception e)
+            {
+                result = EXIT_FAILURE;
+                Console.WriteLine("{0} threw an unexpected exception: {1}", tag, e);
+            }
+        }
+
         public static T Tensor<T, D, B>(Shape shape)
             where B : IList<D>
             where T : Tensor<D, B>

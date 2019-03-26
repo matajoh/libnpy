@@ -17,6 +17,7 @@
 #include <string>
 #include <fstream>
 #include <vector>
+#include <stdexcept>
 
 #include "core.h"
 
@@ -109,7 +110,7 @@ void save(const std::string &path,
     std::ofstream output(path, std::ios::out | std::ios::binary);
     if (!output.is_open())
     {
-        throw new std::invalid_argument("failed to create output file");
+        throw std::invalid_argument("path");
     }
 
     save(output, tensor, endianness);
@@ -137,7 +138,7 @@ TENSOR<T> load(std::istream &input)
     TENSOR<T> tensor(info.shape, info.fortran_order);
     if (info.dtype != tensor.dtype())
     {
-        throw new std::invalid_argument("dtype mismatch");
+        throw std::logic_error("requested dtype does not match stream's dtype");
     }
 
     if (info.endianness == npy::endian_t::NATIVE || info.endianness == native_endian())
@@ -174,7 +175,7 @@ TENSOR<T> load(const std::string &path)
     std::ifstream input(path, std::ios::in | std::ios::binary);
     if (!input.is_open())
     {
-        throw new std::logic_error("input file does not exist");
+        throw std::invalid_argument("path");
     }
 
     return load<T, TENSOR>(input);
