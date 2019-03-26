@@ -23,7 +23,7 @@ int main()
     npy::save("color.npy", color);
 
     // we can manually set the endianness to use
-    npy::save("color.npy", color, npy::endian::BIG);
+    npy::save("color.npy", color, npy::endian_t::BIG);
 
     // the built-in tensor class also has a save method
     color.save("color.npy");
