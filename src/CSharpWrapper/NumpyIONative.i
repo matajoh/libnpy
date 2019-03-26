@@ -70,6 +70,18 @@ public:
     %apply float FIXED[] {const float *source};
     %apply double FIXED[] {const double *source};
 
+    %exception tensor(const std::string& path) %{
+        try{
+            $action
+        } catch( std::invalid_argument& e) {
+            SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentException, "Invalid path location", e.what());
+            return $null;
+        } catch( std::logic_error& e) {
+            SWIG_CSharpSetPendingException(SWIG_CSharpIOException, e.what());
+            return $null;
+        }
+    %}
+
     tensor(const std::string& path);
 
     tensor(const std::vector<size_t>& shape, bool fortran_order=false);
@@ -77,10 +89,10 @@ public:
     %exception save(const std::string& path, endian endian = endian::NATIVE) %{
         try{
             $action
-        } catch (std::invalid_argument e) {
+        } catch (std::invalid_argument& e) {
             SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentException, "Invalid path location", e.what());
             return $null;            
-        } catch (std::logic_error e) {
+        } catch (std::logic_error& e) {
             SWIG_CSharpSetPendingException(SWIG_CSharpIOException, e.what());
             return $null;
         }
@@ -90,8 +102,18 @@ public:
     %rename(Save) save;
     void save(const std::string& path, endian endian = endian::NATIVE);
 
+    %exception copy_from(const T* source, size_t nitems) %{
+        try{
+            $action
+        } catch (std::invalid_argument& e){
+            SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentException, "Incorrect number of items", e.what());
+            return $null;
+        }
+    %}
+
     %csmethodmodifiers copy_from "public unsafe override";
     %rename(CopyFrom) copy_from;
+    %rename(itemCount) nitems;
     void copy_from(const T* source, size_t nitems);
 
     %csmethodmodifiers values "protected override"
@@ -152,6 +174,18 @@ public:
     %rename(Close) close;
     void close();
 
+    %exception write(const std::string& filename, const tensor<T>& tensor) %{
+        try{
+            $action
+        }catch(std::invalid_argument& e){
+            SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentException, "Unsupported compression method", e.what());
+            return $null;
+        }catch(std::logic_error& e){
+            SWIG_CSharpSetPendingException(SWIG_CSharpIOException, e.what());
+            return $null;
+        }
+    %}
+
     template <typename T>
     void write(const std::string& filename, const tensor<T>& tensor);
 };
@@ -173,6 +207,18 @@ public:
 class inpzstream {
 public:
     inpzstream(const std::string& path);
+
+    %exception read(const std::string& filename) %{
+        try{
+            $action
+        }catch(std::invalid_argument& e){
+            SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentException, "Filename does not exist in archive", e.what());
+            return $null;
+        }catch(std::logic_error& e){
+            SWIG_CSharpSetPendingException(SWIG_CSharpIOException, e.what());
+            return $null;
+        }
+    %}
 
     template <typename T>
     tensor<T> read(const std::string& filename);
