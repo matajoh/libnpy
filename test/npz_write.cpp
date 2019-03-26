@@ -14,11 +14,11 @@ const char *TEMP_NPZ = "temp.npz";
 
 namespace
 {
-void _test(int &result, npy::compression_method compression_method)
+void _test(int &result, npy::compression_method_t compression_method)
 {
     std::string asset_name = "test.npz";
     std::string suffix = "";
-    if (compression_method == npy::compression_method::DEFLATED)
+    if (compression_method == npy::compression_method_t::DEFLATED)
     {
         asset_name = "test_compressed.npz";
         suffix = "_compressed";
@@ -43,8 +43,8 @@ int test_npz_write()
 {
     int result = EXIT_SUCCESS;
 
-    _test(result, npy::compression_method::STORED);
-    _test(result, npy::compression_method::DEFLATED);
+    _test(result, npy::compression_method_t::STORED);
+    _test(result, npy::compression_method_t::DEFLATED);
 
     return result;
 }

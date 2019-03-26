@@ -36,9 +36,9 @@ enum class endian_t : std::uint8_t {
     LITTLE
 };
 
-%rename(CompressionMethod) compression_method;
-%typemap(csbase) compression_method "ushort";
-enum class compression_method : std::uint16_t {
+%rename(CompressionMethod) compression_method_t;
+%typemap(csbase) compression_method_t "ushort";
+enum class compression_method_t : std::uint16_t {
     STORED = 0,
     DEFLATED = 8
 };
@@ -86,7 +86,7 @@ public:
 
     tensor(const std::vector<size_t>& shape, bool fortran_order=false);
 
-    %exception save(const std::string& path, endian endian = endian::NATIVE) %{
+    %exception save(const std::string& path, endian_t endian = endian_t::NATIVE) %{
         try{
             $action
         } catch (std::invalid_argument& e) {
@@ -145,7 +145,7 @@ public:
             SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentOutOfRangeException, "index out of range", e.what());
             return $null;
         }
-    }
+    %}
 
     %csmethodmodifiers get "protected override"
     const T& get(const std::vector<size_t>& index) const;
@@ -160,7 +160,7 @@ public:
             SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentOutOfRangeException, "index out of range", e.what());
             return $null;
         }
-    }
+    %}
 
     %csmethodmodifiers set "protected override"
     void set(const std::vector<size_t>& index, const T& value);
@@ -192,7 +192,7 @@ public:
 %rename(NPZOutputStream) onpzstream;
 class onpzstream {
 public:
-    onpzstream(const std::string& path, compression_method compression=compression_method::STORED, endian_t endian=endian_t::NATIVE);
+    onpzstream(const std::string& path, compression_method_t compression=compression_method_t::STORED, endian_t endian=endian_t::NATIVE);
 
     %rename(Close) close;
     void close();
@@ -229,6 +229,18 @@ public:
 %rename(NPZInputStream) inpzstream;
 class inpzstream {
 public:
+    %exception inpzstream(const std::string& path) %{
+        try{
+            $action
+        }catch(std::invalid_argument& e){
+            SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentException, "File does not exist", e.what());
+            return $null;
+        }catch(std::logic_error& e){
+            SWIG_CSharpSetPendingException(SWIG_CSharpIOException, e.what());
+            return $null;
+        }
+    %}
+
     inpzstream(const std::string& path);
 
     %exception read(const std::string& filename) %{

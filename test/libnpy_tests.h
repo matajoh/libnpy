@@ -93,8 +93,7 @@ void assert_throws(void (*function)(), int& result, const std::string& tag)
         function();
         result = EXIT_FAILURE;
         std::cout << tag << " did not throw an exception" << std::endl;
-    }catch(EXCEPTION& e){
-        std::cout << tag << " threw expected exception: " << e.what() << std::endl;
+    }catch(EXCEPTION&){
     }catch(std::exception& e){
         result = EXIT_FAILURE;
         std::cout << tag << " threw unexpected exception: " << e.what() << std::endl;
