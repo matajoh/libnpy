@@ -135,8 +135,32 @@ public:
     %rename(getSize) size;
     size_t size() const;
 
+    %exception get(const std::vector<size_t>& index) const %{
+        try{
+            $action
+        }catch(std::invalid_argument& e){
+            SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentException, "incorrect index size", e.what());
+            return $null;
+        }catch(std::out_of_range& e){
+            SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentOutOfRangeException, "index out of range", e.what());
+            return $null;
+        }
+    }
+
     %csmethodmodifiers get "protected override"
     const T& get(const std::vector<size_t>& index) const;
+
+    %exception set(const std::vector<size_t>& index, const T& value) const %{
+        try{
+            $action
+        }catch(std::invalid_argument& e){
+            SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentException, "incorrect index size", e.what());
+            return $null;
+        }catch(std::out_of_range& e){
+            SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentOutOfRangeException, "index out of range", e.what());
+            return $null;
+        }
+    }
 
     %csmethodmodifiers set "protected override"
     void set(const std::vector<size_t>& index, const T& value);
