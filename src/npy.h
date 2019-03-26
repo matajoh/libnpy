@@ -19,8 +19,7 @@
 #include <vector>
 #include <stdexcept>
 
-#include "dtype.h"
-#include "util.h"
+#include "core.h"
 
 using namespace std;
 
@@ -35,10 +34,10 @@ struct header_info
     header_info(const std::string &dictionary);
 
     /** The data type of the NPY file */
-    data_type dtype;
+    data_type_t dtype;
 
     /** The endianness of the data in the NPY file */
-    npy::endian endianness;
+    npy::endian_t endianness;
 
     /** Whether the values in the tensor are stored in FORTRAN, or column major, order */
     bool fortran_order;
@@ -71,12 +70,12 @@ template <typename T,
           template <typename> class TENSOR>
 void save(std::ostream &output,
           const TENSOR<T> &tensor,
-          endian endianness = npy::endian::NATIVE)
+          endian_t endianness = npy::endian_t::NATIVE)
 {
     auto dtype = to_dtype(tensor.dtype(), endianness);
     write_npy_header(output, dtype, tensor.fortran_order(), tensor.shape());
 
-    if (endianness == npy::endian::NATIVE ||
+    if (endianness == npy::endian_t::NATIVE ||
         endianness == native_endian() ||
         dtype[0] == '|')
     {
@@ -106,7 +105,7 @@ template <typename T,
           template <typename> class TENSOR>
 void save(const std::string &path,
           const TENSOR<T> &tensor,
-          endian endianness = npy::endian::NATIVE)
+          endian_t endianness = npy::endian_t::NATIVE)
 {
     std::ofstream output(path, std::ios::out | std::ios::binary);
     if (!output.is_open())
@@ -142,7 +141,7 @@ TENSOR<T> load(std::istream &input)
         throw std::logic_error("requested dtype does not match stream's dtype");
     }
 
-    if (info.endianness == npy::endian::NATIVE || info.endianness == native_endian())
+    if (info.endianness == npy::endian_t::NATIVE || info.endianness == native_endian())
     {
         char *start = reinterpret_cast<char *>(tensor.data());
         input.read(start, tensor.size() * sizeof(T));

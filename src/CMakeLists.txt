@@ -7,8 +7,7 @@ set( SOURCES
 )
 
 set( HEADERS
-   dtype.h
-   util.h
+   core.h
    npy.h
    npz.h
    tensor.h

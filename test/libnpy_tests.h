@@ -6,7 +6,7 @@
 #include <vector>
 #include <sstream>
 
-#include "util.h"
+#include "core.h"
 #include "tensor.h"
 #include "npy.h"
 
@@ -137,7 +137,7 @@ npy::tensor<T> test_fortran_tensor()
 }
 
 template <typename T>
-std::string npy_stream(npy::endian endianness = npy::endian::NATIVE)
+std::string npy_stream(npy::endian_t endianness = npy::endian_t::NATIVE)
 {
     std::ostringstream actual_stream;
     npy::tensor<T> tensor = test_tensor<T>({5, 2, 5});
@@ -146,7 +146,7 @@ std::string npy_stream(npy::endian endianness = npy::endian::NATIVE)
 };
 
 template <typename T>
-std::string npy_fortran_stream(npy::endian endianness = npy::endian::NATIVE)
+std::string npy_fortran_stream(npy::endian_t endianness = npy::endian_t::NATIVE)
 {
     std::ostringstream actual_stream;
     npy::tensor<T> tensor = test_fortran_tensor<T>();

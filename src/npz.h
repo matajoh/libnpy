@@ -22,7 +22,7 @@
 #include <vector>
 #include <map>
 
-#include "util.h"
+#include "core.h"
 #include "npy.h"
 #include "tensor.h"
 
@@ -73,7 +73,7 @@ class onpzstream
      */
     onpzstream(const std::string &path,
                compression_method compression = compression_method::STORED,
-               endian endianness = npy::endian::NATIVE);
+               endian_t endianness = npy::endian_t::NATIVE);
 
     /** Closes this stream. This will write the directory and close 
      *  the underlying stream as well. */
@@ -126,7 +126,7 @@ class onpzstream
     bool m_closed;
     std::ofstream m_output;
     compression_method m_compression_method;
-    endian m_endianness;
+    endian_t m_endianness;
     std::vector<file_entry> m_entries;
 };
 
