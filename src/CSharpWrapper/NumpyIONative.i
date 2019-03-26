@@ -113,8 +113,7 @@ public:
 
     %csmethodmodifiers copy_from "public unsafe override";
     %rename(CopyFrom) copy_from;
-    %rename(itemCount) nitems;
-    void copy_from(const T* source, size_t nitems);
+    void copy_from(const T* source, size_t itemCount);
 
     %csmethodmodifiers values "protected override"
     %rename(getValues) values;
