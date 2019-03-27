@@ -119,7 +119,7 @@ class imemstream : public std::basic_istream<std::uint8_t>
     std::vector<std::uint8_t> &buf();
     const std::vector<std::uint8_t> &buf() const;
 
-private:
+  private:
     membuf m_buffer;
 };
 
@@ -133,7 +133,7 @@ class omemstream : public std::basic_ostream<std::uint8_t>
     std::vector<std::uint8_t> &buf();
     const std::vector<std::uint8_t> &buf() const;
 
-private:
+  private:
     membuf m_buffer;
 };
 

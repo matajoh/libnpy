@@ -225,11 +225,12 @@ onpzstream::~onpzstream()
 }
 
 void onpzstream::write_file(const std::string &filename,
-                            const std::string &bytes)
+                            std::vector<std::uint8_t> &&bytes)
 {
-    std::uint32_t uncompressed_size = static_cast<std::uint32_t>(bytes.length());
+    std::uint32_t uncompressed_size = static_cast<std::uint32_t>(bytes.size());
     std::uint32_t compressed_size = 0;
-    std::string compressed_bytes;
+    std::vector<std::uint8_t> compressed_bytes;
+    std::uint32_t checksum = crc32(bytes);
     if (this->m_compression_method == compression_method_t::STORED)
     {
         compressed_bytes = bytes;
@@ -237,8 +238,8 @@ void onpzstream::write_file(const std::string &filename,
     }
     else if (this->m_compression_method == compression_method_t::DEFLATED)
     {
-        compressed_bytes = zip::deflate(bytes);
-        compressed_size = static_cast<std::uint32_t>(compressed_bytes.length());
+        compressed_bytes = deflate(std::move(bytes));
+        compressed_size = static_cast<std::uint32_t>(compressed_bytes.size());
     }
     else
     {
@@ -247,13 +248,13 @@ void onpzstream::write_file(const std::string &filename,
 
     file_entry entry = {
         filename,
-        zip::crc32(bytes),
+        checksum,
         compressed_size,
         uncompressed_size,
         static_cast<std::uint16_t>(this->m_compression_method),
         static_cast<std::uint32_t>(this->m_output.tellp())};
     write_local_header(this->m_output, entry);
-    this->m_output.write(compressed_bytes.data(), compressed_size);
+    this->m_output.write(reinterpret_cast<char*>(compressed_bytes.data()), compressed_size);
     this->m_entries.push_back(std::move(entry));
 }
 
@@ -299,7 +300,7 @@ void inpzstream::read_entries()
     }
 }
 
-std::string inpzstream::read_file(const std::string &filename)
+std::vector<std::uint8_t> inpzstream::read_file(const std::string &filename)
 {
     if (this->m_entries.count(filename) == 0)
     {
@@ -315,18 +316,16 @@ std::string inpzstream::read_file(const std::string &filename)
         throw std::logic_error("Central directory and local headers disagree");
     }
 
-    std::vector<char> buffer(entry.compressed_size);
-    this->m_input.read(buffer.data(), buffer.size());
+    std::vector<std::uint8_t> uncompressed_bytes(entry.compressed_size);
+    this->m_input.read(reinterpret_cast<char*>(uncompressed_bytes.data()), uncompressed_bytes.size());
     compression_method_t cmethod = static_cast<compression_method_t>(entry.compression_method);
-    std::string bytes = std::string(buffer.begin(), buffer.end());
-    std::string uncompressed_bytes = bytes;
     if (cmethod == compression_method_t::DEFLATED)
     {
-        uncompressed_bytes = zip::inflate(bytes);
+        uncompressed_bytes = inflate(std::move(uncompressed_bytes));
     }
 
-    std::uint32_t crc32 = zip::crc32(uncompressed_bytes);
-    if (crc32 != entry.crc32)
+    std::uint32_t actual_crc32 = crc32(uncompressed_bytes);
+    if (actual_crc32 != entry.crc32)
     {
         throw std::logic_error("CRC mismatch");
     }

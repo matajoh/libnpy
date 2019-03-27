@@ -1,7 +1,7 @@
 #include <algorithm>
 
 #include "libnpy_tests.h"
-#include "core.h"
+#include "zip.h"
 
 namespace {
     const size_t SIZE = 50;
@@ -29,7 +29,7 @@ namespace {
     void test_write(int& result)
     {
         std::vector<std::uint8_t> expected(SIZE);
-        std::iota(expected.begin(), expected.end(), SIZE);
+        std::iota(expected.begin(), expected.end(), 0);
 
         npy::omemstream stream;
         stream.write(expected.data(), SIZE);

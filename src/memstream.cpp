@@ -1,8 +1,12 @@
 #include "core.h"
 
+namespace {
+    const int BUFFER_SIZE = 1;//64 * 1024;
+}
+
 namespace npy
 {
-membuf::membuf()
+membuf::membuf() : membuf(BUFFER_SIZE)
 {
     this->seekpos(0);
 }
@@ -144,10 +148,14 @@ std::streamsize membuf::xsputn(const std::uint8_t *s, std::streamsize n)
     std::copy(s, s + num_copy, this->m_posp);
     if (num_insert > 0)
     {
+        auto diffg = this->m_posg - this->m_buffer.begin();
         this->m_buffer.insert(this->m_buffer.end(), s + num_copy, s + n);
-    }
+        this->m_posp = this->m_buffer.end();
+        this->m_posg = this->m_buffer.begin() + diffg;
 
-    this->m_posp += n;
+    }else{
+        this->m_posp += num_copy;
+    }    
 
     return n;
 }
