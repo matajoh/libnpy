@@ -13,6 +13,8 @@
 
 #include <cstdint>
 #include <string>
+#include <iostream>
+#include <vector>
 
 using namespace std;
 
@@ -79,6 +81,61 @@ const std::string &to_dtype(data_type_t dtype, endian_t endian = endian_t::NATIV
  *  \return a pair of data type and endianness corresponding to the input
  */
 const std::pair<data_type_t, endian_t> &from_dtype(const std::string &dtype);
+
+class membuf : public std::basic_streambuf<std::uint8_t>
+{
+  public:
+    membuf();
+    membuf(size_t n);
+    membuf(const std::vector<std::uint8_t> &buffer);
+    membuf(std::vector<std::uint8_t> &&buffer);
+
+    std::vector<std::uint8_t> &buf();
+    const std::vector<std::uint8_t> &buf() const;
+
+  protected:
+    membuf *setbuf(std::uint8_t *s, std::streamsize n) override;
+    pos_type seekoff(off_type off, std::ios_base::seekdir way, std::ios_base::openmode which = std::ios_base::in | std::ios_base::out) override;
+    pos_type seekpos(pos_type pos, std::ios_base::openmode which = std::ios_base::in | std::ios_base::out) override;
+    std::streamsize showmanyc() override;
+    std::streamsize xsgetn(std::uint8_t *s, std::streamsize n) override;
+    int_type underflow() override;
+    int_type pbackfail(int_type c = traits_type::eof()) override;
+    std::streamsize xsputn(const std::uint8_t *s, std::streamsize n) override;
+    int_type overflow(int_type c = traits_type::eof()) override;
+
+  private:
+    std::vector<std::uint8_t> m_buffer;
+    std::vector<std::uint8_t>::iterator m_posg;
+    std::vector<std::uint8_t>::iterator m_posp;
+};
+
+class imemstream : public std::basic_istream<std::uint8_t>
+{
+  public:
+    imemstream(const std::vector<std::uint8_t> &buffer);
+    imemstream(std::vector<std::uint8_t> &&buffer);
+
+    std::vector<std::uint8_t> &buf();
+    const std::vector<std::uint8_t> &buf() const;
+
+private:
+    membuf m_buffer;
+};
+
+class omemstream : public std::basic_ostream<std::uint8_t>
+{
+  public:
+    omemstream();
+    omemstream(std::vector<std::uint8_t> &&buffer);
+    omemstream(std::streamsize capacity);
+
+    std::vector<std::uint8_t> &buf();
+    const std::vector<std::uint8_t> &buf() const;
+
+private:
+    membuf m_buffer;
+};
 
 } // namespace npy
 

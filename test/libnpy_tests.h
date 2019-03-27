@@ -10,12 +10,13 @@
 #include "tensor.h"
 #include "npy.h"
 
+int test_exceptions();
+int test_memstream();
 int test_npy_write();
 int test_npy_read();
 int test_npz_write();
 int test_npz_read();
 int test_tensor();
-int test_exceptions();
 
 namespace test
 {
