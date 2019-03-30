@@ -82,15 +82,32 @@ const std::string &to_dtype(data_type_t dtype, endian_t endian = endian_t::NATIV
  */
 const std::pair<data_type_t, endian_t> &from_dtype(const std::string &dtype);
 
+/** Implementation of an in-memory stream buffer that can be moved */
 class membuf : public std::basic_streambuf<std::uint8_t>
 {
   public:
+    /** Default Constructor. */
     membuf();
+
+    /** Constructor.
+     *  \param n the default starting capacity for the buffer
+     */
     membuf(size_t n);
+  
+    /** Copy constructor.
+     *  \param buffer the values copied and used for the buffer
+     */
     membuf(const std::vector<std::uint8_t> &buffer);
+
+    /** Move constructor.
+     *  \param buffer the values moved and used for the buffer
+     */
     membuf(std::vector<std::uint8_t> &&buffer);
 
+    /** Returns a reference to the internal buffer object. */
     std::vector<std::uint8_t> &buf();
+
+    /** Returns a const reference to the internal buffer object. */
     const std::vector<std::uint8_t> &buf() const;
 
   protected:
@@ -110,27 +127,51 @@ class membuf : public std::basic_streambuf<std::uint8_t>
     std::vector<std::uint8_t>::iterator m_posp;
 };
 
+/** An input stream which uses a moveable, in-memory buffer */
 class imemstream : public std::basic_istream<std::uint8_t>
 {
   public:
+    /** Copy constructor.
+     *  \param buffer the buffer copied and used for the stream
+     */
     imemstream(const std::vector<std::uint8_t> &buffer);
+
+    /** Move constructor.
+     *  \param buffer the buffer moved and used for the stream
+     */
     imemstream(std::vector<std::uint8_t> &&buffer);
 
+    /** Returns a reference to the underlying byte vector */
     std::vector<std::uint8_t> &buf();
+
+    /** Returns a const reference to the underlying byte vector */
     const std::vector<std::uint8_t> &buf() const;
 
   private:
     membuf m_buffer;
 };
 
+/** An output stream which uses a moveable, in-memory byte vector */
 class omemstream : public std::basic_ostream<std::uint8_t>
 {
   public:
+    /** Default constructor */
     omemstream();
+
+    /** Move constructor.
+     *  \param buffer the buffer to use for writing. Values in the buffer will be overwritten
+     */
     omemstream(std::vector<std::uint8_t> &&buffer);
+  
+    /** Constructor.
+     *  \param capacity the initial capacity for the output buffer
+     */
     omemstream(std::streamsize capacity);
 
+    /** Returns a reference to the underlying byte vector */
     std::vector<std::uint8_t> &buf();
+
+    /** Returns a const reference to the underlying byte vector */
     const std::vector<std::uint8_t> &buf() const;
 
   private:
