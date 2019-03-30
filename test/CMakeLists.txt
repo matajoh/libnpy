@@ -6,10 +6,11 @@ set( CPP_TEST_SOURCES
 set( TESTS
    exceptions
    memstream
-   npy_write
+   npy_peek
    npy_read
-   npz_write
+   npy_write
    npz_read
+   npz_write
    tensor
 )
 

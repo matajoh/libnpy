@@ -37,7 +37,13 @@ struct header_info
     /** Constructor.
      *  \param dictionary a Python-encoded dictionary containing the header information
      */
-    header_info(const std::string &dictionary);
+    explicit header_info(const std::string &dictionary);
+
+    /** Constructor */
+    header_info(data_type_t dtype,
+                npy::endian_t endianness,
+                bool fortran_order,
+                const std::vector<size_t> &shape);
 
     /** The data type of the NPY file */
     data_type_t dtype;
@@ -249,6 +255,23 @@ TENSOR<T> load(const std::string &path)
 
     return load<T, TENSOR>(input);
 }
+
+/** Return the header information for an NPY file.
+ *  \param input the input stream containing the NPY-encoded bytes
+ *  \return the NPY header information
+ */
+template <typename CHAR>
+header_info peek(std::basic_istream<CHAR> &input)
+{
+    return read_npy_header(input);
+}
+
+/** Return the header information for an NPY file.
+ *  \param path the path to the NPY file on disk
+ *  \return the NPY header information
+ */
+header_info peek(const std::string &path);
+
 } // namespace npy
 
 #endif

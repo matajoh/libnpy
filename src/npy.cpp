@@ -128,4 +128,23 @@ header_info::header_info(const std::string &dictionary)
     read(input, '}');
 }
 
+header_info::header_info(data_type_t dtype, npy::endian_t endianness, bool fortran_order, const std::vector<size_t> &shape)
+{
+    this->dtype = dtype;
+    this->endianness = endianness;
+    this->fortran_order = fortran_order;
+    this->shape = shape;
+}
+
+header_info peek(const std::string &path)
+{
+    std::ifstream input(path, std::ios::in | std::ios::binary);
+    if (!input.is_open())
+    {
+        throw std::invalid_argument("path");
+    }
+
+    return peek(input);
+}
+
 } // namespace npy

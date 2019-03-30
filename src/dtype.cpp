@@ -73,4 +73,17 @@ const std::pair<data_type_t, endian_t> &from_dtype(const std::string &dtype)
 {
     return DTYPE_MAP[dtype];
 }
+
+std::ostream &operator<<(std::ostream &os, const data_type_t &value)
+{
+    os << static_cast<int>(value);
+    return os;
+}
+
+std::ostream &operator<<(std::ostream &os, const endian_t &value)
+{
+    os << static_cast<int>(value);
+    return os;
+}
+
 } // namespace npy

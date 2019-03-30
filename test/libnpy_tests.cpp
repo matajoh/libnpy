@@ -49,10 +49,14 @@ std::string read_file(const std::string &path)
     return stream.str();
 }
 
+std::string asset_path(const std::string &filename)
+{
+    return path_join({"assets", "test", filename});
+}
+
 std::string read_asset(const std::string &filename)
 {
-    std::string path = path_join({"assets", "test", filename});
-    return read_file(path);
+    return read_file(asset_path(filename));
 }
 
 } // namespace test
@@ -65,10 +69,11 @@ int main(int argc, char **argv)
 
     tests["exceptions"] = test_exceptions;
     tests["memstream"] = test_memstream;
-    tests["npy_write"] = test_npy_write;
+    tests["npy_peek"] = test_npy_peek;
     tests["npy_read"] = test_npy_read;
-    tests["npz_write"] = test_npz_write;
+    tests["npy_write"] = test_npy_write;
     tests["npz_read"] = test_npz_read;
+    tests["npz_write"] = test_npz_write;
     tests["tensor"] = test_tensor;
 
     if (argc == 2)

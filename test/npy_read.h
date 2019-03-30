@@ -14,8 +14,7 @@ void test_read(int &result, const std::string &name, bool fortran_order = false)
         expected = test::test_fortran_tensor<T>();
     }
 
-    std::string path = test::path_join({"assets", "test", name + ".npy"});
-    npy::tensor<T> actual = npy::load<T, npy::tensor>(path);
+    npy::tensor<T> actual = npy::load<T, npy::tensor>(test::asset_path(name + ".npy"));
     test::assert_equal(expected, actual, result, "npy_read_" + name);
 }
 

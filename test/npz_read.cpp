@@ -8,7 +8,7 @@ void _test(int &result, const std::string &filename, bool compressed)
     auto expected_color = test::test_tensor<std::uint8_t>({5, 5, 3});
     auto expected_depth = test::test_tensor<float>({5, 5});
 
-    npy::inpzstream stream(test::path_join({"assets", "test", filename}));
+    npy::inpzstream stream(test::asset_path(filename));
     auto actual_color = stream.read<std::uint8_t, npy::tensor>("color.npy");
     auto actual_depth = stream.read<float, npy::tensor>("depth.npy");
 
