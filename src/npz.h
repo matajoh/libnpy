@@ -94,9 +94,9 @@ class onpzstream
             throw std::logic_error("Stream is closed");
         }
 
-        std::ostringstream output;
+        omemstream output;
         save(output, tensor);
-        this->write_file(filename, output.str());
+        this->write_file(filename, std::move(output.buf()));
     }
 
     /** Write a tensor to the NPZ archive.
@@ -121,7 +121,7 @@ class onpzstream
      *  \param bytes the file data
      */
     void write_file(const std::string &filename,
-                    const std::string &bytes);
+                    std::vector<uint8_t> &&bytes);
 
     bool m_closed;
     std::ofstream m_output;
@@ -155,8 +155,7 @@ class inpzstream
               template <typename> class TENSOR>
     TENSOR<T> read(const std::string &filename)
     {
-        std::string bytes = this->read_file(filename);
-        std::istringstream stream(bytes);
+        imemstream stream(this->read_file(filename));
         return load<T, TENSOR>(stream);
     }
 
@@ -177,7 +176,7 @@ class inpzstream
      *  \param filename the name of the file
      *  \return the raw file bytes
      */
-    std::string read_file(const std::string &filename);
+    std::vector<uint8_t> read_file(const std::string &filename);
 
     /** Read all entries from the directory. */
     void read_entries();

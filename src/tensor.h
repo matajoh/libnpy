@@ -42,7 +42,7 @@ class tensor
     /** Constructor.
      *  \param path the path to an NPY file on the disk
      */
-    tensor(const std::string &path) : tensor(npy::load<T, npy::tensor>(path)) {}
+    explicit tensor(const std::string &path) : tensor(npy::load<T, npy::tensor>(path)) {}
 
     /** Constructor. This will allocate a data buffer of the appropriate size.
      *  \param shape the shape of the tensor

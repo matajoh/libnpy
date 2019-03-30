@@ -1,5 +1,6 @@
 set( SOURCES
    dtype.cpp
+   memstream.cpp
    npy.cpp
    npz.cpp
    tensor.cpp

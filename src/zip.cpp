@@ -1,8 +1,8 @@
-#include <sstream>
 #include <cassert>
 #include <stdexcept>
 #include "zlib.h"
 
+#include "core.h"
 #include "zip.h"
 
 namespace
@@ -12,18 +12,18 @@ const int WINDOW_BITS = -15;
 const int MEM_LEVEL = 8;
 } // namespace
 
-namespace zip
+namespace npy
 {
 
-std::uint32_t crc32(const std::string &bytes)
+std::uint32_t crc32(const std::vector<std::uint8_t> &bytes)
 {
     uLong crc = ::crc32(0L, Z_NULL, 0);
     const Bytef *buf = reinterpret_cast<const Bytef *>(bytes.data());
-    uInt len = static_cast<uInt>(bytes.length());
+    uInt len = static_cast<uInt>(bytes.size());
     return ::crc32(crc, buf, len);
 }
 
-std::string deflate(const std::string &bytes)
+std::vector<std::uint8_t> deflate(std::vector<std::uint8_t> &&bytes)
 {
     int ret, flush;
     unsigned have;
@@ -42,13 +42,13 @@ std::string deflate(const std::string &bytes)
         throw std::logic_error("Unable to initialize deflate algorithm");
     }
 
-    std::istringstream input(bytes, std::ios::in | std::ios::binary);
-    std::ostringstream output(std::ios::out | std::ios::binary);
+    imemstream input(std::move(bytes));
+    omemstream output;
 
     /* compress until end of file */
     do
     {
-        input.read(reinterpret_cast<char *>(in), CHUNK);
+        input.read(in, CHUNK);
         strm.avail_in = static_cast<uInt>(input.gcount());
         if (input.eof())
         {
@@ -76,7 +76,7 @@ std::string deflate(const std::string &bytes)
             ret = deflate(&strm, flush);
             assert(ret != Z_STREAM_ERROR); /* state not clobbered */
             have = CHUNK - strm.avail_out;
-            output.write(reinterpret_cast<char *>(out), have);
+            output.write(out, have);
             if (output.fail() || output.bad())
             {
                 (void)deflateEnd(&strm);
@@ -91,10 +91,10 @@ std::string deflate(const std::string &bytes)
     /* clean up and return */
     (void)deflateEnd(&strm);
 
-    return output.str();
+    return std::move(output.buf());
 }
 
-std::string inflate(const std::string &bytes)
+std::vector<std::uint8_t> inflate(std::vector<std::uint8_t> &&bytes)
 {
     int ret;
     unsigned have;
@@ -113,13 +113,13 @@ std::string inflate(const std::string &bytes)
         throw std::logic_error("Unable to initialize inflate algorithm");
     }
 
-    std::istringstream input(bytes, std::ios::in | std::ios::binary);
-    std::ostringstream output(std::ios::out | std::ios::binary);
+    imemstream input(std::move(bytes));
+    omemstream output;
 
     /* decompress until deflate stream ends or end of file */
     do
     {
-        input.read(reinterpret_cast<char *>(in), CHUNK);
+        input.read(in, CHUNK);
         strm.avail_in = static_cast<uInt>(input.gcount());
         if ((input.fail() && !input.eof()) || input.bad())
         {
@@ -152,7 +152,7 @@ std::string inflate(const std::string &bytes)
             }
 
             have = CHUNK - strm.avail_out;
-            output.write(reinterpret_cast<char *>(out), have);
+            output.write(out, have);
             if (output.fail() || output.bad())
             {
                 (void)inflateEnd(&strm);
@@ -168,7 +168,7 @@ std::string inflate(const std::string &bytes)
 
     if (ret == Z_STREAM_END)
     {
-        return output.str();
+        return std::move(output.buf());
     }
 
     throw std::logic_error("Error inflating stream");

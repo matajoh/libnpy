@@ -82,7 +82,7 @@ public:
         }
     %}
 
-    tensor(const std::string& path);
+    explicit tensor(const std::string& path);
 
     tensor(const std::vector<size_t>& shape, bool fortran_order=false);
 

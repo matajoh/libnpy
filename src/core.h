@@ -13,6 +13,8 @@
 
 #include <cstdint>
 #include <string>
+#include <iostream>
+#include <vector>
 
 using namespace std;
 
@@ -79,6 +81,102 @@ const std::string &to_dtype(data_type_t dtype, endian_t endian = endian_t::NATIV
  *  \return a pair of data type and endianness corresponding to the input
  */
 const std::pair<data_type_t, endian_t> &from_dtype(const std::string &dtype);
+
+/** Implementation of an in-memory stream buffer that can be moved */
+class membuf : public std::basic_streambuf<std::uint8_t>
+{
+  public:
+    /** Default Constructor. */
+    membuf();
+
+    /** Constructor.
+     *  \param n the default starting capacity for the buffer
+     */
+    membuf(size_t n);
+  
+    /** Copy constructor.
+     *  \param buffer the values copied and used for the buffer
+     */
+    membuf(const std::vector<std::uint8_t> &buffer);
+
+    /** Move constructor.
+     *  \param buffer the values moved and used for the buffer
+     */
+    membuf(std::vector<std::uint8_t> &&buffer);
+
+    /** Returns a reference to the internal buffer object. */
+    std::vector<std::uint8_t> &buf();
+
+    /** Returns a const reference to the internal buffer object. */
+    const std::vector<std::uint8_t> &buf() const;
+
+  protected:
+    membuf *setbuf(std::uint8_t *s, std::streamsize n) override;
+    pos_type seekoff(off_type off, std::ios_base::seekdir way, std::ios_base::openmode which = std::ios_base::in | std::ios_base::out) override;
+    pos_type seekpos(pos_type pos, std::ios_base::openmode which = std::ios_base::in | std::ios_base::out) override;
+    std::streamsize showmanyc() override;
+    std::streamsize xsgetn(std::uint8_t *s, std::streamsize n) override;
+    int_type underflow() override;
+    int_type pbackfail(int_type c = traits_type::eof()) override;
+    std::streamsize xsputn(const std::uint8_t *s, std::streamsize n) override;
+    int_type overflow(int_type c = traits_type::eof()) override;
+
+  private:
+    std::vector<std::uint8_t> m_buffer;
+    std::vector<std::uint8_t>::iterator m_posg;
+    std::vector<std::uint8_t>::iterator m_posp;
+};
+
+/** An input stream which uses a moveable, in-memory buffer */
+class imemstream : public std::basic_istream<std::uint8_t>
+{
+  public:
+    /** Copy constructor.
+     *  \param buffer the buffer copied and used for the stream
+     */
+    imemstream(const std::vector<std::uint8_t> &buffer);
+
+    /** Move constructor.
+     *  \param buffer the buffer moved and used for the stream
+     */
+    imemstream(std::vector<std::uint8_t> &&buffer);
+
+    /** Returns a reference to the underlying byte vector */
+    std::vector<std::uint8_t> &buf();
+
+    /** Returns a const reference to the underlying byte vector */
+    const std::vector<std::uint8_t> &buf() const;
+
+  private:
+    membuf m_buffer;
+};
+
+/** An output stream which uses a moveable, in-memory byte vector */
+class omemstream : public std::basic_ostream<std::uint8_t>
+{
+  public:
+    /** Default constructor */
+    omemstream();
+
+    /** Move constructor.
+     *  \param buffer the buffer to use for writing. Values in the buffer will be overwritten
+     */
+    omemstream(std::vector<std::uint8_t> &&buffer);
+  
+    /** Constructor.
+     *  \param capacity the initial capacity for the output buffer
+     */
+    omemstream(std::streamsize capacity);
+
+    /** Returns a reference to the underlying byte vector */
+    std::vector<std::uint8_t> &buf();
+
+    /** Returns a const reference to the underlying byte vector */
+    const std::vector<std::uint8_t> &buf() const;
+
+  private:
+    membuf m_buffer;
+};
 
 } // namespace npy
 

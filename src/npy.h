@@ -15,13 +15,19 @@
 
 #include <algorithm>
 #include <string>
+#include <sstream>
+#include <iomanip>
 #include <fstream>
 #include <vector>
 #include <stdexcept>
+#include <cstdint>
+#include <cassert>
 
 #include "core.h"
 
 using namespace std;
+
+const int STATIC_HEADER_LENGTH = 10;
 
 namespace npy
 {
@@ -53,10 +59,44 @@ struct header_info
  *  \param shape a sequence of values indicating the shape of each dimension of the tensor
  *  \sa npy::to_dtype
  */
-void write_npy_header(std::ostream &output,
+template <typename CHAR>
+void write_npy_header(std::basic_ostream<CHAR> &output,
                       const std::string &dtype,
                       bool fortran_order,
-                      const std::vector<size_t> &shape);
+                      const std::vector<size_t> &shape)
+{
+    std::ostringstream buff;
+    buff << "{'descr': '" << dtype;
+    buff << "', 'fortran_order': " << (fortran_order ? "True" : "False");
+    buff << ", 'shape': (";
+    for (auto dim = shape.begin(); dim < shape.end(); ++dim)
+    {
+        buff << *dim;
+        if (dim < shape.end() - 1)
+        {
+            buff << ", ";
+        }
+    }
+    buff << "), }";
+    std::string dictionary = buff.str();
+    auto dict_length = dictionary.size() + 1;
+    std::string end = "\n";
+    auto header_length = dict_length + STATIC_HEADER_LENGTH;
+    if (header_length % 64 != 0)
+    {
+        header_length = ((header_length / 64) + 1) * 64;
+        dict_length = header_length - STATIC_HEADER_LENGTH;
+        end = std::string(dict_length - dictionary.length(), ' ');
+        end.back() = '\n';
+    }
+
+    std::uint8_t header[STATIC_HEADER_LENGTH] = {0x93, 'N', 'U', 'M', 'P', 'Y', 0x01, 0x00,
+                                                 static_cast<std::uint8_t>(dict_length),
+                                                 0x00};
+    output.write(reinterpret_cast<const CHAR *>(header), STATIC_HEADER_LENGTH);
+    output.write(reinterpret_cast<const CHAR *>(dictionary.data()), dictionary.length());
+    output.write(reinterpret_cast<const CHAR *>(end.data()), end.length());
+}
 
 /** Saves a tensor to the provided stream.
  *  \tparam T the data type
@@ -67,8 +107,9 @@ void write_npy_header(std::ostream &output,
  *  \sa npy::tensor
  */
 template <typename T,
-          template <typename> class TENSOR>
-void save(std::ostream &output,
+          template <typename> class TENSOR,
+          typename CHAR>
+void save(std::basic_ostream<CHAR> &output,
           const TENSOR<T> &tensor,
           endian_t endianness = npy::endian_t::NATIVE)
 {
@@ -79,14 +120,14 @@ void save(std::ostream &output,
         endianness == native_endian() ||
         dtype[0] == '|')
     {
-        output.write(reinterpret_cast<const char *>(tensor.data()), tensor.size() * sizeof(T));
+        output.write(reinterpret_cast<const CHAR *>(tensor.data()), tensor.size() * sizeof(T));
     }
     else
     {
-        char buffer[sizeof(T)];
+        CHAR buffer[sizeof(T)];
         for (auto curr = tensor.data(); curr < tensor.data() + tensor.size(); ++curr)
         {
-            const char *start = reinterpret_cast<const char *>(curr);
+            const CHAR *start = reinterpret_cast<const CHAR *>(curr);
             std::reverse_copy(start, start + sizeof(T), buffer);
             output.write(buffer, sizeof(T));
         }
@@ -120,7 +161,34 @@ void save(const std::string &path,
  *  \param input the input stream
  *  \return the header information
  */
-header_info read_npy_header(std::istream &input);
+template <typename CHAR>
+header_info read_npy_header(std::basic_istream<CHAR> &input)
+{
+    std::uint8_t header[STATIC_HEADER_LENGTH];
+    input.read(reinterpret_cast<CHAR *>(header), STATIC_HEADER_LENGTH);
+    assert(header[0] == 0x93);
+    assert(header[1] == 'N');
+    assert(header[2] == 'U');
+    assert(header[3] == 'M');
+    assert(header[4] == 'P');
+    assert(header[5] == 'Y');
+    size_t dict_length = 0;
+    if (header[6] == 0x01 && header[7] == 0x00)
+    {
+        dict_length = header[8] | (header[9] << 8);
+    }
+    else if (header[6] == 0x02 && header[7] == 0x00)
+    {
+        std::uint8_t extra[2];
+        input.read(reinterpret_cast<CHAR *>(extra), 2);
+        dict_length = header[8] | (header[9] << 8) | (extra[0] << 16) | (extra[1] << 24);
+    }
+
+    std::vector<CHAR> buffer(dict_length);
+    input.read(buffer.data(), dict_length);
+    std::string dictionary(buffer.begin(), buffer.end());
+    return header_info(dictionary);
+}
 
 /** Loads a tensor in NPY format from the provided stream. The type of the tensor
  *  must match the data to be read.
@@ -131,8 +199,9 @@ header_info read_npy_header(std::istream &input);
  *  \sa npy::tensor
  */
 template <typename T,
-          template <typename> class TENSOR>
-TENSOR<T> load(std::istream &input)
+          template <typename> class TENSOR,
+          typename CHAR>
+TENSOR<T> load(std::basic_istream<CHAR> &input)
 {
     header_info info = read_npy_header(input);
     TENSOR<T> tensor(info.shape, info.fortran_order);
@@ -143,16 +212,16 @@ TENSOR<T> load(std::istream &input)
 
     if (info.endianness == npy::endian_t::NATIVE || info.endianness == native_endian())
     {
-        char *start = reinterpret_cast<char *>(tensor.data());
+        CHAR *start = reinterpret_cast<CHAR *>(tensor.data());
         input.read(start, tensor.size() * sizeof(T));
     }
     else
     {
-        char buffer[sizeof(T)];
+        CHAR buffer[sizeof(T)];
         for (auto curr = tensor.data(); curr < tensor.data() + tensor.size(); ++curr)
         {
             input.read(buffer, sizeof(T));
-            char *start = reinterpret_cast<char *>(curr);
+            CHAR *start = reinterpret_cast<CHAR *>(curr);
             std::reverse_copy(buffer, buffer + sizeof(T), start);
         }
     }

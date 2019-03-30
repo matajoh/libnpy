@@ -64,6 +64,7 @@ int main(int argc, char **argv)
     std::map<std::string, TestFunction> tests;
 
     tests["exceptions"] = test_exceptions;
+    tests["memstream"] = test_memstream;
     tests["npy_write"] = test_npy_write;
     tests["npy_read"] = test_npy_read;
     tests["npz_write"] = test_npz_write;
