@@ -10,7 +10,7 @@ namespace Testing
         static void TestWrite(bool compressed, ref int result)
         {
             string filename = compressed ? "test_compressed.npz" : "test.npz";
-            byte[] expected = File.ReadAllBytes(Path.Combine("assets", "test", filename));
+            byte[] expected = File.ReadAllBytes(Test.AssetPath(filename));
 
             UInt8Tensor color = Test.Tensor<UInt8Tensor, byte, UInt8Buffer>(new Shape(new uint[] { 5, 5, 3 }));
             Float32Tensor depth = Test.Tensor<Float32Tensor, float, Float32Buffer>(new Shape(new uint[] { 5, 5 }));

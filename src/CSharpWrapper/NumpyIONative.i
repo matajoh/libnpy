@@ -56,6 +56,31 @@ enum class compression_method_t : std::uint16_t {
 
 %template(Shape) std::vector<size_t>;
 
+%rename(HeaderInfo) header_info;
+struct header_info
+{
+    header_info(data_type_t dtype,
+                npy::endian_t endianness,
+                bool fortran_order,
+                const std::vector<size_t> &shape);
+
+
+    %rename(DataType) dtype;
+    data_type_t dtype;
+
+    %rename(Endianness) endianness;
+    npy::endian_t endianness;
+
+    %rename(FortranOrder) fortran_order;
+    bool fortran_order;
+
+    %rename(Shape) shape;
+    std::vector<size_t> shape;
+};
+
+%rename(Peek) peek;
+static header_info peek(const std::string& path);
+
 template <typename T>
 class tensor {
 public:

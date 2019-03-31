@@ -16,7 +16,7 @@ namespace Testing
             string path = Path.GetRandomFileName();
             tensor.Save(path);
             byte[] actual = File.ReadAllBytes(path);
-            byte[] expected = File.ReadAllBytes(Path.Combine("assets", "test", tag + ".npy"));
+            byte[] expected = File.ReadAllBytes(Test.AssetPath(tag + ".npy"));
             Test.AssertEqual<byte, byte[]>(expected, actual, ref result, "c#_npy_write_" + tag);
             File.Delete(path);
         }
