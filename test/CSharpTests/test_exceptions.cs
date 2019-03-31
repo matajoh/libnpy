@@ -7,6 +7,12 @@ namespace Testing
     class TestExceptions
     {
         static UInt8Tensor TENSOR = new UInt8Tensor(new Shape(new uint[] { 5, 2, 5 }));
+        static string TEMP_NPZ = "temp.npz";
+
+        static void PeekInvalidPath()
+        {
+            NumpyIO.NumpyIO.Peek(Path.Combine("does_not_exist", "bad.npy"));
+        }
 
         static void SaveInvalidPath()
         {
@@ -26,7 +32,7 @@ namespace Testing
         static void NPZOutputStreamCompression()
         {
             CompressionMethod method = (CompressionMethod)99;
-            using(var stream = new NPZOutputStream("test.npz", method))
+            using(var stream = new NPZOutputStream(TEMP_NPZ, method))
             {
                 stream.Write("error.npy", TENSOR);   
             }
@@ -34,7 +40,7 @@ namespace Testing
 
         static void NPZInputStreamInvalidFilename()
         {
-            using(var stream = new NPZInputStream(Path.Combine("assets", "test", "test.npz")))
+            using(var stream = new NPZInputStream(Test.AssetPath("test.npz")))
             {
                 var tensor = stream.ReadUInt8("not_there.npy");
             }
@@ -58,7 +64,7 @@ namespace Testing
 
         static void NPZOutputStreamClosed()
         {
-            using(var stream = new NPZOutputStream("test.npz"))
+            using(var stream = new NPZOutputStream(TEMP_NPZ))
             {
                 stream.Close();
                 stream.Write("error.npy", TENSOR);
@@ -67,13 +73,14 @@ namespace Testing
 
         static void NPZInputStreamInvalidFile()
         {
-            var stream = new NPZInputStream(Path.Combine("assets", "test", "uint8.npy"));
+            var stream = new NPZInputStream(Test.AssetPath("uint8.npy"));
         }
 
         public static int Main(string[] args)
         {
             int result = Test.EXIT_SUCCESS;
 
+            Test.AssertThrows<ArgumentException>(PeekInvalidPath, ref result, "PeekInvalidPath");
             Test.AssertThrows<ArgumentException>(SaveInvalidPath, ref result, "SaveInvalidPath");
             Test.AssertThrows<ArgumentException>(LoadInvalidPath, ref result, "LoadInvalidPath");
             Test.AssertThrows<ArgumentException>(NPZInputStreamInvalidPath, ref result, "NPZInputStreamInvalidPath");
@@ -87,7 +94,7 @@ namespace Testing
             Test.AssertThrows<IOException>(NPZInputStreamInvalidFile, ref result, "NPZInputStreamInvalidFile");
             Test.AssertThrows<IOException>(NPZOutputStreamClosed, ref result, "NPZOutputStreamClosed");
             
-            File.Delete("test.npz");
+            File.Delete(TEMP_NPZ);
 
             return result;
         }

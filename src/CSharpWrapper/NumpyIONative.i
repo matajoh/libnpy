@@ -78,8 +78,20 @@ struct header_info
     std::vector<size_t> shape;
 };
 
+%exception header_info peek(const std::string& path) %{
+    try{
+        $action
+    } catch( std::invalid_argument& e) {
+        SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentException, "Invalid path location", e.what());
+        return $null;
+    } catch( std::logic_error& e) {
+        SWIG_CSharpSetPendingException(SWIG_CSharpIOException, e.what());
+        return $null;
+    }
+%}
+
 %rename(Peek) peek;
-static header_info peek(const std::string& path);
+header_info peek(const std::string& path);
 
 template <typename T>
 class tensor {

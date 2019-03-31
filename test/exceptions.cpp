@@ -17,6 +17,11 @@ void load_invalid_path()
     npy::load<std::uint8_t, npy::tensor>(test::path_join({"does_not_exist", "bad.npy"}));
 }
 
+void peek_invalid_path()
+{
+    npy::peek(test::path_join({"does_not_exist", "bad.npy"}));
+}
+
 void inpzstream_invalid_path()
 {
     npy::inpzstream(test::path_join({"does_not_exist", "bad.npz"}));
@@ -86,6 +91,7 @@ int test_exceptions()
 {
     int result = EXIT_SUCCESS;
 
+    test::assert_throws<std::invalid_argument>(peek_invalid_path, result, "peek_invalid_path");
     test::assert_throws<std::invalid_argument>(save_invalid_path, result, "save_invalid_path");
     test::assert_throws<std::invalid_argument>(load_invalid_path, result, "load_invalid_path");
     test::assert_throws<std::invalid_argument>(inpzstream_invalid_path, result, "inpzstream_invalid_path");
