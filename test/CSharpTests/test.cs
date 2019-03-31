@@ -50,7 +50,7 @@ namespace Testing
             AssertEqual(expected.DataType, actual.DataType, ref result, tag + " DataType");
             AssertEqual(expected.Endianness, actual.Endianness, ref result, tag + " Endianness");
             AssertEqual(expected.FortranOrder, actual.FortranOrder, ref result, tag + " FortranOrder");
-            AssertEqual(expected.Shape, actual.Shape, ref result, tag + " Shape");
+            AssertEqual<uint, List<uint>>(expected.Shape.ToList(), actual.Shape.ToList(), ref result, tag + " Shape");
         }
 
         public static void AssertThrows<E>(Action action, ref int result, string tag) where E:Exception

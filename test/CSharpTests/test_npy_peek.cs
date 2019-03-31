@@ -7,24 +7,26 @@ namespace Testing
 {
     class TestNPYPeek
     {
+        static void TestPeek(ref int result, string tag, DataType dtype)
+        {
+            TestPeek(ref result, tag, dtype, Endian.LITTLE, false);
+        }
+
         static void TestPeek(ref int result, string tag, DataType dtype, Endian endianness)
         {
-            TestPeek(result, tag, dtype, endianness, false);
+            TestPeek(ref result, tag, dtype, endianness, false);
         }
 
         static void TestPeek(ref int result, string tag, DataType dtype, bool fortranOrder)
         {
-            TestPeek(result, tag, dtype, Endian.LITTLE, fortranOrder);
+            TestPeek(ref result, tag, dtype, Endian.LITTLE, fortranOrder);
         }
-        static void TestPeek(ref int result, string tag, DataType dtype,
-                             Endian endianness = Endian.LITTLE,
-                             bool fortranOrder = false)
+        static void TestPeek(ref int result, string tag, DataType dtype, Endian endianness, bool fortranOrder)
         {
             Shape shape = new Shape(new uint[]{5, 2, 5});
             HeaderInfo expected = new HeaderInfo(dtype, endianness, fortranOrder, shape);
             HeaderInfo actual = NumpyIO.NumpyIO.Peek(Test.AssetPath(tag + ".npy"));
             Test.AssertEqual(expected, actual, ref result, "c#_npy_peek_" + tag);
-            File.Delete(path);
         }
         public static int Main()
         {

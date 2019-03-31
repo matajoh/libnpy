@@ -9,6 +9,7 @@ set( TESTS
    npy_peek
    npy_read
    npy_write
+   npz_peek
    npz_read
    npz_write
    tensor

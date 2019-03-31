@@ -60,7 +60,7 @@ enum class compression_method_t : std::uint16_t {
 struct header_info
 {
     header_info(data_type_t dtype,
-                npy::endian_t endianness,
+                endian_t endianness,
                 bool fortran_order,
                 const std::vector<size_t> &shape);
 
@@ -69,7 +69,7 @@ struct header_info
     data_type_t dtype;
 
     %rename(Endianness) endianness;
-    npy::endian_t endianness;
+    endian_t endianness;
 
     %rename(FortranOrder) fortran_order;
     bool fortran_order;
@@ -78,7 +78,7 @@ struct header_info
     std::vector<size_t> shape;
 };
 
-%exception header_info peek(const std::string& path) %{
+%exception peek(const std::string& path) %{
     try{
         $action
     } catch( std::invalid_argument& e) {
@@ -279,6 +279,25 @@ public:
     %}
 
     inpzstream(const std::string& path);
+
+    %rename(Contains) contains;
+    bool contains(const std::string& filename);
+
+    %exception peek(const std::string& filename) %{
+        try{
+            $action
+        }catch(std::invalid_argument& e){
+            SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentException, "Filename does not exist in archive", e.what());
+            return $null;
+        }catch(std::logic_error& e){
+            SWIG_CSharpSetPendingException(SWIG_CSharpIOException, e.what());
+            return $null;
+        }
+    %}
+
+    %rename(Peek) peek;
+    header_info peek(const std::string& filename);
+
 
     %exception read(const std::string& filename) %{
         try{

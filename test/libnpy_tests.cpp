@@ -72,6 +72,7 @@ int main(int argc, char **argv)
     tests["npy_peek"] = test_npy_peek;
     tests["npy_read"] = test_npy_read;
     tests["npy_write"] = test_npy_write;
+    tests["npz_peek"] = test_npz_peek;
     tests["npz_read"] = test_npz_read;
     tests["npz_write"] = test_npz_write;
     tests["tensor"] = test_tensor;

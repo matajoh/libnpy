@@ -15,6 +15,7 @@ int test_memstream();
 int test_npy_peek();
 int test_npy_read();
 int test_npy_write();
+int test_npz_peek();
 int test_npz_read();
 int test_npz_write();
 int test_tensor();
