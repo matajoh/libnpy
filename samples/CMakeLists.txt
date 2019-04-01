@@ -16,9 +16,13 @@ install( TARGETS images DESTINATION samples )
 
 install( FILES images.cpp DESTINATION samples )
 install( FILES CMakeLists.txt.in DESTINATION samples RENAME CMakeLists.txt )
+install( FILES README.md.in DESTINATION samples RENAME README.md )
 install( FILES display.py DESTINATION samples )
+install( FILES display.png DESTINATION samples )
 
 add_custom_command( TARGET images POST_BUILD COMMAND ${CMAKE_COMMAND} ARGS -E copy_if_different ${CMAKE_CURRENT_SOURCE_DIR}/display.py ${SAMPLES_FOLDER}/display.py )
+add_custom_command( TARGET images POST_BUILD COMMAND ${CMAKE_COMMAND} ARGS -E copy_if_different ${CMAKE_CURRENT_SOURCE_DIR}/README.md.in ${SAMPLES_FOLDER}/README.md )
+add_custom_command( TARGET images POST_BUILD COMMAND ${CMAKE_COMMAND} ARGS -E copy_if_different ${CMAKE_CURRENT_SOURCE_DIR}/display.png ${SAMPLES_FOLDER}/display.png )
 
 if( INCLUDE_CSHARP )
   add_executable( images_net images_net.cs )
