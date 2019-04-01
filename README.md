@@ -129,7 +129,7 @@ If you would rather package up the library for distribution, run:
 Which will create a distribution package similar to the ones we have
 produced, but for your platform.
 
-## Creating a tensor
+## Sample code
 
 Once the library has been built and installed, you can begin to use it
 in your code. We have provided some
