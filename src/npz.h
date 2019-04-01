@@ -142,6 +142,18 @@ class inpzstream
     /** Closes the underlying stream. */
     void close();
 
+    /** Returns whether this NPZ contains the specified tensor
+     *  \param filename the name of the tensor in the archive
+     *  \return whether the tensor is in the archive
+    */
+    bool contains(const std::string &filename);
+
+    /** Returns the header for a specified tensor.
+     *  \param filename the name of the tensor in the archive
+     *  \return the header for the tensor
+     */
+    header_info peek(const std::string &filename);
+
     /** Read a tensor from the archive. This method will thrown an exception if
      *  the tensor does not exist, or if the data type of the tensor does not match
      *  the template type.

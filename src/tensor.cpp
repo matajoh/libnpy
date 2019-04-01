@@ -61,4 +61,5 @@ data_type_t tensor<double>::get_dtype()
 {
     return data_type_t::FLOAT64;
 };
+
 } // namespace npy

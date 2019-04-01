@@ -56,6 +56,43 @@ enum class compression_method_t : std::uint16_t {
 
 %template(Shape) std::vector<size_t>;
 
+%rename(HeaderInfo) header_info;
+struct header_info
+{
+    header_info(data_type_t dtype,
+                endian_t endianness,
+                bool fortran_order,
+                const std::vector<size_t> &shape);
+
+
+    %rename(DataType) dtype;
+    data_type_t dtype;
+
+    %rename(Endianness) endianness;
+    endian_t endianness;
+
+    %rename(FortranOrder) fortran_order;
+    bool fortran_order;
+
+    %rename(Shape) shape;
+    std::vector<size_t> shape;
+};
+
+%exception peek(const std::string& path) %{
+    try{
+        $action
+    } catch( std::invalid_argument& e) {
+        SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentException, "Invalid path location", e.what());
+        return $null;
+    } catch( std::logic_error& e) {
+        SWIG_CSharpSetPendingException(SWIG_CSharpIOException, e.what());
+        return $null;
+    }
+%}
+
+%rename(Peek) peek;
+header_info peek(const std::string& path);
+
 template <typename T>
 class tensor {
 public:
@@ -242,6 +279,25 @@ public:
     %}
 
     inpzstream(const std::string& path);
+
+    %rename(Contains) contains;
+    bool contains(const std::string& filename);
+
+    %exception peek(const std::string& filename) %{
+        try{
+            $action
+        }catch(std::invalid_argument& e){
+            SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentException, "Filename does not exist in archive", e.what());
+            return $null;
+        }catch(std::logic_error& e){
+            SWIG_CSharpSetPendingException(SWIG_CSharpIOException, e.what());
+            return $null;
+        }
+    %}
+
+    %rename(Peek) peek;
+    header_info peek(const std::string& filename);
+
 
     %exception read(const std::string& filename) %{
         try{

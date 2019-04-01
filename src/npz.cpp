@@ -254,7 +254,7 @@ void onpzstream::write_file(const std::string &filename,
         static_cast<std::uint16_t>(this->m_compression_method),
         static_cast<std::uint32_t>(this->m_output.tellp())};
     write_local_header(this->m_output, entry);
-    this->m_output.write(reinterpret_cast<char*>(compressed_bytes.data()), compressed_size);
+    this->m_output.write(reinterpret_cast<char *>(compressed_bytes.data()), compressed_size);
     this->m_entries.push_back(std::move(entry));
 }
 
@@ -284,7 +284,8 @@ inpzstream::inpzstream(const std::string &path) : m_input(path, std::ios::out | 
 
 void inpzstream::read_entries()
 {
-    if(!this->m_input.is_open()){
+    if (!this->m_input.is_open())
+    {
         throw std::invalid_argument("path");
     }
 
@@ -317,7 +318,7 @@ std::vector<std::uint8_t> inpzstream::read_file(const std::string &filename)
     }
 
     std::vector<std::uint8_t> uncompressed_bytes(entry.compressed_size);
-    this->m_input.read(reinterpret_cast<char*>(uncompressed_bytes.data()), uncompressed_bytes.size());
+    this->m_input.read(reinterpret_cast<char *>(uncompressed_bytes.data()), uncompressed_bytes.size());
     compression_method_t cmethod = static_cast<compression_method_t>(entry.compression_method);
     if (cmethod == compression_method_t::DEFLATED)
     {
@@ -336,5 +337,16 @@ std::vector<std::uint8_t> inpzstream::read_file(const std::string &filename)
 void inpzstream::close()
 {
     this->m_input.close();
+}
+
+bool inpzstream::contains(const std::string &filename)
+{
+    return this->m_entries.count(filename);
+}
+
+header_info inpzstream::peek(const std::string &filename)
+{
+    imemstream stream(this->read_file(filename));
+    return npy::peek(stream);
 }
 } // namespace npy

@@ -45,6 +45,14 @@ namespace Testing
             AssertEqual<T, IList<T>>(expected.Values, actual.Values, ref result, tag);
         }
 
+        public static void AssertEqual(HeaderInfo expected, HeaderInfo actual, ref int result, string tag)
+        {
+            AssertEqual(expected.DataType, actual.DataType, ref result, tag + " DataType");
+            AssertEqual(expected.Endianness, actual.Endianness, ref result, tag + " Endianness");
+            AssertEqual(expected.FortranOrder, actual.FortranOrder, ref result, tag + " FortranOrder");
+            AssertEqual<uint, List<uint>>(expected.Shape.ToList(), actual.Shape.ToList(), ref result, tag + " Shape");
+        }
+
         public static void AssertThrows<E>(Action action, ref int result, string tag) where E:Exception
         {
             try
@@ -74,6 +82,11 @@ namespace Testing
             }
 
             return tensor;
+        }
+
+        public static string AssetPath(string filename)
+        {
+            return Path.Combine("assets", "test", filename);
         }
     }
 }

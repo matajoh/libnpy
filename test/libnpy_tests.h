@@ -12,10 +12,12 @@
 
 int test_exceptions();
 int test_memstream();
-int test_npy_write();
+int test_npy_peek();
 int test_npy_read();
-int test_npz_write();
+int test_npy_write();
+int test_npz_peek();
 int test_npz_read();
+int test_npz_write();
 int test_tensor();
 
 namespace test
@@ -87,15 +89,32 @@ inline void assert_equal<std::string>(const std::string &expected,
     }
 }
 
-template <class EXCEPTION>
-void assert_throws(void (*function)(), int& result, const std::string& tag)
+template <>
+inline void assert_equal<npy::header_info>(const npy::header_info &expected,
+                                           const npy::header_info &actual,
+                                           int &result,
+                                           const std::string &tag)
 {
-    try{
+    assert_equal(expected.dtype, actual.dtype, result, tag + " dtype");
+    assert_equal(expected.endianness, actual.endianness, result, tag + " endianness");
+    assert_equal(expected.fortran_order, actual.fortran_order, result, tag + " fortran_order");
+    assert_equal(expected.shape, actual.shape, result, tag + " shape");
+}
+
+template <class EXCEPTION>
+void assert_throws(void (*function)(), int &result, const std::string &tag)
+{
+    try
+    {
         function();
         result = EXIT_FAILURE;
         std::cout << tag << " did not throw an exception" << std::endl;
-    }catch(EXCEPTION&){
-    }catch(std::exception& e){
+    }
+    catch (EXCEPTION &)
+    {
+    }
+    catch (std::exception &e)
+    {
         result = EXIT_FAILURE;
         std::cout << tag << " threw unexpected exception: " << e.what() << std::endl;
     }
@@ -156,6 +175,7 @@ std::string npy_fortran_stream(npy::endian_t endianness = npy::endian_t::NATIVE)
 
 std::string read_file(const std::string &path);
 std::string read_asset(const std::string &filename);
+std::string asset_path(const std::string &filename);
 std::string path_join(const std::vector<std::string> &parts);
 } // namespace test
 

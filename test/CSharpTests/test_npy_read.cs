@@ -13,7 +13,7 @@ namespace Testing
         {
             Shape shape = new Shape(new uint[] { 5, 2, 5 });
             T expected = Test.Tensor<T, D, B>(shape);
-            string path = Path.Combine("assets", "test", tag + ".npy");
+            string path = Test.AssetPath(tag + ".npy");
             T actual = (T)Activator.CreateInstance(typeof(T), new object[] { path });
             Test.AssertEqual<D, B>(expected, actual, ref result, "c#_npy_read_" + tag);
         }

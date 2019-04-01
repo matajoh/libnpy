@@ -13,7 +13,7 @@ namespace Testing
             Float32Tensor expectedDepth = Test.Tensor<Float32Tensor, float, Float32Buffer>(new Shape(new uint[] { 5, 5 }));
 
             string filename = compressed ? "test_compressed.npz" : "test.npz";
-            NPZInputStream stream = new NPZInputStream(Path.Combine("assets", "test", filename));
+            NPZInputStream stream = new NPZInputStream(Test.AssetPath(filename));
 
             UInt8Tensor actualColor = stream.ReadUInt8("color.npy");
             Float32Tensor actualDepth = stream.ReadFloat32("depth.npy");
@@ -30,6 +30,9 @@ namespace Testing
         public static int Main()
         {
             int result = Test.EXIT_SUCCESS;
+
+            TestRead(false, ref result);
+            TestRead(true, ref result);
 
             return result;
         }

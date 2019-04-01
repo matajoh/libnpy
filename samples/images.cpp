@@ -11,8 +11,10 @@ int main()
     npy::tensor<std::uint8_t> color(shape);
 
     // fill it with some data
-    for(size_t row=0; row < color.shape()[0]; ++row){
-        for(size_t col=0; col < color.shape()[1]; ++col){
+    for (size_t row = 0; row < color.shape()[0]; ++row)
+    {
+        for (size_t col = 0; col < color.shape()[1]; ++col)
+        {
             color({row, col, 0}) = static_cast<std::uint8_t>(row << 3);
             color({row, col, 1}) = static_cast<std::uint8_t>(col << 3);
             color({row, col, 2}) = 128;
@@ -28,6 +30,9 @@ int main()
     // the built-in tensor class also has a save method
     color.save("color.npy");
 
+    // we can peek at the header of the file
+    npy::header_info header = npy::peek("color.npy");
+
     // we can load it back the same way
     color = npy::load<std::uint8_t, npy::tensor>("color.npy");
 
@@ -35,11 +40,13 @@ int main()
     shape = {32, 32};
     npy::tensor<float> gray(shape);
 
-    for(size_t row=0; row<gray.shape()[0]; ++row){
-        for(size_t col=0; col<gray.shape()[1]; ++col){
-            gray({row, col}) = 0.21f*color({row, col, 0}) +
-                               0.72f*color({row, col, 1}) +
-                               0.07f*color({row, col, 2});
+    for (size_t row = 0; row < gray.shape()[0]; ++row)
+    {
+        for (size_t col = 0; col < gray.shape()[1]; ++col)
+        {
+            gray({row, col}) = 0.21f * color({row, col, 0}) +
+                               0.72f * color({row, col, 1}) +
+                               0.07f * color({row, col, 2});
         }
     }
 
@@ -53,6 +60,14 @@ int main()
     // and we can read them back out again
     {
         npy::inpzstream input("test.npz");
+
+        // we can test to see if the archive contains a file
+        if (input.contains("color.npy"))
+        {
+            // and peek at its header
+            header = input.peek("color.npy");
+        }
+
         color = input.read<std::uint8_t>("color.npy");
         gray = input.read<float>("gray.npy");
     }

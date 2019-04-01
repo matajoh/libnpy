@@ -12,7 +12,7 @@ public unsafe class Sample
         // fill it with some data.
         for (uint row = 0; row < color.Shape[0]; ++row)
         {
-            for(uint col=0; col < color.Shape[1]; ++col)
+            for (uint col = 0; col < color.Shape[1]; ++col)
             {
                 color[row, col, 0] = (byte)(row << 3);
                 color[row, col, 1] = (byte)(col << 3);
@@ -25,6 +25,9 @@ public unsafe class Sample
 
         // we can manually set the endianness to use
         color.Save("color.npy", Endian.BIG);
+
+        // we can peek at the header of a file
+        HeaderInfo header = NumpyIO.NumpyIO.Peek("color.npy");
 
         // we can load it using the path constructor
         color = new UInt8Tensor("color.npy");
@@ -50,6 +53,14 @@ public unsafe class Sample
 
         // and we can read them back out again
         NPZInputStream input = new NPZInputStream("test.npz");
+
+        // we can check of an archive contains a file
+        if (input.Contains("color.npy"))
+        {
+            // and peek at its header
+            header = input.Peek("color.npy");
+        }
+
         color = input.ReadUInt8("color.npy");
         gray = input.ReadFloat32("gray.npy");
         input.Close();
