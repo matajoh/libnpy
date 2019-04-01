@@ -31,6 +31,9 @@ namespace Testing
         {
             int result = Test.EXIT_SUCCESS;
 
+            TestRead(false, ref result);
+            TestRead(true, ref result);
+
             return result;
         }
     }

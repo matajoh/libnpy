@@ -27,10 +27,16 @@ void inpzstream_invalid_path()
     npy::inpzstream(test::path_join({"does_not_exist", "bad.npz"}));
 }
 
-void inpzstream_invalid_filename()
+void inpzstream_read_invalid_filename()
 {
     npy::inpzstream stream(test::path_join({"assets", "test", "test.npz"}));
     npy::tensor<std::uint8_t> tensor = stream.read<std::uint8_t>("not_there.npy");
+}
+
+void inpzstream_peek_invalid_filename()
+{
+    npy::inpzstream stream(test::path_join({"assets", "test", "test.npz"}));
+    npy::header_info header = stream.peek("not_there.npy");
 }
 
 void onpzstream_compression()
@@ -95,7 +101,8 @@ int test_exceptions()
     test::assert_throws<std::invalid_argument>(save_invalid_path, result, "save_invalid_path");
     test::assert_throws<std::invalid_argument>(load_invalid_path, result, "load_invalid_path");
     test::assert_throws<std::invalid_argument>(inpzstream_invalid_path, result, "inpzstream_invalid_path");
-    test::assert_throws<std::invalid_argument>(inpzstream_invalid_filename, result, "inpzstream_invalid_filename");
+    test::assert_throws<std::invalid_argument>(inpzstream_read_invalid_filename, result, "inpzstream_read_invalid_filename");
+    test::assert_throws<std::invalid_argument>(inpzstream_peek_invalid_filename, result, "inpzstream_peek_invalid_filename");
 	test::assert_throws<std::invalid_argument>(onpzstream_compression, result, "onpzstream_compression");
 	test::assert_throws<std::invalid_argument>(tensor_copy_from_0, result, "tensor_copy_from_0");
     test::assert_throws<std::invalid_argument>(tensor_copy_from_1, result, "tensor_copy_from_1");

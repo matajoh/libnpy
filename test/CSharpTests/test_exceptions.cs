@@ -38,13 +38,21 @@ namespace Testing
             }
         }
 
-        static void NPZInputStreamInvalidFilename()
+        static void NPZInputStreamReadInvalidFilename()
         {
             using(var stream = new NPZInputStream(Test.AssetPath("test.npz")))
             {
                 var tensor = stream.ReadUInt8("not_there.npy");
             }
         }
+
+        static void NPZInputStreamPeekInvalidFilename()
+        {
+            using(var stream = new NPZInputStream(Test.AssetPath("test.npz")))
+            {
+                var header = stream.Peek("not_there.npy");
+            }
+        }        
 
         static void TensorCopyFrom()
         {
@@ -84,7 +92,8 @@ namespace Testing
             Test.AssertThrows<ArgumentException>(SaveInvalidPath, ref result, "SaveInvalidPath");
             Test.AssertThrows<ArgumentException>(LoadInvalidPath, ref result, "LoadInvalidPath");
             Test.AssertThrows<ArgumentException>(NPZInputStreamInvalidPath, ref result, "NPZInputStreamInvalidPath");
-            Test.AssertThrows<ArgumentException>(NPZInputStreamInvalidFilename, ref result, "NPZInputStreamInvalidFilename");
+            Test.AssertThrows<ArgumentException>(NPZInputStreamReadInvalidFilename, ref result, "NPZInputStreamReadInvalidFilename");
+            Test.AssertThrows<ArgumentException>(NPZInputStreamPeekInvalidFilename, ref result, "NPZInputStreamPeekInvalidFilename");
             Test.AssertThrows<ArgumentException>(NPZOutputStreamCompression, ref result, "NPZOutputStreamCompression");
             Test.AssertThrows<ArgumentException>(TensorCopyFrom, ref result, "TensorCopyFrom");
             Test.AssertThrows<ArgumentException>(TensorIndexSize, ref result, "TensorIndexSize");
