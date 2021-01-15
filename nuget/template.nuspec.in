@@ -12,5 +12,8 @@
     <description>C++ library for reading and writing NPY and NPZ files.</description>
     <releaseNotes>@LIBNPY_RELEASE_NOTES@</releaseNotes>
     <tags>native</tags>
+    <dependencies>
+      <group targetFramework=".NETFramework4.7.2" />
+    </dependencies>
   </metadata>
 </package>
