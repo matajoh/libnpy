@@ -1,6 +1,6 @@
 // ----------------------------------------------------------------------------
 //
-// zip.h -- simple wrapper around ZLIB
+// zip.h -- simple wrapper around miniz
 //
 // Copyright (C) 2019 Matthew Johnson
 //

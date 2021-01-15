@@ -48,7 +48,6 @@ include_directories(
 
 target_link_libraries( images
   ${npy_LIBRARIES}
-  ${ZLIB_LIBRARIES}
 )
 
 add_custom_command( TARGET images POST_BUILD

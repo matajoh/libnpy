@@ -20,7 +20,6 @@ add_definitions( -DLIBNPY_VERSION=${LIBNPY_VERSION} )
 
 set( LIBNPY_INCLUDE_FOLDERS 
     ${CMAKE_CURRENT_SOURCE_DIR}
-    ${ZLIB_INCLUDE_DIRS}
 )
 
 include_directories( ${LIBNPY_INCLUDE_FOLDERS} )
@@ -28,7 +27,6 @@ include_directories( ${LIBNPY_INCLUDE_FOLDERS} )
 add_library( npy STATIC ${SOURCES} ${HEADERS} )
 
 set( LIBNPY_LINK_LIBRARIES 
-  ${ZLIB_LIBRARIES}
 )
 
 target_link_libraries( npy ${LIBNPY_LINK_LIBRARIES} )
