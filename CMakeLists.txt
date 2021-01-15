@@ -32,8 +32,10 @@ set( WARNINGS_AS_ERRORS OFF )
 
 if( APPLE )
   set( SYSTEM_NAME "Mac" )
+  set( LIBNPY_NUGET_LIB "libnpy.a")
 elseif( UNIX )
   set( SYSTEM_NAME "Linux" )
+  set( LIBNPY_NUGET_LIB "libnpy.a")
   execute_process(COMMAND lsb_release -is OUTPUT_VARIABLE LSB_ID)
   execute_process(COMMAND lsb_release -rs OUTPUT_VARIABLE LSB_RELEASE)
   if( LSB_ID AND LSB_RELEASE )
@@ -51,12 +53,16 @@ elseif( UNIX )
     set( SYSTEM_NAME "${SYSTEM_NAME}-Redhat")
   endif()
 elseif( WIN32 )
+  set( LIBNPY_NUGET_LIB "npy.lib")
   set( SYSTEM_NAME "Windows" )
 endif()
+
 if( CMAKE_SIZEOF_VOID_P EQUAL 8 )
   set( SYSTEM_NAME "${SYSTEM_NAME}-64bit" )
+  set( SYSTEM_BITS "x64" )
 else()
   set( SYSTEM_NAME "${SYSTEM_NAME}-32bit" )
+  set( SYSTEM_BITS "x86" )
 endif()
 
 # -------------------- Find packages --------------------------
@@ -70,6 +76,8 @@ endif()
 set( CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${CMAKE_CURRENT_SOURCE_DIR}/cmake )
 
 if( INCLUDE_CSHARP )
+  find_package( SWIG REQUIRED )
+
   # Select the .NET architecture
   if( CMAKE_SIZEOF_VOID_P EQUAL 8 )
     set( CSHARP_PLATFORM "x64" CACHE STRING "C# target platform: x86, x64, anycpu, or itanium")
@@ -78,46 +86,14 @@ if( INCLUDE_CSHARP )
   endif()
 endif()
 
-find_package( ZLIB REQUIRED )
-find_package( SWIG REQUIRED )
-find_package( Git REQUIRED )
-
 if( BUILD_DOCUMENTATION )
   find_package( Doxygen REQUIRED )
 endif()
 
-# -------------------- Git hooks ------------------------------
-
-file( GLOB GIT_HOOKS hooks/* )
-
-foreach( hook_source ${GIT_HOOKS} )
-  file(READ ${hook_source} content)
-  string(REPLACE "<SOURCE_DIR>" "${CMAKE_SOURCE_DIR}" content ${content})
-  get_filename_component(hook_name ${hook_source} NAME)
-  get_filename_component(script_ext ${hook_source} EXT)
-  if (${script_ext} STREQUAL ".sh")
-	  string(REPLACE ${script_ext} "" hook_name ${hook_name})
-	  string(REPLACE "_" "-" hook_name ${hook_name})
-	  set( output_path "${CMAKE_SOURCE_DIR}/.git/hooks/${hook_name}")
-	  file( GENERATE OUTPUT ${output_path} CONTENT ${content})
-  else()
-	# assume it is the Python hook script...
-	  string(REPLACE "_" "-" hook_name ${hook_name})
-	  set( output_path "${CMAKE_SOURCE_DIR}/.git/hooks/${hook_name}")
-	  file( GENERATE OUTPUT ${output_path} CONTENT ${content})
-  endif()
-endforeach()
-
 # -------------------- Build settings -----------------------------
 
 # use C++11
-if (CMAKE_VERSION VERSION_LESS "3.1")
-  if (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
-    set (CMAKE_CXX_FLAGS "--std=gnu++11 ${CMAKE_CXX_FLAGS}")
-  endif ()
-else ()
-  set (CMAKE_CXX_STANDARD 11)
-endif ()
+set (CMAKE_CXX_STANDARD 11)
  
 if( MSVC )
   set( LIBNPY_CSHARP_DIR ${CMAKE_BINARY_DIR}/src/CSharpWrapper/$<CONFIG> )
@@ -172,8 +148,29 @@ endif()
 
 # -------------------- Package ------------------------------------
 
+set( PROJECT_FILES
+  README.md
+  CHANGELOG.md
+)
+
+# copy these files into the root of the distribution zip
+install( FILES ${PROJECT_FILES} DESTINATION "." )
+
+# CMake package configuration file
+configure_file("${CMAKE_CURRENT_SOURCE_DIR}/libnpy-config.cmake.in" "${CMAKE_CURRENT_BINARY_DIR}/nuget/cmake/libnpy-config.cmake" @ONLY )
+
+# NuGet files
+set( CMAKE_INSTALL_PREFIX "${CMAKE_CURRENT_BINARY_DIR}/nuget" CACHE PATH "..." FORCE )
+set( LIBNPY_NUGET_NAME "npy-v${MSVC_TOOLSET_VERSION}-${SYSTEM_BITS}-${CMAKE_BUILD_TYPE}" CACHE STRING "libnpy NuGet Name" FORCE )
+file( READ RELEASE_NOTES LIBNPY_RELEASE_NOTES )
+
+configure_file("${CMAKE_CURRENT_SOURCE_DIR}/nuget/template.nuspec.in" "${CMAKE_CURRENT_BINARY_DIR}/nuget/${LIBNPY_NUGET_NAME}.nuspec" @ONLY )
+configure_file("${CMAKE_CURRENT_SOURCE_DIR}/nuget/template.targets.in"
+               "${CMAKE_CURRENT_BINARY_DIR}/nuget/build/native/${LIBNPY_NUGET_NAME}.targets" @ONLY )
+
 set( CPACK_SYSTEM_NAME ${SYSTEM_NAME} )
 set( CPACK_PACKAGE_VERSION "${LIBNPY_VERSION}" )
 set( CPACK_GENERATOR "ZIP" )
 set( CPACK_SOURCE_GENERATOR "ZIP" )
+set( CPACK_INCLUDE_TOPLEVEL_DIRECTORY 0 )
 include( CPack )

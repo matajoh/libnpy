@@ -1,6 +1,14 @@
 # Changelog
 
-### 2019-04-01 - Version 0.2.0
+## [2021-01-15 - Version 1.0.0](https://github.com/matajoh/libnpy/releases/tag/v1.0.0)
+
+New Features:
+- There is no longer a dependency on `zlib`
+
+Improvements:
+- Better packaging (NuGet packages are now produced for C++ and C#)
+
+## [2019-04-01 - Version 0.2.0](https://github.com/matajoh/libnpy/releases/tag/v0.2.0)
 
 Breaking changes:
 - Renamed `endian` => `endian_t`
@@ -14,6 +22,6 @@ New Features:
 Improvements:
 - Removed the unnecessary copies in the compression/decompression process
 
-### 2019-03-24 - Version 0.1.0
+## [2019-03-24 - Version 0.1.0](https://github.com/matajoh/libnpy/releases/tag/v0.1.0)
 
 Initial Release

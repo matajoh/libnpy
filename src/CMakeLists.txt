@@ -5,6 +5,7 @@ set( SOURCES
    npz.cpp
    tensor.cpp
    zip.cpp
+   miniz/miniz.cpp
 )
 
 set( HEADERS
@@ -19,7 +20,6 @@ add_definitions( -DLIBNPY_VERSION=${LIBNPY_VERSION} )
 
 set( LIBNPY_INCLUDE_FOLDERS 
     ${CMAKE_CURRENT_SOURCE_DIR}
-    ${ZLIB_INCLUDE_DIRS}
 )
 
 include_directories( ${LIBNPY_INCLUDE_FOLDERS} )
@@ -27,17 +27,18 @@ include_directories( ${LIBNPY_INCLUDE_FOLDERS} )
 add_library( npy STATIC ${SOURCES} ${HEADERS} )
 
 set( LIBNPY_LINK_LIBRARIES 
-  ${ZLIB_LIBRARIES}
 )
 
 target_link_libraries( npy ${LIBNPY_LINK_LIBRARIES} )
 
+
 install(TARGETS npy 
-  RUNTIME DESTINATION "bin"
-  ARCHIVE DESTINATION "lib"
-  LIBRARY DESTINATION "lib"
+  RUNTIME DESTINATION "build/native/bin"
+  ARCHIVE DESTINATION "build/native/lib"
+  LIBRARY DESTINATION "build/native/lib"
 )
-install(FILES ${HEADERS} DESTINATION "include" )
+install(FILES ${HEADERS} DESTINATION "build/native/include/npy" )
+
 
 # -------------------- Walk the subdirectories --------------------
 if( INCLUDE_CSHARP )

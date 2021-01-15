@@ -26,11 +26,12 @@ work for other platforms as well (the codebase is written to be clean,
 portable C++ 11). If you have problems on your platform, please raise
 it as an [issue](https://github.com/matajoh/libnpy/issues).
 
+
 ### Ubuntu 18.04 [gcc 7.3.0], Ubuntu 16.04 [gcc 5.4.0]
 
 First, install all of the necessary dependencies:
 
-    sudo apt-get install git cmake build-essential zlib1g-dev swig
+    sudo apt-get install git cmake build-essential
 
 If you want to build the documentation, you will also need:
 
@@ -50,39 +51,24 @@ makefiles:
 
 Your other build options are `Release` and `RelWithDebInfo`.
 
-### Windows 10 [Visual Studio 2017]
+### Windows 10
 
 On Windows, you can download and install the dependencies from the following
 locations:
 
 #### Install CMake
-Download and run e.g. `v3.11/cmake-3.11.0-win64-x64.msi` from
+Download and run e.g. `v3.19/cmake-3.19.0-win64-x64.msi` from
 https://cmake.org/files/.
 
 #### Install git and Visual Studio.
 Get the latest Windows git from https://git-scm.com/downloads. Download a
 version of Visual Studio from https://visualstudio.microsoft.com/vs/. You
-will need the C++ and C# compilers.
+will need the C++ compiler (and C# compiler if needed).
 
-#### Build and install ZLib 
-Download e.g. `zlib-1.2.11.zip` from http://zlib.net/ and extract to
-`C:\zlib-1.2.11\`. Then, open a command prompt aith Admin rights
-([How-To](https://technet.microsoft.com/en-us/library/cc947813(v=ws.10).aspx))
-to run the following commands:
-
-    cd C:\zlib-1.2.11\
-    cmake -G "Visual Studio 15 2017 Win64" ..
-    cmake --build . --config Debug --target install
-    cmake --build . --config Release --target install
-
-This will build and install zlib on your system. Then, add
-`C:\Program Files\zlib\bin` to your PATH
-([How To](https://support.microsoft.com/en-us/kb/310519)).
-
-#### Install SWIG
+#### Install SWIG (optional, only for C#)
 Browse to http://swig.org/download.html and download the latest version of
 `swigwin`. Unzip the directory and copy it to your `C:\` drive. Add (e.g.)
-`C:\swigwin-3.0.12` to your PATH. CMake should then find swig automatically.
+`C:\swigwin-4.0.2` to your PATH. CMake should then find swig automatically.
 
 #### Download and install Doxygen (optional)
 If you want to build the documentation, you should also download
@@ -96,7 +82,10 @@ navigated to your desired source code folder:
     git clone https://github.com/matajoh/libnpy.git
     mkdir libnpy\build
     cd libnpy\build
-    cmake -G "Visual Studio 15 2017 Win64" ..
+    cmake ..
+
+If building the C# library, you will also need to do the following:
+
     cmake --build . --target NumpyIONative
     cmake ..
 
@@ -121,13 +110,6 @@ Where again you replace `<CONFIG>` as above will run all of the tests.
 If you want to install the library, run:
 
     cmake --build . --config <CONFIG> --target INSTALL
-
-If you would rather package up the library for distribution, run:
-
-    cpack -C <CONFIG>
-
-Which will create a distribution package similar to the ones we have
-produced, but for your platform.
 
 ## Sample code
 

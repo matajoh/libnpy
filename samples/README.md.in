@@ -10,7 +10,7 @@ To build the sample code, start by using the dependency install guide for your p
 
 First, install all of the necessary dependencies:
 
-    sudo apt-get install git cmake build-essential zlib1g-dev python3 python3-pip
+    sudo apt-get install git cmake build-essential python3 python3-pip
 
 You may find that `cmake` is easier to use via the curses GUI:
 
@@ -42,21 +42,6 @@ https://cmake.org/files/.
 Get the latest Windows git from https://git-scm.com/downloads. Download a
 version of Visual Studio from https://visualstudio.microsoft.com/vs/. You
 will need the C++ and C# compilers.
-
-#### Build and install ZLib 
-Download e.g. `zlib-1.2.11.zip` from http://zlib.net/ and extract to
-`C:\zlib-1.2.11\`. Then, open a command prompt aith Admin rights
-([How-To](https://technet.microsoft.com/en-us/library/cc947813(v=ws.10).aspx))
-to run the following commands:
-
-    cd C:\zlib-1.2.11\
-    cmake -G "Visual Studio 15 2017 Win64" ..
-    cmake --build . --config Debug --target install
-    cmake --build . --config Release --target install
-
-This will build and install zlib on your system. Then, add
-`C:\Program Files\zlib\bin` to your PATH
-([How To](https://support.microsoft.com/en-us/kb/310519)).
 
 #### Download and install Python
 
