@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<package xmlns="http://schemas.microsoft.com/packaging/2011/08/nuspec.xsd">
+  <metadata>
+    <id>@LIBNPY_NUGET_NAME@</id>
+    <version>@LIBNPY_VERSION@</version>
+    <title>@LIBNPY_NUGET_NAME@</title>
+    <authors>Matthew Johnson</authors>
+    <owners>Matthew Johnson</owners>
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <license type="expression">MIT</license>
+    <projectUrl>https://github.com/matajoh/libnpy</projectUrl>
+    <description>C++ library for reading and writing NPY and NPZ files.</description>
+    <releaseNotes>@LIBNPY_RELEASE_NOTES@</releaseNotes>
+    <tags>native</tags>
+  </metadata>
+  <files>
+    <file src="bin\NumpyIO.dll" target="lib\net47" />
+    <file src="bin\NumpyIONative.dll" target="lib\net47" />
+  </files>
+</package>

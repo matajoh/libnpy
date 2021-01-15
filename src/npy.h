@@ -4,7 +4,7 @@
 //          implementation is based upon the description available at:
 // https://docs.scipy.org/doc/numpy/reference/generated/numpy.lib.format.html
 //
-// Copyright (C) 2019 Matthew Johnson
+// Copyright (C) 2021 Matthew Johnson
 //
 // For conditions of distribution and use, see copyright notice in LICENSE
 //

@@ -31,12 +31,14 @@ set( LIBNPY_LINK_LIBRARIES
 
 target_link_libraries( npy ${LIBNPY_LINK_LIBRARIES} )
 
+
 install(TARGETS npy 
-  RUNTIME DESTINATION "bin"
-  ARCHIVE DESTINATION "lib"
-  LIBRARY DESTINATION "lib"
+  RUNTIME DESTINATION "build/native/bin"
+  ARCHIVE DESTINATION "build/native/lib"
+  LIBRARY DESTINATION "build/native/lib"
 )
-install(FILES ${HEADERS} DESTINATION "include" )
+install(FILES ${HEADERS} DESTINATION "build/native/include/npy" )
+
 
 # -------------------- Walk the subdirectories --------------------
 if( INCLUDE_CSHARP )

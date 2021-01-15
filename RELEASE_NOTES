@@ -1,0 +1,5 @@
+New Features:
+- There is no longer a dependency on `zlib`
+
+Improvements:
+- Better packaging (NuGet packages are now produced for C++ and C#)

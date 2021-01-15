@@ -3,7 +3,7 @@ using System.Runtime.CompilerServices;
 
 [assembly: AssemblyVersion("@LIBNPY_VERSION@")]
 [assembly: AssemblyTitle("@PROJECT_NAME@ C# @CSHARP_PLATFORM@ wrapper @LIBNPY_VERSION@")]
-[assembly: AssemblyCopyright("Copyright Matthew Johnson (c) 2019")]
+[assembly: AssemblyCopyright("Copyright Matthew Johnson (c) 2021")]
 [assembly: AssemblyDescription("NumpyIO C# @CSHARP_PLATFORM@ wrapper @LIBNPY_VERSION_CSHARP_AssemblyVersion@, compiled with @CSHARP_TYPE@ @CSHARP_VERSION@")]
 [assembly: AssemblyCompany("")]
 [assembly: AssemblyFileVersion("@LIBNPY_VERSION@")]
