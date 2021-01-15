@@ -1,6 +1,6 @@
 #include <cassert>
 #include <stdexcept>
-#include "zlib.h"
+#include "miniz/miniz.h"
 
 #include "core.h"
 #include "zip.h"
@@ -15,7 +15,7 @@ const int MEM_LEVEL = 8;
 namespace npy
 {
 
-std::uint32_t crc32(const std::vector<std::uint8_t> &bytes)
+std::uint32_t npy_crc32(const std::vector<std::uint8_t> &bytes)
 {
     uLong crc = ::crc32(0L, Z_NULL, 0);
     const Bytef *buf = reinterpret_cast<const Bytef *>(bytes.data());
@@ -23,7 +23,7 @@ std::uint32_t crc32(const std::vector<std::uint8_t> &bytes)
     return ::crc32(crc, buf, len);
 }
 
-std::vector<std::uint8_t> deflate(std::vector<std::uint8_t> &&bytes)
+std::vector<std::uint8_t> npy_deflate(std::vector<std::uint8_t> &&bytes)
 {
     int ret, flush;
     unsigned have;
@@ -94,7 +94,7 @@ std::vector<std::uint8_t> deflate(std::vector<std::uint8_t> &&bytes)
     return std::move(output.buf());
 }
 
-std::vector<std::uint8_t> inflate(std::vector<std::uint8_t> &&bytes)
+std::vector<std::uint8_t> npy_inflate(std::vector<std::uint8_t> &&bytes)
 {
     int ret;
     unsigned have;

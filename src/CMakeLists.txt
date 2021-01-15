@@ -5,6 +5,7 @@ set( SOURCES
    npz.cpp
    tensor.cpp
    zip.cpp
+   miniz/miniz.cpp
 )
 
 set( HEADERS

@@ -30,7 +30,7 @@ it as an [issue](https://github.com/matajoh/libnpy/issues).
 
 First, install all of the necessary dependencies:
 
-    sudo apt-get install git cmake build-essential zlib1g-dev swig
+    sudo apt-get install git cmake build-essential swig
 
 If you want to build the documentation, you will also need:
 
@@ -64,21 +64,6 @@ Get the latest Windows git from https://git-scm.com/downloads. Download a
 version of Visual Studio from https://visualstudio.microsoft.com/vs/. You
 will need the C++ and C# compilers.
 
-#### Build and install ZLib 
-Download e.g. `zlib-1.2.11.zip` from http://zlib.net/ and extract to
-`C:\zlib-1.2.11\`. Then, open a command prompt aith Admin rights
-([How-To](https://technet.microsoft.com/en-us/library/cc947813(v=ws.10).aspx))
-to run the following commands:
-
-    cd C:\zlib-1.2.11\
-    cmake -G "Visual Studio 15 2017 Win64" ..
-    cmake --build . --config Debug --target install
-    cmake --build . --config Release --target install
-
-This will build and install zlib on your system. Then, add
-`C:\Program Files\zlib\bin` to your PATH
-([How To](https://support.microsoft.com/en-us/kb/310519)).
-
 #### Install SWIG
 Browse to http://swig.org/download.html and download the latest version of
 `swigwin`. Unzip the directory and copy it to your `C:\` drive. Add (e.g.)
@@ -96,7 +81,7 @@ navigated to your desired source code folder:
     git clone https://github.com/matajoh/libnpy.git
     mkdir libnpy\build
     cd libnpy\build
-    cmake -G "Visual Studio 15 2017 Win64" ..
+    cmake -G "Visual Studio 16 2019 Win64" ..
     cmake --build . --target NumpyIONative
     cmake ..
 

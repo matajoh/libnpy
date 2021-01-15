@@ -70,6 +70,8 @@ endif()
 set( CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${CMAKE_CURRENT_SOURCE_DIR}/cmake )
 
 if( INCLUDE_CSHARP )
+  find_package( SWIG REQUIRED )
+
   # Select the .NET architecture
   if( CMAKE_SIZEOF_VOID_P EQUAL 8 )
     set( CSHARP_PLATFORM "x64" CACHE STRING "C# target platform: x86, x64, anycpu, or itanium")
@@ -78,8 +80,6 @@ if( INCLUDE_CSHARP )
   endif()
 endif()
 
-find_package( ZLIB REQUIRED )
-find_package( SWIG REQUIRED )
 find_package( Git REQUIRED )
 
 if( BUILD_DOCUMENTATION )

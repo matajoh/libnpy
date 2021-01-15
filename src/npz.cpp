@@ -230,7 +230,7 @@ void onpzstream::write_file(const std::string &filename,
     std::uint32_t uncompressed_size = static_cast<std::uint32_t>(bytes.size());
     std::uint32_t compressed_size = 0;
     std::vector<std::uint8_t> compressed_bytes;
-    std::uint32_t checksum = crc32(bytes);
+    std::uint32_t checksum = npy_crc32(bytes);
     if (this->m_compression_method == compression_method_t::STORED)
     {
         compressed_bytes = bytes;
@@ -238,7 +238,7 @@ void onpzstream::write_file(const std::string &filename,
     }
     else if (this->m_compression_method == compression_method_t::DEFLATED)
     {
-        compressed_bytes = deflate(std::move(bytes));
+        compressed_bytes = npy_deflate(std::move(bytes));
         compressed_size = static_cast<std::uint32_t>(compressed_bytes.size());
     }
     else
@@ -322,10 +322,10 @@ std::vector<std::uint8_t> inpzstream::read_file(const std::string &filename)
     compression_method_t cmethod = static_cast<compression_method_t>(entry.compression_method);
     if (cmethod == compression_method_t::DEFLATED)
     {
-        uncompressed_bytes = inflate(std::move(uncompressed_bytes));
+        uncompressed_bytes = npy_inflate(std::move(uncompressed_bytes));
     }
 
-    std::uint32_t actual_crc32 = crc32(uncompressed_bytes);
+    std::uint32_t actual_crc32 = npy_crc32(uncompressed_bytes);
     if (actual_crc32 != entry.crc32)
     {
         throw std::logic_error("CRC mismatch");
