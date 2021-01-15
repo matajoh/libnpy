@@ -32,10 +32,10 @@ set( WARNINGS_AS_ERRORS OFF )
 
 if( APPLE )
   set( SYSTEM_NAME "Mac" )
-  set( LIBNPY_NUGET_LIB "libsvt.a")
+  set( LIBNPY_NUGET_LIB "libnpy.a")
 elseif( UNIX )
   set( SYSTEM_NAME "Linux" )
-  set( LIBNPY_NUGET_LIB "libsvt.a")
+  set( LIBNPY_NUGET_LIB "libnpy.a")
   execute_process(COMMAND lsb_release -is OUTPUT_VARIABLE LSB_ID)
   execute_process(COMMAND lsb_release -rs OUTPUT_VARIABLE LSB_RELEASE)
   if( LSB_ID AND LSB_RELEASE )
@@ -53,7 +53,7 @@ elseif( UNIX )
     set( SYSTEM_NAME "${SYSTEM_NAME}-Redhat")
   endif()
 elseif( WIN32 )
-  set( LIBNPY_NUGET_LIB "svt.lib")
+  set( LIBNPY_NUGET_LIB "npy.lib")
   set( SYSTEM_NAME "Windows" )
 endif()
 
@@ -162,7 +162,7 @@ configure_file("${CMAKE_CURRENT_SOURCE_DIR}/libnpy-config.cmake.in" "${CMAKE_CUR
 # NuGet files
 set( CMAKE_INSTALL_PREFIX "${CMAKE_CURRENT_BINARY_DIR}/nuget" CACHE PATH "..." FORCE )
 set( LIBNPY_NUGET_NAME "npy-v${MSVC_TOOLSET_VERSION}-${SYSTEM_BITS}-${CMAKE_BUILD_TYPE}" CACHE STRING "libnpy NuGet Name" FORCE )
-file( READ RELEASE_NOTES SVT_RELEASE_NOTES )
+file( READ RELEASE_NOTES LIBNPY_RELEASE_NOTES )
 
 configure_file("${CMAKE_CURRENT_SOURCE_DIR}/nuget/template.nuspec.in" "${CMAKE_CURRENT_BINARY_DIR}/nuget/${LIBNPY_NUGET_NAME}.nuspec" @ONLY )
 configure_file("${CMAKE_CURRENT_SOURCE_DIR}/nuget/template.targets.in"
