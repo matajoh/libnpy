@@ -13,8 +13,4 @@
     <releaseNotes>@LIBNPY_RELEASE_NOTES@</releaseNotes>
     <tags>native</tags>
   </metadata>
-  <files>
-    <file src="bin\NumpyIO.dll" target="lib\net47" />
-    <file src="bin\NumpyIONative.dll" target="lib\net47" />
-  </files>
 </package>

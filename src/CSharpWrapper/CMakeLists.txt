@@ -81,4 +81,4 @@ add_library(
 target_compile_options( NumpyIO PUBLIC "/unsafe" )
 target_link_libraries( NumpyIO ${SWIG_MODULE_NumpyIONative_REAL_NAME} )
 
-install( TARGETS NumpyIO ${SWIG_MODULE_NumpyIONative_REAL_NAME} RUNTIME DESTINATION "bin")
+install( TARGETS NumpyIO ${SWIG_MODULE_NumpyIONative_REAL_NAME} RUNTIME DESTINATION "lib/net472")
