@@ -1,6 +1,6 @@
 # Changelog
 
-## [2021-01-16 - Version 1.0.1](https://github.com/matajoh/libnpy/releases/tag/v1.0.1)
+## [2021-01-16 - Version 1.0.1](https://github.com/matajoh/libnpy/releases/tag/v1.1.0)
 
 New Features:
 - Zip64 compatibility
