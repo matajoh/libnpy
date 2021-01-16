@@ -1,6 +1,2 @@
-New Features:
-- Zip64 compatibility
-
 Improvements:
-- Can use `numpy` style lookup for tensors (i.e. dropping the `.npy` from the name)
-- Added a crc32 test
+- Minor cmake change
