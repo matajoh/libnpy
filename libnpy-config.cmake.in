@@ -4,7 +4,7 @@
 # - LIBNPY_LIBS: Libraries to link against.
 
 get_filename_component (_BIN_DIR "${CMAKE_CURRENT_LIST_DIR}/../build/native" ABSOLUTE)
-set(LIBNPY_INCLUDE_DIRS "${_BIN_DIR}/include/npy")
+set(LIBNPY_INCLUDE_DIRS "${_BIN_DIR}/include")
 set(LIBNPY_LIBS "${_BIN_DIR}/lib/@LIBNPY_NUGET_LIB@")
 
 # Unset private variables.
