@@ -22,6 +22,10 @@ const int CD_END_SIZE = 22;
 const std::uint16_t VERSION = 20;
 const int CHUNK = 128 * 1024;
 
+const std::uint16_t ZIP64_TAG = 1;
+const std::uint64_t ZIP64_LIMIT = 0x8FFFFFFF;
+const std::uint32_t ZIP64_PLACEHOLDER = 0xFFFFFFFF;
+
 void write(std::ostream &stream, std::uint16_t value)
 {
     stream.put(value & 0x00FF);
@@ -33,6 +37,27 @@ void write(std::ostream &stream, std::uint32_t value)
     for (int i = 0; i < 4; ++i)
     {
         stream.put(value & 0x000000FF);
+        value >>= 8;
+    }
+}
+
+void write32(std::ostream & stream, std::uint64_t value)
+{
+    if(value > ZIP64_LIMIT)
+    {
+        write(stream, ZIP64_PLACEHOLDER);
+    }
+    else
+    {
+        write(stream, static_cast<std::uint32_t>(value));
+    }
+}
+
+void write(std::ostream &stream, std::uint64_t value)
+{
+    for(int i=0; i<8; ++i)
+    {
+        stream.put(value & 0x00000000000000FF);
         value >>= 8;
     }
 }
@@ -57,6 +82,19 @@ std::uint32_t read32(std::istream &stream)
     return result;
 }
 
+std::uint64_t read64(std::istream &stream)
+{
+    std::uint64_t result = 0;
+    int shift = 0;
+    for(int i=0; i<8; ++i, shift += 8)
+    {
+        std::uint8_t part = stream.get();
+        result |= part << shift;
+    }
+
+    return result;
+}
+
 void assert_sig(std::istream &stream, const std::array<std::uint8_t, 4> &expected)
 {
     std::array<std::uint8_t, 4> actual;
@@ -67,6 +105,94 @@ void assert_sig(std::istream &stream, const std::array<std::uint8_t, 4> &expecte
     }
 }
 
+std::uint16_t determine_extra_length(const npy::file_entry &header, bool include_offset)
+{
+    std::uint16_t length = 0;
+    if(header.compressed_size > ZIP64_LIMIT)
+    {
+        length += 8;
+    }
+
+    if(header.uncompressed_size > ZIP64_LIMIT)
+    {
+        length += 8;
+    }
+
+    if(include_offset && header.offset > ZIP64_LIMIT)
+    {
+        length += 8;
+    }
+
+    return length;
+}
+
+void write_zip64_extra(std::ostream &stream, const npy::file_entry &header, bool include_offset)
+{
+    std::vector<std::uint64_t> extra;
+    if(header.uncompressed_size > ZIP64_LIMIT)
+    {
+        extra.push_back(header.uncompressed_size);
+    }
+
+    if(header.compressed_size > ZIP64_LIMIT)
+    {
+        extra.push_back(header.compressed_size);
+    }
+
+    if(include_offset && header.offset > ZIP64_LIMIT)
+    {
+        extra.push_back(header.offset);
+    }
+
+    write(stream, ZIP64_TAG);
+    write(stream, static_cast<std::uint16_t>(extra.size() * 8));
+    for(auto val : extra)
+    {
+        write(stream, val);
+    }
+}
+
+void read_zip64_extra(std::istream &stream, npy::file_entry &header, bool include_offset)
+{
+    std::uint16_t tag = read16(stream);
+    if(tag != ZIP64_TAG)
+    {
+        throw std::logic_error("Invalid tag (expected ZIP64)");
+    }
+
+    std::uint16_t actual_size = read16(stream);
+    std::uint16_t expected_size = 0;
+
+    if(header.uncompressed_size == ZIP64_PLACEHOLDER)
+    {
+        header.uncompressed_size = read64(stream);
+        expected_size += 8;
+    }
+
+    if(header.compressed_size == ZIP64_PLACEHOLDER)
+    {
+        header.compressed_size = read64(stream);
+        expected_size += 8;
+    }
+
+    if(include_offset && header.offset == ZIP64_PLACEHOLDER)
+    {
+        header.offset = read64(stream);
+        expected_size += 8;
+    }
+
+    if(actual_size < expected_size)
+    {
+        throw std::logic_error("ZIP64 extra info missing");
+    }
+
+    if(actual_size > expected_size)
+    {
+        // this can be the result of force_zip64 being set in Python's zipfile
+        stream.seekg(actual_size - expected_size, std::ios::cur);
+    }
+}
+
 void write_shared_header(std::ostream &stream, const npy::file_entry &header)
 {
     std::uint16_t general_purpose_big_flag = 0;
@@ -74,14 +200,12 @@ void write_shared_header(std::ostream &stream, const npy::file_entry &header)
     write(stream, header.compression_method);
     stream.write(reinterpret_cast<const char *>(TIME.data()), TIME.size());
     write(stream, header.crc32);
-    write(stream, header.compressed_size);
-    write(stream, header.uncompressed_size);
+    write32(stream, header.compressed_size);
+    write32(stream, header.uncompressed_size);
     write(stream, static_cast<std::uint16_t>(header.filename.length()));
-    std::uint16_t extra_field_length = 0;
-    write(stream, extra_field_length);
 }
 
-std::size_t read_shared_header(std::istream &stream, npy::file_entry &header)
+std::uint16_t read_shared_header(std::istream &stream, npy::file_entry &header)
 {
     read16(stream); // general purpose bit flag
     header.compression_method = read16(stream);
@@ -89,9 +213,7 @@ std::size_t read_shared_header(std::istream &stream, npy::file_entry &header)
     header.crc32 = read32(stream);
     header.compressed_size = read32(stream);
     header.uncompressed_size = read32(stream);
-    size_t length = read16(stream);
-    read16(stream); // extra field length
-    return length;
+    return read16(stream);
 }
 
 void write_local_header(std::ostream &stream, const npy::file_entry &header)
@@ -99,7 +221,13 @@ void write_local_header(std::ostream &stream, const npy::file_entry &header)
     stream.write(reinterpret_cast<const char *>(LOCAL_HEADER_SIG.data()), LOCAL_HEADER_SIG.size());
     write(stream, VERSION);
     write_shared_header(stream, header);
+    std::uint16_t extra_field_length = determine_extra_length(header, false);
+    write(stream, extra_field_length);
     stream.write(header.filename.data(), header.filename.length());
+    if(extra_field_length > 0)
+    {
+        write_zip64_extra(stream, header, false);
+    }
 }
 
 npy::file_entry read_local_header(std::istream &stream)
@@ -112,10 +240,18 @@ npy::file_entry read_local_header(std::istream &stream)
     }
 
     npy::file_entry entry;
-    size_t length = read_shared_header(stream, entry);
-    std::vector<char> buffer(length);
-    stream.read(buffer.data(), length);
+
+    std::uint16_t filename_length = read_shared_header(stream, entry);
+    std::uint16_t extra_field_length = read16(stream);
+    std::vector<char> buffer(filename_length);
+    stream.read(buffer.data(), filename_length);
     entry.filename = std::string(buffer.begin(), buffer.end());
+
+    if(extra_field_length > 0)
+    {
+        read_zip64_extra(stream, entry, false);
+    }
+    
     return entry;
 }
 
@@ -125,6 +261,8 @@ void write_central_directory_header(std::ostream &stream, const npy::file_entry 
     write(stream, VERSION);
     write(stream, VERSION);
     write_shared_header(stream, header);
+    std::uint16_t extra_field_length = determine_extra_length(header, true);
+    write(stream, extra_field_length);
     std::uint16_t file_comment_length = 0;
     write(stream, file_comment_length);
     std::uint16_t disk_number_start = 0;
@@ -132,8 +270,12 @@ void write_central_directory_header(std::ostream &stream, const npy::file_entry 
     std::uint16_t internal_file_attributes = 0;
     write(stream, internal_file_attributes);
     stream.write(reinterpret_cast<const char *>(EXTERNAL_ATTR.data()), EXTERNAL_ATTR.size());
-    write(stream, header.offset);
+    write32(stream, header.offset);
     stream.write(header.filename.data(), header.filename.length());
+    if(extra_field_length > 0)
+    {
+        write_zip64_extra(stream, header, true);
+    }
 }
 
 npy::file_entry read_central_directory_header(std::istream &stream)
@@ -147,15 +289,23 @@ npy::file_entry read_central_directory_header(std::istream &stream)
     }
 
     npy::file_entry entry;
-    size_t length = read_shared_header(stream, entry);
+    std::uint16_t filename_length = read_shared_header(stream, entry);
+    std::uint16_t extra_field_length = read16(stream);
     read16(stream); // file comment length
     read16(stream); // disk number start
     read16(stream); // internal file attributes
     read32(stream); // external file attributes
     entry.offset = read32(stream);
-    std::vector<char> buffer(length);
-    stream.read(buffer.data(), length);
+
+    std::vector<char> buffer(filename_length);
+    stream.read(buffer.data(), filename_length);
     entry.filename = std::string(buffer.begin(), buffer.end());
+
+    if(extra_field_length > 0)
+    {
+        read_zip64_extra(stream, entry, true);
+    }
+
     return entry;
 }
 
@@ -301,11 +451,16 @@ void inpzstream::read_entries()
     }
 }
 
-std::vector<std::uint8_t> inpzstream::read_file(const std::string &filename)
+std::vector<std::uint8_t> inpzstream::read_file(const std::string &temp_filename)
 {
+    std::string filename = temp_filename;
     if (this->m_entries.count(filename) == 0)
     {
-        throw std::invalid_argument("filename");
+        filename += ".npy";
+        if(this->m_entries.count(filename) == 0)
+        {
+            throw std::invalid_argument("filename");
+        }
     }
 
     const file_entry &entry = this->m_entries[filename];

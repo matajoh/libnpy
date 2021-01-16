@@ -165,7 +165,7 @@ configure_file("${CMAKE_CURRENT_SOURCE_DIR}/libnpy-config.cmake.in" "${CMAKE_CUR
 if( MSVC )
   # NuGet files
   set( CMAKE_INSTALL_PREFIX "${CMAKE_CURRENT_BINARY_DIR}/nuget" CACHE PATH "..." FORCE )
-  set( LIBNPY_NUGET_NAME "npy-${SYSTEM_TOOLKIT}-${SYSTEM_BITS}-${CMAKE_BUILD_TYPE}" CACHE STRING "libnpy NuGet Name" FORCE )
+  set( LIBNPY_NUGET_NAME "libnpy-${SYSTEM_TOOLKIT}-${SYSTEM_BITS}-${CMAKE_BUILD_TYPE}" CACHE STRING "libnpy NuGet Name" FORCE )
   file( READ RELEASE_NOTES LIBNPY_RELEASE_NOTES )
 
   configure_file("${CMAKE_CURRENT_SOURCE_DIR}/nuget/template.nuspec.in" "${CMAKE_CURRENT_BINARY_DIR}/nuget/${LIBNPY_NUGET_NAME}.nuspec" @ONLY )
