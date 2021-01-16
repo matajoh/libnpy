@@ -67,6 +67,7 @@ int main(int argc, char **argv)
 {
     std::map<std::string, TestFunction> tests;
 
+    tests["crc32"] = test_crc32;
     tests["exceptions"] = test_exceptions;
     tests["memstream"] = test_memstream;
     tests["npy_peek"] = test_npy_peek;

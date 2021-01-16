@@ -4,6 +4,7 @@ set( CPP_TEST_SOURCES
 )
 
 set( TESTS
+   crc32
    exceptions
    memstream
    npy_peek

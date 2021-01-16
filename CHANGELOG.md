@@ -1,5 +1,14 @@
 # Changelog
 
+## [2021-01-16 - Version 1.0.1](https://github.com/matajoh/libnpy/releases/tag/v1.0.1)
+
+New Features:
+- Zip64 compatibility
+
+Improvements:
+- Can use `numpy` style lookup for tensors (i.e. dropping the `.npy` from the name)
+- Added a crc32 test
+
 ## [2021-01-15 - Version 1.0.0](https://github.com/matajoh/libnpy/releases/tag/v1.0.0)
 
 New Features:

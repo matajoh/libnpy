@@ -47,13 +47,13 @@ struct file_entry
     /** The CRC32 checksum of the uncompressed data */
     std::uint32_t crc32;
     /** The size of the compressed data */
-    std::uint32_t compressed_size;
+    std::uint64_t compressed_size;
     /** The size of the uncompressed data */
-    std::uint32_t uncompressed_size;
+    std::uint64_t uncompressed_size;
     /** The method used to compress the data */
     std::uint16_t compression_method;
     /** The offset of the file in the archive */
-    std::uint32_t offset;
+    std::uint64_t offset;
 
     /** Check if this entry matches another entry 
          *  \param other the other entry

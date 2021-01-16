@@ -10,7 +10,7 @@ void _test(int &result, const std::string &filename, bool compressed)
 
     npy::inpzstream stream(test::asset_path(filename));
     auto actual_color = stream.read<std::uint8_t, npy::tensor>("color.npy");
-    auto actual_depth = stream.read<float, npy::tensor>("depth.npy");
+    auto actual_depth = stream.read<float, npy::tensor>("depth");
 
     std::string suffix = compressed ? "_compressed" : "";
     test::assert_equal(expected_color, actual_color, result, "npz_read_color" + suffix);

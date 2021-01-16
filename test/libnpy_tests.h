@@ -10,6 +10,7 @@
 #include "tensor.h"
 #include "npy.h"
 
+int test_crc32();
 int test_exceptions();
 int test_memstream();
 int test_npy_peek();

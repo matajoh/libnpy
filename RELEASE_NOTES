@@ -1,5 +1,6 @@
 New Features:
-- There is no longer a dependency on `zlib`
+- Zip64 compatibility
 
 Improvements:
-- Better packaging (NuGet packages are now produced for C++ and C#)
+- Can use `numpy` style lookup for tensors (i.e. dropping the `.npy` from the name)
+- Added a crc32 test
