@@ -115,8 +115,8 @@ If you want to install the library, run:
 
 Once the library has been built and installed, you can begin to use it
 in your code. We have provided some
-[sample programs](https://github.com/matajoh/libnpy/tree/MAIN/samples)
-(and naturally the [tests](https://github.com/matajoh/libnpy/tree/MAIN/test)
+[sample programs](https://github.com/matajoh/libnpy/tree/main/samples)
+(and naturally the [tests](https://github.com/matajoh/libnpy/tree/main/test)
 as well) which show how to use the library, but the basic concepts are as follows.
 For the purpose of this sample code we will use the built-in [tensor](src/tensor.h)
 class, but you should use your own tensor class as appropriate.
