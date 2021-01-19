@@ -11,3 +11,4 @@ set( SOURCES
 add_definitions( -DLIBNPY_VERSION=${LIBNPY_VERSION} )
 
 add_library( npy STATIC ${SOURCES} )
+add_library( npy::npy ALIAS npy )

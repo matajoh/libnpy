@@ -11,9 +11,9 @@ int main()
     npy::tensor<std::uint8_t> color(shape);
 
     // fill it with some data
-    for (int row = 0; row < color.shape()[0]; ++row)
+    for (int row = 0; row < color.shape(0); ++row)
     {
-        for (int col = 0; col < color.shape()[1]; ++col)
+        for (int col = 0; col < color.shape(1); ++col)
         {
             color(row, col, 0) = static_cast<std::uint8_t>(row << 3);
             color(row, col, 1) = static_cast<std::uint8_t>(col << 3);
@@ -40,9 +40,9 @@ int main()
     shape = {32, 32};
     npy::tensor<float> gray(shape);
 
-    for (int row = 0; row < gray.shape()[0]; ++row)
+    for (int row = 0; row < gray.shape(0); ++row)
     {
-        for (int col = 0; col < gray.shape()[1]; ++col)
+        for (int col = 0; col < gray.shape(1); ++col)
         {
             gray(row, col) = 0.21f * color(row, col, 0) +
                              0.72f * color(row, col, 1) +
