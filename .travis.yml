@@ -6,6 +6,7 @@ addons:
     update: true
 
 before_install:
+  - sudo apt-get remove cmake
   - sudo apt-get update
   - sudo apt-get install apt-transport-https ca-certificates gnupg software-properties-common wget
   - wget -qO - https://apt.kitware.com/keys/kitware-archive-latest.asc | sudo apt-key add -
@@ -16,6 +17,6 @@ before_install:
 script:
   - mkdir build
   - cd build
-  - cmake -DCMAKE_BUILD_TYPE=RelWithDebInfo ..
-  - cmake --build .
-  - ctest -C RelWithDebInfo
+  - /usr/bin/cmake -DCMAKE_BUILD_TYPE=RelWithDebInfo ..
+  - /usr/bin/cmake --build .
+  - /usr/bin/ctest -C RelWithDebInfo
