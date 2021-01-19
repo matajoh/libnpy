@@ -10,9 +10,9 @@ public unsafe class Sample
         UInt8Tensor color = new UInt8Tensor(shape);
 
         // fill it with some data.
-        for (uint row = 0; row < color.Shape[0]; ++row)
+        for (int row = 0; row < color.Shape[0]; ++row)
         {
-            for (uint col = 0; col < color.Shape[1]; ++col)
+            for (int col = 0; col < color.Shape[1]; ++col)
             {
                 color[row, col, 0] = (byte)(row << 3);
                 color[row, col, 1] = (byte)(col << 3);
@@ -35,9 +35,9 @@ public unsafe class Sample
         // let's create a second tensor as well
         shape = new Shape(new uint[] { 32, 32 });
         Float32Tensor gray = new Float32Tensor(shape);
-        for (uint row = 0; row < gray.Shape[0]; ++row)
+        for (int row = 0; row < gray.Shape[0]; ++row)
         {
-            for (uint col = 0; col < gray.Shape[1]; ++col)
+            for (int col = 0; col < gray.Shape[1]; ++col)
             {
                 gray[row, col] = 0.21f * color[row, col, 0] +
                                  0.72f * color[row, col, 1] +

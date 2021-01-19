@@ -1,6 +1,6 @@
 #include "libnpy_tests.h"
-#include "npy.h"
-#include "tensor.h"
+#include "npy/npy.h"
+#include "npy/tensor.h"
 
 int test_npy_write()
 {

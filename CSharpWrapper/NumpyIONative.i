@@ -1,8 +1,8 @@
 %module NumpyIO
 %{
-    #include "tensor.h"
-    #include "npy.h"
-    #include "npz.h"
+    #include "npy/tensor.h"
+    #include "npy/npy.h"
+    #include "npy/npz.h"
     using namespace npy;
 %}
 
@@ -172,7 +172,7 @@ public:
     %rename(getSize) size;
     size_t size() const;
 
-    %exception get(const std::vector<size_t>& index) const %{
+    %exception get(const std::vector<std::int32_t>& index) const %{
         try{
             $action
         }catch(std::invalid_argument& e){
@@ -185,9 +185,9 @@ public:
     %}
 
     %csmethodmodifiers get "protected override"
-    const T& get(const std::vector<size_t>& index) const;
+    const T& get(const std::vector<std::int32_t>& index) const;
 
-    %exception set(const std::vector<size_t>& index, const T& value) const %{
+    %exception set(const std::vector<std::int32_t>& index, const T& value) const %{
         try{
             $action
         }catch(std::invalid_argument& e){
@@ -200,7 +200,7 @@ public:
     %}
 
     %csmethodmodifiers set "protected override"
-    void set(const std::vector<size_t>& index, const T& value);
+    void set(const std::vector<std::int32_t>& index, const T& value);
 };
 
 %typemap(csbase) SWIGTYPE "Tensor<byte, UInt8Buffer>";

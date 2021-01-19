@@ -5,7 +5,7 @@
 #include <cctype>
 #include <tuple>
 
-#include "npy.h"
+#include "npy/npy.h"
 
 namespace
 {

@@ -1,4 +1,4 @@
-#include "core.h"
+#include "npy/core.h"
 
 namespace {
     const int BUFFER_SIZE = 1;//64 * 1024;

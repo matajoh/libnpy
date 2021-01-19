@@ -1,5 +1,5 @@
 #include "libnpy_tests.h"
-#include "npy.h"
+#include "npy/npy.h"
 
 namespace
 {

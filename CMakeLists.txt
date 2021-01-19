@@ -1,6 +1,4 @@
-cmake_minimum_required( VERSION 3.8 )
-
-project( libnpy )
+cmake_minimum_required( VERSION 3.13...3.16 FATAL_ERROR )
 
 # -------------------- Version --------------------------------
 
@@ -18,6 +16,8 @@ set( LIBNPY_VERSION ${LIBNPY_VERSION_MAJOR}.${LIBNPY_VERSION_MINOR}.${LIBNPY_VER
 
 message("Configure LIBNPY_VERSION at ${LIBNPY_VERSION}")
 
+project( libnpy VERSION ${LIBNPY_VERSION} LANGUAGES CXX)
+
 # -------------------- Options --------------------------------
 
 set( BUILD_DOCUMENTATION_DESC "Specifies whether to build the documentation for the API and XML" )
@@ -25,8 +25,6 @@ set( INCLUDE_CSHARP_DESC  "Specifies whether to build libnpy with C# bindings" )
 
 set( BUILD_DOCUMENTATION ON  CACHE BOOL ${BUILD_DOCUMENTATION_DESC} )
 set( INCLUDE_CSHARP      ON  CACHE BOOL ${INCLUDE_CSHARP_DESC} )
-
-set( WARNINGS_AS_ERRORS OFF )
 
 # ------------------- Detect the system -----------------------
 
@@ -93,61 +91,86 @@ if( BUILD_DOCUMENTATION )
   find_package( Doxygen REQUIRED )
 endif()
 
-# -------------------- Build settings -----------------------------
-
-# use C++11
-set (CMAKE_CXX_STANDARD 11)
- 
-if( MSVC )
-  set( LIBNPY_CSHARP_DIR ${CMAKE_BINARY_DIR}/src/CSharpWrapper/$<CONFIG> )
-  if( WARNINGS_AS_ERRORS )
-    set( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /WX" )
-  endif()
-  # set the Windows target version to WinXP or later
-  set( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -D_WIN32_WINNT=0x0501" )
-  set( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -D_CRT_SECURE_NO_WARNINGS -D_SCL_SECURE_NO_WARNINGS" )
-else()
-  set( LIBNPY_CSHARP_DIR ${CMAKE_BINARY_DIR}/src/CSharpWrapper )
-  set( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fPIC" )
-  if( WARNINGS_AS_ERRORS )
-    set( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Werror" )
-  else()
-    set( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-deprecated-declarations" ) # get a lot of warnings from Boost about auto_ptr
-  endif()  
-endif()
-
-if( APPLE )
-  add_definitions( -DAPPLE )
-  set( CMAKE_MACOSX_RPATH ON )
-endif()
-
 # -------------------- Testing ------------------------------------
 
-set( BUILDNAME ${CMAKE_SYSTEM} ) # including version numbers
-if( MSVC )
-  set( BUILDNAME "${BUILDNAME}_MSVC" )
-elseif( CMAKE_COMPILER_IS_GNUCXX )
-  set( BUILDNAME "${BUILDNAME}_gcc" )
-else()
-  set( BUILDNAME "${BUILDNAME}_${CMAKE_CXX_COMPILER}" )
-endif()
-
-if( CMAKE_SIZEOF_VOID_P EQUAL 8 )
-  set( BUILDNAME "${BUILDNAME}_64bit" )
-else()
-  set( BUILDNAME "${BUILDNAME}_32bit" )
-endif()
-
 include( CTest )
+
+if( MSVC )
+  set( LIBNPY_CSHARP_DIR ${CMAKE_BINARY_DIR}/CSharpWrapper/$<CONFIG> )
+endif()
 
 # -------------------- Walk the subdirectories --------------------
 
 add_subdirectory( src )
 add_subdirectory( test )
 add_subdirectory( samples )
+
 if( BUILD_DOCUMENTATION )
   add_subdirectory( doc )
 endif()
+
+if( INCLUDE_CSHARP )
+  add_subdirectory( CSharpWrapper )
+endif()
+
+target_include_directories(npy
+  PUBLIC
+    $<INSTALL_INTERFACE:build/native/include>
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+  PRIVATE
+    ${CMAKE_CURRENT_SOURCE_DIR}/src
+)
+
+# -------------------- Build settings -----------------------------
+
+# use C++11
+target_compile_features(npy PRIVATE cxx_std_11)
+
+# -------------------- INSTALL ------------------------------------
+
+set(INSTALL_CONFIGDIR "cmake")
+
+install(TARGETS npy 
+  EXPORT npy-targets
+  ARCHIVE DESTINATION "build/native/lib"
+  LIBRARY DESTINATION "build/native/lib"
+)
+
+install(DIRECTORY include/ DESTINATION "build/native/include")
+
+install(EXPORT npy-targets
+  FILE
+    npyTargets.cmake
+  NAMESPACE
+    npy::
+  DESTINATION
+    ${INSTALL_CONFIGDIR}
+)
+
+include(CMakePackageConfigHelpers)
+write_basic_package_version_file(
+  ${CMAKE_CURRENT_BINARY_DIR}/npyConfigVersion.cmake
+  VERSION ${PROJECT_VERSION}
+  COMPATIBILITY AnyNewerVersion
+)
+
+configure_package_config_file(${CMAKE_CURRENT_LIST_DIR}/cmake/npyConfig.cmake.in
+  ${CMAKE_CURRENT_BINARY_DIR}/npyConfig.cmake
+  INSTALL_DESTINATION ${INSTALL_CONFIGDIR}
+)
+
+install(FILES
+  ${CMAKE_CURRENT_BINARY_DIR}/npyConfig.cmake
+  ${CMAKE_CURRENT_BINARY_DIR}/npyConfigVersion.cmake
+  DESTINATION ${INSTALL_CONFIGDIR}
+)
+
+export(EXPORT npy-targets
+  FILE ${CMAKE_CURRENT_BINARY_DIR}/npyTargets.cmake
+  NAMESPACE npy::
+)
+
+export(PACKAGE npy)
 
 # -------------------- Package ------------------------------------
 
@@ -159,13 +182,10 @@ set( PROJECT_FILES
 # copy these files into the root of the distribution zip
 install( FILES ${PROJECT_FILES} DESTINATION "." )
 
-# CMake package configuration file
-configure_file("${CMAKE_CURRENT_SOURCE_DIR}/libnpy-config.cmake.in" "${CMAKE_CURRENT_BINARY_DIR}/nuget/cmake/libnpy-config.cmake" @ONLY )
-
 if( MSVC )
   # NuGet files
   set( CMAKE_INSTALL_PREFIX "${CMAKE_CURRENT_BINARY_DIR}/nuget" CACHE PATH "..." FORCE )
-  set( LIBNPY_NUGET_NAME "libnpy-${SYSTEM_TOOLKIT}-${SYSTEM_BITS}-${CMAKE_BUILD_TYPE}" CACHE STRING "libnpy NuGet Name" FORCE )
+  set( LIBNPY_NUGET_NAME "npy-${SYSTEM_TOOLKIT}-${SYSTEM_BITS}-${CMAKE_BUILD_TYPE}" CACHE STRING "npy NuGet Name" FORCE )
   file( READ RELEASE_NOTES LIBNPY_RELEASE_NOTES )
 
   configure_file("${CMAKE_CURRENT_SOURCE_DIR}/nuget/template.nuspec.in" "${CMAKE_CURRENT_BINARY_DIR}/nuget/${LIBNPY_NUGET_NAME}.nuspec" @ONLY )

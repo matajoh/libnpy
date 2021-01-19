@@ -2,7 +2,7 @@
 #include <stdexcept>
 #include "miniz/miniz.h"
 
-#include "core.h"
+#include "npy/core.h"
 #include "zip.h"
 
 namespace
