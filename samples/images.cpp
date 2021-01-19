@@ -1,8 +1,8 @@
 #include <cstdint>
 
-#include "tensor.h"
-#include "npy.h"
-#include "npz.h"
+#include "npy/tensor.h"
+#include "npy/npy.h"
+#include "npy/npz.h"
 
 int main()
 {
@@ -11,13 +11,13 @@ int main()
     npy::tensor<std::uint8_t> color(shape);
 
     // fill it with some data
-    for (size_t row = 0; row < color.shape()[0]; ++row)
+    for (int row = 0; row < color.shape(0); ++row)
     {
-        for (size_t col = 0; col < color.shape()[1]; ++col)
+        for (int col = 0; col < color.shape(1); ++col)
         {
-            color({row, col, 0}) = static_cast<std::uint8_t>(row << 3);
-            color({row, col, 1}) = static_cast<std::uint8_t>(col << 3);
-            color({row, col, 2}) = 128;
+            color(row, col, 0) = static_cast<std::uint8_t>(row << 3);
+            color(row, col, 1) = static_cast<std::uint8_t>(col << 3);
+            color(row, col, 2) = 128;
         }
     }
 
@@ -40,13 +40,13 @@ int main()
     shape = {32, 32};
     npy::tensor<float> gray(shape);
 
-    for (size_t row = 0; row < gray.shape()[0]; ++row)
+    for (int row = 0; row < gray.shape(0); ++row)
     {
-        for (size_t col = 0; col < gray.shape()[1]; ++col)
+        for (int col = 0; col < gray.shape(1); ++col)
         {
-            gray({row, col}) = 0.21f * color({row, col, 0}) +
-                               0.72f * color({row, col, 1}) +
-                               0.07f * color({row, col, 2});
+            gray(row, col) = 0.21f * color(row, col, 0) +
+                             0.72f * color(row, col, 1) +
+                             0.07f * color(row, col, 2);
         }
     }
 

@@ -1,6 +1,6 @@
 # libnpy
 
-[![Build Status](https://travis-ci.com/matajoh/libnpy.svg?token=mQKh8ae3m6BDSeGHqxyY&branch=master)](https://travis-ci.com/matajoh/libnpy)
+[![Build Status](https://travis-ci.com/matajoh/libnpy.svg?token=mQKh8ae3m6BDSeGHqxyY&branch=main)](https://travis-ci.com/matajoh/libnpy)
 
 `libnpy` is a multi-platform C++ library for reading and writing NPY and
 NPZ files, with an additional .NET interface. It was built with the 
@@ -115,8 +115,8 @@ If you want to install the library, run:
 
 Once the library has been built and installed, you can begin to use it
 in your code. We have provided some
-[sample programs](https://github.com/matajoh/libnpy/tree/master/samples)
-(and naturally the [tests](https://github.com/matajoh/libnpy/tree/master/test)
+[sample programs](https://github.com/matajoh/libnpy/tree/main/samples)
+(and naturally the [tests](https://github.com/matajoh/libnpy/tree/main/test)
 as well) which show how to use the library, but the basic concepts are as follows.
 For the purpose of this sample code we will use the built-in [tensor](src/tensor.h)
 class, but you should use your own tensor class as appropriate.
@@ -132,13 +132,13 @@ class, but you should use your own tensor class as appropriate.
     npy::tensor<std::uint8_t> color(shape);
 
     // fill it with some data
-    for (size_t row = 0; row < color.shape()[0]; ++row)
+    for (int row = 0; row < color.shape(0); ++row)
     {
-        for (size_t col = 0; col < color.shape()[1]; ++col)
+        for (int col = 0; col < color.shape(1); ++col)
         {
-            color({row, col, 0}) = static_cast<std::uint8_t>(row << 3);
-            color({row, col, 1}) = static_cast<std::uint8_t>(col << 3);
-            color({row, col, 2}) = 128;
+            color(row, col, 0) = static_cast<std::uint8_t>(row << 3);
+            color(row, col, 1) = static_cast<std::uint8_t>(col << 3);
+            color(row, col, 2) = 128;
         }
     }
 
@@ -161,13 +161,13 @@ class, but you should use your own tensor class as appropriate.
     shape = {32, 32};
     npy::tensor<float> gray(shape);
 
-    for (size_t row = 0; row < gray.shape()[0]; ++row)
+    for (int row = 0; row < gray.shape(0); ++row)
     {
-        for (size_t col = 0; col < gray.shape()[1]; ++col)
+        for (int col = 0; col < gray.shape(1); ++col)
         {
-            gray({row, col}) = 0.21f * color({row, col, 0}) +
-                               0.72f * color({row, col, 1}) +
-                               0.07f * color({row, col, 2});
+            gray(row, col) = 0.21f * color(row, col, 0) +
+                             0.72f * color(row, col, 1) +
+                             0.07f * color(row, col, 2);
         }
     }
 

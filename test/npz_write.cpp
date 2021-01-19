@@ -5,7 +5,7 @@
 #include <cstdio>
 
 #include "libnpy_tests.h"
-#include "npz.h"
+#include "npy/npz.h"
 
 namespace
 {

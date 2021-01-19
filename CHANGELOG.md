@@ -1,5 +1,14 @@
 # Changelog
 
+## [2021-01-19 - Version 1.2.0](https://github.com/matajoh/libnpy/releases/tag/v1.2.0)
+
+New Features:
+- Easier indexing (variable argument index method + negative indexes)
+- Easier access to shape
+
+Improvements:
+- Cmake upgraded to "modern" usage, i.e. you use the library by adding `npy::npy` as a link library
+
 ## [2021-01-16 - Version 1.1.1](https://github.com/matajoh/libnpy/releases/tag/v1.1.1)
 
 Improvements:

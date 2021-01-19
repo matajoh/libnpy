@@ -2,8 +2,8 @@
 #define _NPY_READ_H_
 
 #include "libnpy_tests.h"
-#include "tensor.h"
-#include "npy.h"
+#include "npy/tensor.h"
+#include "npy/npy.h"
 
 template <typename T>
 void test_read(int &result, const std::string &name, bool fortran_order = false)

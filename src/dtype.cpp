@@ -2,7 +2,7 @@
 #include <array>
 #include <string>
 
-#include "core.h"
+#include "npy/core.h"
 
 namespace
 {

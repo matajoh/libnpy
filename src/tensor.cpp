@@ -1,4 +1,4 @@
-#include "tensor.h"
+#include "npy/tensor.h"
 
 namespace npy
 {

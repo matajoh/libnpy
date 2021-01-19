@@ -8,39 +8,7 @@ set( SOURCES
    miniz/miniz.cpp
 )
 
-set( HEADERS
-   core.h
-   npy.h
-   npz.h
-   tensor.h
-   zip.h
-)
-
 add_definitions( -DLIBNPY_VERSION=${LIBNPY_VERSION} )
 
-set( LIBNPY_INCLUDE_FOLDERS 
-    ${CMAKE_CURRENT_SOURCE_DIR}
-)
-
-include_directories( ${LIBNPY_INCLUDE_FOLDERS} )
-
-add_library( npy STATIC ${SOURCES} ${HEADERS} )
-
-set( LIBNPY_LINK_LIBRARIES 
-)
-
-target_link_libraries( npy ${LIBNPY_LINK_LIBRARIES} )
-
-
-install(TARGETS npy 
-  RUNTIME DESTINATION "build/native/bin"
-  ARCHIVE DESTINATION "build/native/lib"
-  LIBRARY DESTINATION "build/native/lib"
-)
-install(FILES ${HEADERS} DESTINATION "build/native/include/npy" )
-
-
-# -------------------- Walk the subdirectories --------------------
-if( INCLUDE_CSHARP )
-  add_subdirectory( CSharpWrapper )
-endif()
+add_library( npy STATIC ${SOURCES} )
+add_library( npy::npy ALIAS npy )

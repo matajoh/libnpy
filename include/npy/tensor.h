@@ -11,10 +11,12 @@
 #ifndef _TENSOR_H_
 #define _TENSOR_H_
 
+#include <algorithm>
 #include <vector>
 #include <cstdint>
 #include <numeric>
 #include <stdexcept>
+#include <type_traits>
 
 #include "core.h"
 #include "npy.h"
@@ -75,29 +77,73 @@ class tensor
     {
     }
 
+    /** Variable parameter index function.
+     *  \param index an index into the tensor. Can be negative (in which case it will work as in numpy)
+     *  \return the value at the provided index
+     */
+    template<typename... Indices>
+    const T &operator()(Indices... index) const
+    {        
+        return this->m_values[this->ravel(std::vector<std::int32_t>({index...}))];
+    }
+
     /** Index function.
      *  \param multi_index the index into the tensor.
      *  \return the value at the provided index
      */
-    const T &operator()(const std::vector<size_t> &multi_index) const
+    const T &operator()(const std::vector<std::size_t> &multi_index) const
     {
         return this->m_values[this->ravel(multi_index)];
     }
 
-    /** Index function.
-     *  \param multi_index the index into the tensor
-     *  \return a reference to the value at the index
+    /** Variable parameter index function.
+     *  \param index an index into the tensor. Can be negative (in which case it will work as in numpy)
+     *  \return the value at the provided index
      */
-    T &operator()(const std::vector<size_t> &multi_index)
+    template<typename... Indices>
+    T &operator()(Indices... index)
+    {
+        return this->m_values[this->ravel(std::vector<std::int32_t>({index...}))];
+    }
+
+    /** Index function.
+     *  \param multi_index the index into the tensor.
+     *  \return the value at the provided index
+     */
+    T &operator()(const std::vector<std::size_t> &multi_index)
     {
         return this->m_values[this->ravel(multi_index)];
+    }
+
+    /** Iterator pointing at the beginning of the tensor in memory. */
+    typename std::vector<T>::iterator begin()
+    {
+        return this->m_values.begin();
+    }
+
+    /** Iterator pointing at the beginning of the tensor in memory. */
+    typename std::vector<T>::const_iterator begin() const
+    {
+        return this->m_values.begin();
+    }
+
+    /** Iterator pointing at the end of the tensor in memory. */
+    typename std::vector<T>::iterator end()
+    {
+        return this->m_values.end();
+    }
+
+    /** Iterator pointing at the end of the tensor in memory. */
+    typename std::vector<T>::const_iterator end() const
+    {
+        return this->m_values.end();
     }
 
     /** Sets the value at the provided index.
      *  \param multi_index an index into the tensor
      *  \param value the value to set
      */
-    void set(const std::vector<size_t> &multi_index, const T &value)
+    void set(const std::vector<std::int32_t> &multi_index, const T &value)
     {
         this->m_values[this->ravel(multi_index)] = value;
     }
@@ -106,7 +152,7 @@ class tensor
      *  \param multi_index the index into the tensor
      *  \return the value at the provided index
      */
-    const T &get(const std::vector<size_t> &multi_index) const
+    const T &get(const std::vector<std::int32_t> &multi_index) const
     {
         return this->m_values[this->ravel(multi_index)];
     }
@@ -182,10 +228,19 @@ class tensor
     }
 
     /** The shape of the vector. Each element is the size of the 
-         *  corresponding dimension. */
+     *  corresponding dimension. */
     const std::vector<size_t> &shape() const
     {
         return this->m_shape;
+    }
+
+    /** Returns the dimensionality of the tensor at the specified index.
+     *  \param index index into the shape
+     *  \return the dimensionality at the index
+     */
+    const size_t shape(int index) const
+    {
+        return this->m_shape[index];
     }
 
     /** Whether the tensor data is stored in FORTRAN, or column-major, order. */
@@ -255,19 +310,39 @@ class tensor
      *  \param multi_index the multi-index value
      *  \return the single value in the buffer corresponding to the multi-index
      */
-    size_t ravel(const std::vector<size_t> &multi_index) const
+    size_t ravel(const std::vector<std::int32_t> &multi_index) const
     {
         if (multi_index.size() != this->m_shape.size())
         {
             throw std::invalid_argument("multi_index");
         }
 
+        std::vector<std::size_t> abs_multi_index(multi_index.size());
+        std::transform(multi_index.begin(), multi_index.end(), this->m_shape.begin(), abs_multi_index.begin(),
+                       [](std::int32_t index, std::size_t shape) -> std::size_t{
+                           if(index < 0)
+                           {
+                               return static_cast<std::size_t>(shape + index);
+                           }
+
+                           return static_cast<std::size_t>(index);
+                       });
+
+        return this->ravel(abs_multi_index);
+    }
+
+    /** Ravels a multi-index into a single value indexing the buffer.
+     *  \param abs_multi_index the multi-index value
+     *  \return the single value in the buffer corresponding to the multi-index
+     */
+    size_t ravel(const std::vector<std::size_t> &abs_multi_index) const
+    {
         if (this->m_fortran_order)
         {
-            return this->ravel(multi_index.rbegin(), this->m_shape.rbegin());
+            return this->ravel(abs_multi_index.rbegin(), this->m_shape.rbegin());
         }
 
-        return this->ravel(multi_index.begin(), this->m_shape.begin());
+        return this->ravel(abs_multi_index.begin(), this->m_shape.begin());
     }
 
   private:

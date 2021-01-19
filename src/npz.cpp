@@ -7,7 +7,7 @@
 #include <cassert>
 #include <stdexcept>
 
-#include "npz.h"
+#include "npy/npz.h"
 #include "zip.h"
 
 namespace

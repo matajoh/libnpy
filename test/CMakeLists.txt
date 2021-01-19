@@ -20,15 +20,10 @@ foreach( test ${TESTS} )
    list( APPEND CPP_TEST_SOURCES "${test}.cpp" )
 endforeach()
 
-set( LIBNPYTESTS_INCLUDE_FOLDERS
-   ${CMAKE_CURRENT_SOURCE_DIR}/../src
-   ${CMAKE_CURRENT_SOURCE_DIR}
-)
-include_directories( ${LIBNPYTESTS_INCLUDE_FOLDERS} )
-
 set( TEST_DRIVER libnpy_tests )
 add_executable( ${TEST_DRIVER} ${CPP_TEST_SOURCES} )
-target_link_libraries( ${TEST_DRIVER} npy )
+target_link_libraries( ${TEST_DRIVER} npy::npy )
+target_include_directories( ${TEST_DRIVER} PRIVATE ${CMAKE_CURRENT_SOURCE_DIR} ${CMAKE_CURRENT_SOURCE_DIR}/../src)
 
 foreach( test ${TESTS} )
 add_test( NAME ${test}

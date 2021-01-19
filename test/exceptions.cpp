@@ -1,7 +1,7 @@
 #include "libnpy_tests.h"
-#include "npy.h"
-#include "npz.h"
-#include "tensor.h"
+#include "npy/npy.h"
+#include "npy/npz.h"
+#include "npy/tensor.h"
 
 namespace
 {
@@ -66,12 +66,12 @@ void tensor_move_from()
 
 void tensor_index_size()
 {
-    std::uint8_t value = TENSOR({0, 0});
+    std::uint8_t value = TENSOR(0, 0);
 }
 
 void tensor_index_range()
 {
-    std::uint8_t value = TENSOR({2, 3, 3});
+    std::uint8_t value = TENSOR(2, 3, 3);
 }
 
 void load_wrong_dtype()

@@ -6,9 +6,9 @@
 #include <vector>
 #include <sstream>
 
-#include "core.h"
-#include "tensor.h"
-#include "npy.h"
+#include "npy/core.h"
+#include "npy/tensor.h"
+#include "npy/npy.h"
 
 int test_crc32();
 int test_exceptions();

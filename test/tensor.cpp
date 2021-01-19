@@ -2,7 +2,7 @@
 #include <cstdio>
 
 #include "libnpy_tests.h"
-#include "tensor.h"
+#include "npy/tensor.h"
 
 namespace
 {
@@ -15,13 +15,16 @@ int test_tensor()
 
     npy::tensor<std::uint8_t> fortran({3, 4, 5}, true);
     std::uint8_t value = 0;
-    for (size_t i = 0; i < 3; ++i)
+    for (auto i = 0; i < 3; ++i)
     {
-        for (size_t j = 0; j < 4; ++j)
+        for (auto j = 0; j < 4; ++j)
         {
-            for (size_t k = 0; k < 5; ++k, ++value)
+            for (auto k = 0; k < 5; ++k, ++value)
             {
-                fortran({i, j, k}) = value;
+                fortran(i, j, k) = value;
+                fortran({static_cast<std::size_t>(i),
+                         static_cast<std::size_t>(j),
+                         static_cast<std::size_t>(k)}) = value;
             }
         }
     }
@@ -30,13 +33,13 @@ int test_tensor()
 
     npy::tensor<std::uint8_t> from_file(TEMP_NPY);
     npy::tensor<std::uint8_t> standard(from_file.shape(), false);
-    for (size_t i = 0; i < 3; ++i)
+    for (int i = 0; i < 3; ++i)
     {
-        for (size_t j = 0; j < 4; ++j)
+        for (int j = 0; j < 4; ++j)
         {
-            for (size_t k = 0; k < 5; ++k)
+            for (int k = 0; k < 5; ++k)
             {
-                standard({i, j, k}) = fortran({i, j, k});
+                standard(i, j, k) = fortran(i, j, k);
             }
         }
     }
