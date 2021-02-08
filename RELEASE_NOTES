@@ -1,6 +1,3 @@
-New Features:
-- Easier indexing (variable argument index method + negative indexes)
-- Easier access to shape
-
 Improvements:
-- Cmake upgraded to "modern" usage, i.e. you use the library by adding `npy::npy` as a link library
+- Bug fix with memstream buffer size at initialization
+- ".npy" will be added to tensor names in NPZ writing if not already present
