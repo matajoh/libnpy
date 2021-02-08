@@ -176,6 +176,15 @@ std::string npy_scalar_stream(npy::endian_t endianness = npy::endian_t::NATIVE)
 }
 
 template <typename T>
+std::string npy_array_stream(npy::endian_t endianness = npy::endian_t::NATIVE)
+{
+    std::ostringstream actual_stream;
+    npy::tensor<T> tensor = test_tensor<T>({25});
+    npy::save(actual_stream, tensor, endianness);
+    return actual_stream.str();
+}
+
+template <typename T>
 std::string npy_fortran_stream(npy::endian_t endianness = npy::endian_t::NATIVE)
 {
     std::ostringstream actual_stream;

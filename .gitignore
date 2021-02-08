@@ -33,4 +33,4 @@
 
 # Misc
 .vscode
-build
+build*

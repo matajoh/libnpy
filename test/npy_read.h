@@ -27,4 +27,12 @@ void test_read_scalar(int &result, const std::string &name)
     test::assert_equal(expected, actual, result, "npy_read_" + name);
 }
 
+template <typename T>
+void test_read_array(int& result, const std::string &name)
+{
+    npy::tensor<T> expected = test::test_tensor<T>({25});
+    npy::tensor<T> actual = npy::load<T, npy::tensor>(test::asset_path(name + ".npy"));
+    test::assert_equal(expected, actual, result, "npy_read_" + name);
+}
+
 #endif

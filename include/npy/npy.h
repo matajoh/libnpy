@@ -83,6 +83,12 @@ void write_npy_header(std::basic_ostream<CHAR> &output,
             buff << ", ";
         }
     }
+
+    if(shape.size() == 1)
+    {
+        buff << ",";
+    }
+
     buff << "), }";
     std::string dictionary = buff.str();
     auto dict_length = dictionary.size() + 1;
