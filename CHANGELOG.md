@@ -1,5 +1,12 @@
 # Changelog
 
+## [2021-02-08 - Version 1.2.1](https://github.com/matajoh/libnpy/releases/tag/v1.2.1)
+
+Improvements:
+- Bug fix for scalar tensor reading
+- Bug fix with memstream buffer size at initialization
+- ".npy" will be added to tensor names in NPZ writing if not already present
+
 ## [2021-01-19 - Version 1.2.0](https://github.com/matajoh/libnpy/releases/tag/v1.2.0)
 
 New Features:

@@ -37,6 +37,11 @@ void skip_whitespace(std::istream &input)
 
 std::string read_to(std::istream &input, char delim)
 {
+    if(input.peek() == delim)
+    {
+        return "";
+    }
+
     input.get(BUFFER, BUFFER_SIZE, delim);
     auto length = input.gcount();
     assert(length < BUFFER_SIZE);

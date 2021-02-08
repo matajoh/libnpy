@@ -1,7 +1,7 @@
 #include "npy/core.h"
 
 namespace {
-    const int BUFFER_SIZE = 1;//64 * 1024;
+    const int BUFFER_SIZE = 64 * 1024;
 }
 
 namespace npy
@@ -11,8 +11,9 @@ membuf::membuf() : membuf(BUFFER_SIZE)
     this->seekpos(0);
 }
 
-membuf::membuf(size_t n) : m_buffer(n)
+membuf::membuf(size_t n)
 {
+    m_buffer.reserve(BUFFER_SIZE);
     this->seekpos(0);
 }
 

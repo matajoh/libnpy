@@ -43,6 +43,10 @@ int test_npy_write()
     actual = test::npy_stream<std::int32_t>(npy::endian_t::BIG);
     test::assert_equal(expected, actual, result, "npy_write_int32_big");
 
+    expected = test::read_asset("int32_scalar.npy");
+    actual = test::npy_scalar_stream<std::int32_t>(npy::endian_t::LITTLE);
+    test::assert_equal(expected, actual, result, "npy_write_int32_scalar");
+
     expected = test::read_asset("uint64.npy");
     actual = test::npy_stream<std::uint64_t>(npy::endian_t::LITTLE);
     test::assert_equal(expected, actual, result, "npy_write_uint64");

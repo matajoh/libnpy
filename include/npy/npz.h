@@ -96,7 +96,15 @@ class onpzstream
 
         omemstream output;
         save(output, tensor);
-        this->write_file(filename, std::move(output.buf()));
+
+        std::string suffix = ".npy";
+        std::string name = filename;
+        if(name.size() < 4 || !std::equal(suffix.rbegin(), suffix.rend(), name.rbegin()))
+        {
+            name += ".npy";
+        }
+
+        this->write_file(name, std::move(output.buf()));
     }
 
     /** Write a tensor to the NPZ archive.

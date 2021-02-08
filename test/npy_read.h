@@ -18,4 +18,13 @@ void test_read(int &result, const std::string &name, bool fortran_order = false)
     test::assert_equal(expected, actual, result, "npy_read_" + name);
 }
 
+template <typename T>
+void test_read_scalar(int &result, const std::string &name)
+{
+    npy::tensor<T> expected = test::test_tensor<T>({});
+    *expected.data() = static_cast<T>(42);
+    npy::tensor<T> actual = npy::load<T, npy::tensor>(test::asset_path(name + ".npy"));
+    test::assert_equal(expected, actual, result, "npy_read_" + name);
+}
+
 #endif
