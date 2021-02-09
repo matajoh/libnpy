@@ -56,6 +56,9 @@ struct header_info
 
     /** A vector of values indicating the shape of each dimension of the tensor. */
     std::vector<size_t> shape;
+
+    /** Value used to indicate the maximum length of an element (used by Unicode strings) */
+    std::size_t max_element_length;
 };
 
 /** Writes an NPY header to the provided stream.
@@ -110,6 +113,25 @@ void write_npy_header(std::basic_ostream<CHAR> &output,
     output.write(reinterpret_cast<const CHAR *>(end.data()), end.length());
 }
 
+template<typename T, typename CHAR>
+void copy_to(const T* data_ptr, std::size_t num_elements, std::basic_ostream<CHAR>& output, npy::endian_t endianness)
+{
+    if (endianness == npy::endian_t::NATIVE || endianness == native_endian())
+    {
+        output.write(reinterpret_cast<const CHAR *>(data_ptr), num_elements * sizeof(T));
+    }
+    else
+    {
+        CHAR buffer[sizeof(T)];
+        for (auto curr = data_ptr; curr < data_ptr + num_elements; ++curr)
+        {
+            const CHAR *start = reinterpret_cast<const CHAR *>(curr);
+            std::reverse_copy(start, start + sizeof(T), buffer);
+            output.write(buffer, sizeof(T));
+        }
+    }    
+}
+
 /** Saves a tensor to the provided stream.
  *  \tparam T the data type
  *  \tparam TENSOR the tensor type.
@@ -120,31 +142,71 @@ void write_npy_header(std::basic_ostream<CHAR> &output,
  */
 template <typename T,
           template <typename> class TENSOR,
-          typename CHAR>
+          typename CHAR,
+          std::enable_if_t<!std::is_same<std::wstring, T>::value, int> = 42>
 void save(std::basic_ostream<CHAR> &output,
           const TENSOR<T> &tensor,
           endian_t endianness = npy::endian_t::NATIVE)
 {
     auto dtype = to_dtype(tensor.dtype(), endianness);
     write_npy_header(output, dtype, tensor.fortran_order(), tensor.shape());
+    copy_to(tensor.data(), tensor.size(), output, endianness);
+};
 
-    if (endianness == npy::endian_t::NATIVE ||
-        endianness == native_endian() ||
-        dtype[0] == '|')
+/** Saves a unicode string tensor to the provided stream.
+ *  \tparam TENSOR the tensor type.
+ *  \param output the output stream
+ *  \param tensor the tensor
+ *  \param endianness the endianness to use in saving the tensor
+ *  \sa npy::tensor
+ */
+template <typename T,
+          template <typename> class TENSOR,
+          typename CHAR,
+          std::enable_if_t<std::is_same<std::wstring, T>::value, int> = 42>
+void save(std::basic_ostream<CHAR> &output,
+          const TENSOR<std::wstring> &tensor,
+          endian_t endianness = npy::endian_t::NATIVE)
+{
+    std::size_t max_length = 0;
+    for(const auto& element : tensor)
     {
-        output.write(reinterpret_cast<const CHAR *>(tensor.data()), tensor.size() * sizeof(T));
-    }
-    else
-    {
-        CHAR buffer[sizeof(T)];
-        for (auto curr = tensor.data(); curr < tensor.data() + tensor.size(); ++curr)
+        if(element.size() > max_length)
         {
-            const CHAR *start = reinterpret_cast<const CHAR *>(curr);
-            std::reverse_copy(start, start + sizeof(T), buffer);
-            output.write(buffer, sizeof(T));
+            max_length = element.size();
         }
     }
+
+    if(endianness == npy::endian_t::NATIVE)
+    {
+        endianness = native_endian();
+    }
+
+    std::string dtype = ">U" + std::to_string(max_length);
+    if(endianness == npy::endian_t::LITTLE)
+    {
+        dtype = "<U" + std::to_string(max_length);
+    }
+
+    write_npy_header(output, dtype, tensor.fortran_order(), tensor.shape());
+
+    std::vector<std::int32> unicode(tensor.size() * max_length, 0);
+    auto word_start = unicode.begin();
+    for(const auto& element : tensor)
+    {
+        auto char_it = word_start;
+        for(const auto& wchar : element)
+        {
+            *char_it = static_cast<std::int32_t>(wchar);
+            char_it += 1;
+        }
+
+        word_start += max_length;
+    }
+
+    copy_to(unicode.data(), unicode.size(), output, endianness);
 };
+
 
 /** Saves a tensor to the provided location on disk.
  *  \tparam T the data type
@@ -202,6 +264,26 @@ header_info read_npy_header(std::basic_istream<CHAR> &input)
     return header_info(dictionary);
 }
 
+template <typename T, typename CHAR>
+void copy_to(std::basic_istream<CHAR> &input, T* data_ptr, std::size_t num_elements, npy::endian_t endianness)
+{
+    if (endianness == npy::endian_t::NATIVE || endianness == native_endian())
+    {
+        CHAR *start = reinterpret_cast<CHAR *>(data_ptr);
+        input.read(start, num_elements * sizeof(T));
+    }
+    else
+    {
+        CHAR buffer[sizeof(T)];
+        for (auto curr = data_ptr; curr < data_ptr + num_elements; ++curr)
+        {
+            input.read(buffer, sizeof(T));
+            CHAR *start = reinterpret_cast<CHAR *>(curr);
+            std::reverse_copy(buffer, buffer + sizeof(T), start);
+        }
+    }    
+}
+
 /** Loads a tensor in NPY format from the provided stream. The type of the tensor
  *  must match the data to be read.
  *  \tparam T the data type
@@ -212,7 +294,8 @@ header_info read_npy_header(std::basic_istream<CHAR> &input)
  */
 template <typename T,
           template <typename> class TENSOR,
-          typename CHAR>
+          typename CHAR,
+          std::enable_if_t<!std::is_same<std::wstring, T>::value, int> = 42>
 TENSOR<T> load(std::basic_istream<CHAR> &input)
 {
     header_info info = read_npy_header(input);
@@ -222,20 +305,45 @@ TENSOR<T> load(std::basic_istream<CHAR> &input)
         throw std::logic_error("requested dtype does not match stream's dtype");
     }
 
-    if (info.endianness == npy::endian_t::NATIVE || info.endianness == native_endian())
+    copy_to(input, tensor.data(), tensor.size(), info.endianness);
+    return tensor;
+}
+
+
+/** Loads a unicode string tensor in NPY format from the provided stream. The type of the tensor
+ *  must match the data to be read.
+ *  \tparam T the data type
+ *  \tparam TENSOR the tensor type
+ *  \param input the input stream
+ *  \return an object of type TENSOR<T> read from the stream
+ *  \sa npy::tensor
+ */
+template <typename T,
+          template <typename> class TENSOR,
+          typename CHAR,
+          std::enable_if_t<std::is_same<std::wstring, T>::value, int> = 42>
+TENSOR<T> load(std::basic_istream<CHAR> &input)
+{
+    header_info info = read_npy_header(input);
+    TENSOR<T> tensor(info.shape, info.fortran_order);
+    if (info.dtype != tensor.dtype())
     {
-        CHAR *start = reinterpret_cast<CHAR *>(tensor.data());
-        input.read(start, tensor.size() * sizeof(T));
+        throw std::logic_error("requested dtype does not match stream's dtype");
     }
-    else
+
+    std::vector<std::int32_t> unicode(tensor.size() * info.max_element_length, 0);
+    copy_to(input, unicode.data(), unicode.size(), info.endianness);
+
+    auto word_start = unicode.begin();
+    for(auto& element : tensor)
     {
-        CHAR buffer[sizeof(T)];
-        for (auto curr = tensor.data(); curr < tensor.data() + tensor.size(); ++curr)
+        auto char_it = word_start;
+        for(std::size_t i=0; i<info.max_element_length && *char_it > 0; ++i, ++char_it)
         {
-            input.read(buffer, sizeof(T));
-            CHAR *start = reinterpret_cast<CHAR *>(curr);
-            std::reverse_copy(buffer, buffer + sizeof(T), start);
+            element.push_back(static_cast<wchar_t>(*char_it));
         }
+
+        word_start += info.max_element_length;
     }
 
     return tensor;

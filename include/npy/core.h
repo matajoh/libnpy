@@ -66,7 +66,9 @@ enum class data_type_t : std::uint8_t
   /** 32-bit floating point value (float) */
   FLOAT32,
   /** 64-bit floating point value (double) */
-  FLOAT64
+  FLOAT64,
+  /** Unicode string (std::wstring) */
+  UNICODE_STRING
 };
 
 /** Convert a data type and endianness to a NPY dtype string.

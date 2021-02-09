@@ -62,4 +62,10 @@ data_type_t tensor<double>::get_dtype()
     return data_type_t::FLOAT64;
 };
 
+template <>
+data_type_t tensor<std::wstring>::get_dtype()
+{
+    return data_type_t::UNICODE_STRING;
+}
+
 } // namespace npy
