@@ -1,5 +1,10 @@
 # Changelog
 
+## [2021-02-09 - Version 1.2.2](https://github.com/matajoh/libnpy/releases/tag/v1.2.2)
+
+Improvements:
+- Bug fix for a missing comma on 1d shape
+
 ## [2021-02-08 - Version 1.2.1](https://github.com/matajoh/libnpy/releases/tag/v1.2.1)
 
 Improvements:

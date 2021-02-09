@@ -14,6 +14,7 @@ int test_npy_read()
     test_read<std::int32_t>(result, "int32");
     test_read<std::int32_t>(result, "int32_big");
     test_read_scalar<std::int32_t>(result, "int32_scalar");
+    test_read_array<std::int32_t>(result, "int32_array");
     test_read<std::uint64_t>(result, "uint64");
     test_read<std::int64_t>(result, "int64");
     test_read<float>(result, "float32");

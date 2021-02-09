@@ -1,4 +1,2 @@
 Improvements:
-- Bug fix for scalar tensor reading
-- Bug fix with memstream buffer size at initialization
-- ".npy" will be added to tensor names in NPZ writing if not already present
+- Bug fix for a missing comma on 1d shape
