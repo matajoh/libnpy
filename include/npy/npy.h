@@ -228,7 +228,7 @@ void save(const std::string &path,
         throw std::invalid_argument("path");
     }
 
-    save(output, tensor, endianness);
+    save<T, TENSOR, char>(output, tensor, endianness);
 };
 
 /** Read an NPY header from the provided stream.

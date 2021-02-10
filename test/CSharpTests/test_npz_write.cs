@@ -14,10 +14,12 @@ namespace Testing
 
             UInt8Tensor color = Test.Tensor<UInt8Tensor, byte, UInt8Buffer>(new Shape(new uint[] { 5, 5, 3 }));
             Float32Tensor depth = Test.Tensor<Float32Tensor, float, Float32Buffer>(new Shape(new uint[] { 5, 5 }));
+            UnicodeStringTensor unicode = Test.Tensor<UnicodeStringTensor, string, UnicodeStringBuffer>(new Shape(new uint[]{5, 2, 5}));
             string path = Path.GetRandomFileName();
             NPZOutputStream stream = new NPZOutputStream(path, compressed ? CompressionMethod.DEFLATED : CompressionMethod.STORED);
             stream.Write("color.npy", color);
-            stream.Write("depth.npy", depth);
+            stream.Write("depth", depth);
+            stream.Write("unicode.npy", unicode);
             stream.Close();
 
             byte[] actual = File.ReadAllBytes(path);

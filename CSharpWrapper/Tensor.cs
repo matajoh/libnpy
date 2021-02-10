@@ -22,12 +22,11 @@ namespace NumpyIO
     public abstract class Tensor<T, B> where B : IList<T>
     {
         /// <summary>
-        /// Copy the data from the provided array. These values will
+        /// Copy the data from the provided buffer. These values will
         /// be copied into the underlying C++ type.
         /// </summary>
-        /// <param name="source">The source array</param>
-        /// <param name="nitems">The number of items to copy</param>
-        public abstract void CopyFrom(T[] source, uint nitems);
+        /// <param name="source">The source buffer</param>
+        public abstract void CopyFrom(B source);
 
         /// <summary>
         /// Save the tensor to the provided location on the disk.

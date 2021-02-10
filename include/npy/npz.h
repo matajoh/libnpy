@@ -95,7 +95,7 @@ class onpzstream
         }
 
         omemstream output;
-        save(output, tensor);
+        save<T, TENSOR, omemstream::char_type>(output, tensor);
 
         std::string suffix = ".npy";
         std::string name = filename;

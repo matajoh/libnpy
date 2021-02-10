@@ -90,6 +90,28 @@ inline void assert_equal<std::string>(const std::string &expected,
     }
 }
 
+template<>
+inline void assert_equal<std::wstring>(const std::wstring &expected,
+                                       const std::wstring &actual,
+                                       int &result,
+                                       const std::string &tag)
+{
+    assert_equal(expected.length(), actual.length(), result, tag + " length");
+    if (result == EXIT_SUCCESS)
+    {
+        for (std::size_t i = 0; i < expected.size(); ++i)
+        {
+            int expected_val = static_cast<int>(expected[i]);
+            int actual_val = static_cast<int>(actual[i]);
+            assert_equal(expected_val, actual_val, result, tag + "[" + std::to_string(i) + "]");
+            if (result == EXIT_FAILURE)
+            {
+                break;
+            }
+        }
+    }    
+}
+
 template <>
 inline void assert_equal<npy::header_info>(const npy::header_info &expected,
                                            const npy::header_info &actual,
@@ -100,6 +122,29 @@ inline void assert_equal<npy::header_info>(const npy::header_info &expected,
     assert_equal(expected.endianness, actual.endianness, result, tag + " endianness");
     assert_equal(expected.fortran_order, actual.fortran_order, result, tag + " fortran_order");
     assert_equal(expected.shape, actual.shape, result, tag + " shape");
+}
+
+template<>
+inline void assert_equal<npy::tensor<std::wstring>>(const npy::tensor<std::wstring> &expected,
+                                                    const npy::tensor<std::wstring> &actual,
+                                                    int &result,
+                                                    const std::string &tag)
+{
+    assert_equal(to_dtype(expected.dtype()), to_dtype(actual.dtype()), result, tag + " dtype");
+    assert_equal(expected.fortran_order(), actual.fortran_order(), result, tag + " fortran_order");
+    assert_equal(expected.shape(), actual.shape(), result, tag + " shape");
+
+    auto expected_it = expected.begin();
+    auto actual_it = actual.begin();
+    for (std::size_t i = 0; i < expected.size(); ++i, ++expected_it, ++actual_it)
+    {
+        if (*expected_it != *actual_it)
+        {
+            result = EXIT_FAILURE;
+            std::wcout << std::wstring(tag.begin(), tag.end()) << " is incorrect: " << *actual_it << " != " << *expected_it << std::endl;
+            break;
+        }
+    }
 }
 
 template <class EXCEPTION>
@@ -136,6 +181,20 @@ npy::tensor<T> test_tensor(const std::vector<size_t> &shape)
     return tensor;
 };
 
+template <>
+inline npy::tensor<std::wstring> test_tensor(const std::vector<size_t> &shape)
+{
+    npy::tensor<std::wstring> tensor(shape);
+    int i=0;
+    for(auto& word : tensor)
+    {
+        word = std::to_wstring(i);
+        i += 1;
+    }
+
+    return tensor;    
+}
+
 template <typename T>
 npy::tensor<T> test_fortran_tensor()
 {
@@ -156,12 +215,32 @@ npy::tensor<T> test_fortran_tensor()
     return tensor;
 }
 
+template <>
+inline npy::tensor<std::wstring> test_fortran_tensor()
+{
+    std::vector<int> values = {
+        0, 10, 20, 30, 40, 5, 15, 25, 35, 45,
+        1, 11, 21, 31, 41, 6, 16, 26, 36, 46,
+        2, 12, 22, 32, 42, 7, 17, 27, 37, 47,
+        3, 13, 23, 33, 43, 8, 18, 28, 38, 48,
+        4, 14, 24, 34, 44, 9, 19, 29, 39, 49};
+    npy::tensor<std::wstring> tensor({5, 2, 5}, true);
+    auto dst = tensor.data();
+    auto src = values.begin();
+    for (; dst < tensor.data() + tensor.size(); ++src, ++dst)
+    {
+        *dst = std::to_wstring(*src);
+    }
+
+    return tensor;
+}
+
 template <typename T>
 std::string npy_stream(npy::endian_t endianness = npy::endian_t::NATIVE)
 {
     std::ostringstream actual_stream;
     npy::tensor<T> tensor = test_tensor<T>({5, 2, 5});
-    npy::save(actual_stream, tensor, endianness);
+    npy::save<T, npy::tensor, char>(actual_stream, tensor, endianness);
     return actual_stream.str();
 }
 
