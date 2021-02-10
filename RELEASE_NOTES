@@ -1,2 +1,2 @@
-Improvements:
-- Bug fix for a missing comma on 1d shape
+New Features:
+- Support for Unicode string tensors (npy type 'U')
