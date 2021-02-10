@@ -2,6 +2,22 @@
 #include "npy/npy.h"
 #include "npy/tensor.h"
 
+std::string npy_unicode_stream()
+{
+    std::ostringstream actual_stream;
+    std::vector<std::size_t> shape({5, 2, 5});
+    npy::tensor<std::wstring> tensor = npy::tensor<std::wstring>(shape);
+    int i=0;
+    for(auto& word : tensor)
+    {
+        word = std::to_wstring(i);
+        i += 1;
+    } 
+
+    npy::save<std::wstring, npy::tensor, char>(actual_stream, tensor, npy::endian_t::NATIVE);
+    return actual_stream.str();    
+}
+
 int test_npy_write()
 {
     int result = EXIT_SUCCESS;

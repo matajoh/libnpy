@@ -190,7 +190,7 @@ void save(std::basic_ostream<CHAR> &output,
 
     write_npy_header(output, dtype, tensor.fortran_order(), tensor.shape());
 
-    std::vector<std::int32> unicode(tensor.size() * max_length, 0);
+    std::vector<std::int32_t> unicode(tensor.size() * max_length, 0);
     auto word_start = unicode.begin();
     for(const auto& element : tensor)
     {
