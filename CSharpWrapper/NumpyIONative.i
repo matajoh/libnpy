@@ -8,6 +8,7 @@
 
 %include "std_vector.i"
 %include "std_string.i"
+%include "std_wstring.i"
 %include "stdint.i"
 %include "arrays_csharp.i"
 %include "typemaps.i"
@@ -25,7 +26,8 @@ enum class data_type_t : std::uint8_t {
     INT64,
     UINT64,
     FLOAT32,
-    FLOAT64
+    FLOAT64,
+    UNICODE_STRING
 };
 
 %rename(Endian) endian_t;
@@ -43,6 +45,13 @@ enum class compression_method_t : std::uint16_t {
     DEFLATED = 8
 };
 
+%typemap(ctype, out="void *") const wstring * "wchar_t *"
+%typemap(imtype,
+         inattributes="[global::System.Runtime.InteropServices.MarshalAs(UnmanagedType.LPArray, ArraySubType=UnmanagedType.LPStr)]",
+         outattributes="[return: global::System.Runtime.InteropServices.MarshalAs(UnmanagedType.LPArray, ArraySubType=UnmanagedType.LPStr)]"
+         ) const wstring * "string[]"
+%typemap(cstype) const wstring * "string[]"
+
 %template(UInt8Buffer) std::vector<unsigned char>;
 %template(Int8Buffer) std::vector<signed char>;
 %template(UInt16Buffer) std::vector<unsigned short>;
@@ -53,6 +62,8 @@ enum class compression_method_t : std::uint16_t {
 %template(Int64Buffer) std::vector<long long>;
 %template(Float32Buffer) std::vector<float>;
 %template(Float64Buffer) std::vector<double>;
+%apply const std::wstring & {std::wstring &};
+%template(UnicodeStringBuffer) std::vector<std::wstring>;
 
 %template(Shape) std::vector<size_t>;
 
@@ -96,17 +107,6 @@ header_info peek(const std::string& path);
 template <typename T>
 class tensor {
 public:
-    %apply unsigned char FIXED[] {const unsigned char *source};
-    %apply signed char FIXED[] {const signed char *source};
-    %apply unsigned short FIXED[] {const unsigned short *source};
-    %apply short FIXED[] {const short *source};
-    %apply unsigned int FIXED[] {const unsigned int *source};
-    %apply int FIXED[] {const int *source};
-    %apply unsigned long long FIXED[] {const unsigned long long *source};
-    %apply long long FIXED[] {const long long *source};
-    %apply float FIXED[] {const float *source};
-    %apply double FIXED[] {const double *source};
-
     %exception tensor(const std::string& path) %{
         try{
             $action
@@ -139,7 +139,7 @@ public:
     %rename(Save) save;
     void save(const std::string& path, endian_t endian = endian_t::NATIVE);
 
-    %exception copy_from(const T* source, size_t nitems) %{
+    %exception copy_from(const std::vector<T>& source) %{
         try{
             $action
         } catch (std::invalid_argument& e){
@@ -150,7 +150,7 @@ public:
 
     %csmethodmodifiers copy_from "public unsafe override";
     %rename(CopyFrom) copy_from;
-    void copy_from(const T* source, size_t itemCount);
+    void copy_from(const std::vector<T>& source);
 
     %csmethodmodifiers values "protected override"
     %rename(getValues) values;
@@ -223,6 +223,8 @@ public:
 %template(Float32Tensor) tensor<float>;
 %typemap(csbase) SWIGTYPE "Tensor<double, Float64Buffer>";
 %template(Float64Tensor) tensor<double>;
+%typemap(csbase) SWIGTYPE "Tensor<string, UnicodeStringBuffer>";
+%template(UnicodeStringTensor) tensor<std::wstring>;
 
 %typemap(csbase) SWIGTYPE ""
 
@@ -261,6 +263,7 @@ public:
     %template(Write) write<long long>;
     %template(Write) write<float>;
     %template(Write) write<double>;
+    %template(Write) write<std::wstring>;
 };
 
 %rename(NPZInputStream) inpzstream;
@@ -329,4 +332,5 @@ public:
     %template(ReadInt64) read<long long>;
     %template(ReadFloat32) read<float>;
     %template(ReadFloat64) read<double>;
+    %template(ReadUnicodeString) read<std::wstring>;
 };

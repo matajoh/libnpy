@@ -56,8 +56,8 @@ namespace Testing
 
         static void TensorCopyFrom()
         {
-            byte[] buffer = new byte[10];
-            TENSOR.CopyFrom(buffer, 10);
+            UInt8Buffer buffer = new UInt8Buffer(new byte[10]);
+            TENSOR.CopyFrom(buffer);
         }
 
         static void TensorIndexSize()

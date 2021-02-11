@@ -1,2 +1,5 @@
-Improvements:
-- Bug fix for a missing comma on 1d shape
+New Features:
+- Support for Unicode string tensors (npy type 'U')
+
+Breaking change:
+- `CopyFrom` interface for C# Tensors has been changed to use *Buffer objects

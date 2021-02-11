@@ -67,5 +67,9 @@ int test_npy_write()
     actual = test::npy_stream<double>(npy::endian_t::LITTLE);
     test::assert_equal(expected, actual, result, "npy_write_float64");
 
+    expected = test::read_asset("unicode.npy");
+    actual = test::npy_stream<std::wstring>(npy::endian_t::LITTLE);
+    test::assert_equal(expected, actual, result, "npy_write_unicode");
+
     return result;
 };

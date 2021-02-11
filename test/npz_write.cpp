@@ -30,6 +30,7 @@ void _test(int &result, npy::compression_method_t compression_method)
         npy::onpzstream npz(TEMP_NPZ, compression_method, npy::endian_t::LITTLE);
         npz.write("color", test::test_tensor<std::uint8_t>({5, 5, 3}));
         npz.write("depth.npy", test::test_tensor<float>({5, 5}));
+        npz.write("unicode.npy", test::test_tensor<std::wstring>({5, 2, 5}));
     }
 
     std::string actual = test::read_file(TEMP_NPZ);

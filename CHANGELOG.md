@@ -1,5 +1,13 @@
 # Changelog
 
+## [2021-02-10 - Version 1.3.0](https://github.com/matajoh/libnpy/releases/tag/v1.3.0)
+
+New Features:
+- Support for Unicode string tensors (npy type 'U')
+
+Breaking change:
+- `CopyFrom` interface for C# Tensors has been changed to use *Buffer objects
+
 ## [2021-02-09 - Version 1.2.2](https://github.com/matajoh/libnpy/releases/tag/v1.2.2)
 
 Improvements:

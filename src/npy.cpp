@@ -111,7 +111,19 @@ header_info::header_info(const std::string &dictionary)
         skip_whitespace(input);
         if (key == "descr")
         {
-            std::tie(this->dtype, this->endianness) = from_dtype(read_string(input));
+            std::string dtype = read_string(input);
+            if(dtype[1] == 'U')
+            {
+                this->dtype = npy::data_type_t::UNICODE_STRING;
+                this->endianness = dtype[0] == '>' ? npy::endian_t::BIG : npy::endian_t::LITTLE;
+                this->max_element_length = std::stoi(dtype.substr(2));
+            }
+            else
+            {
+                std::tie(this->dtype, this->endianness) = from_dtype(dtype);
+                this->max_element_length = 0;
+            }
+
         }
         else if (key == "fortran_order")
         {
