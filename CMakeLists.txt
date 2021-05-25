@@ -20,11 +20,8 @@ project( libnpy VERSION ${LIBNPY_VERSION} LANGUAGES CXX)
 
 # -------------------- Options --------------------------------
 
-set( BUILD_DOCUMENTATION_DESC "Specifies whether to build the documentation for the API and XML" )
-set( INCLUDE_CSHARP_DESC  "Specifies whether to build libnpy with C# bindings" )
-
-set( BUILD_DOCUMENTATION ON  CACHE BOOL ${BUILD_DOCUMENTATION_DESC} )
-set( INCLUDE_CSHARP      ON  CACHE BOOL ${INCLUDE_CSHARP_DESC} )
+option( BUILD_DOCUMENTATION "Specifies whether to build the documentation for the API and XML" OFF )
+option( INCLUDE_CSHARP  "Specifies whether to build libnpy with C# bindings" OFF )
 
 # ------------------- Detect the system -----------------------
 
@@ -68,7 +65,7 @@ endif()
 
 # -------------------- Find packages --------------------------
 
-if ( WIN32 )
+if ( WIN32 AND INCLUDE_CSHARP )
     enable_language( CSharp )
 else()
     set( INCLUDE_CSHARP OFF )
@@ -80,10 +77,11 @@ if( INCLUDE_CSHARP )
   find_package( SWIG REQUIRED )
 
   # Select the .NET architecture
+  set( CSHARP_PLATFORM_DESC "C# target platform: x86, x64, anycpu, or itanium" )
   if( CMAKE_SIZEOF_VOID_P EQUAL 8 )
-    set( CSHARP_PLATFORM "x64" CACHE STRING "C# target platform: x86, x64, anycpu, or itanium")
+    set( CSHARP_PLATFORM "x64" CACHE STRING ${CSHARP_PLATFORM_DESC})
   else()
-    set( CSHARP_PLATFORM "x86" CACHE STRING "C# target platform: x86, x64, anycpu, or itanium")
+    set( CSHARP_PLATFORM "x86" CACHE STRING ${CSHARP_PLATFORM_DESC})
   endif()
 endif()
 

@@ -1,5 +1,10 @@
 # Changelog
 
+## [2021-05-21 - Version 1.3.1](https://github.com/matajoh/libnpy/releases/tag/v1.3.1)
+
+New Features:
+- Updated CMake integration to make the library easier to use via `FetchContent`
+
 ## [2021-02-10 - Version 1.3.0](https://github.com/matajoh/libnpy/releases/tag/v1.3.0)
 
 New Features:
