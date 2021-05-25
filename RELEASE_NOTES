@@ -1,5 +1,2 @@
 New Features:
-- Support for Unicode string tensors (npy type 'U')
-
-Breaking change:
-- `CopyFrom` interface for C# Tensors has been changed to use *Buffer objects
+- Updated CMake integration to make the library easier to use via `FetchContent`

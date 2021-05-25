@@ -1,7 +1,7 @@
-add_executable( images images.cpp )
-target_link_libraries( images npy::npy )
+add_executable( npy_images images.cpp )
+target_link_libraries( npy_images npy::npy )
 
 if( INCLUDE_CSHARP )
-  add_executable( images_net images_net.cs )
-  target_link_libraries( images_net NumpyIO ${SWIG_MODULE_NumpyIONative_REAL_NAME} )
+  add_executable( npy_images_net images_net.cs )
+  target_link_libraries( npy_images_net NumpyIO ${SWIG_MODULE_NumpyIONative_REAL_NAME} )
 endif()
