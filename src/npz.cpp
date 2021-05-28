@@ -65,8 +65,8 @@ void write(std::ostream &stream, std::uint64_t value)
 
 std::uint16_t read16(std::istream &stream)
 {
-    std::uint8_t low = stream.get();
-    std::uint8_t high = stream.get();
+    std::uint16_t low = stream.get();
+    std::uint16_t high = stream.get();
     return low | (high << 8);
 }
 
@@ -76,7 +76,7 @@ std::uint32_t read32(std::istream &stream)
     int shift = 0;
     for (int i = 0; i < 4; ++i, shift += 8)
     {
-        std::uint8_t part = stream.get();
+        std::uint32_t part = stream.get();
         result |= part << shift;
     }
 
@@ -89,7 +89,7 @@ std::uint64_t read64(std::istream &stream)
     int shift = 0;
     for(int i=0; i<8; ++i, shift += 8)
     {
-        std::uint8_t part = stream.get();
+        std::uint64_t part = stream.get();
         result |= part << shift;
     }
 
