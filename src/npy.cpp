@@ -115,23 +115,23 @@ header_info::header_info(const std::string &dictionary)
             if(dtype[1] == 'U')
             {
                 this->dtype = npy::data_type_t::UNICODE_STRING;
-                this->endianness = dtype[0] == '>' ? npy::endian_t::BIG : npy::endian_t::LITTLE;
-                this->max_element_length = std::stoi(dtype.substr(2));
+                endianness = dtype[0] == '>' ? npy::endian_t::BIG : npy::endian_t::LITTLE;
+                max_element_length = std::stoi(dtype.substr(2));
             }
             else
             {
-                std::tie(this->dtype, this->endianness) = from_dtype(dtype);
-                this->max_element_length = 0;
+                std::tie(this->dtype, endianness) = from_dtype(dtype);
+                max_element_length = 0;
             }
 
         }
         else if (key == "fortran_order")
         {
-            this->fortran_order = read_bool(input);
+            fortran_order = read_bool(input);
         }
         else if (key == "shape")
         {
-            this->shape = read_shape(input);
+            shape = read_shape(input);
         }
         else
         {

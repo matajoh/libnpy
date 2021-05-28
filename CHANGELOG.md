@@ -1,8 +1,18 @@
 # Changelog
 
+## [2021-05-28 - Version 1.4.0](https://github.com/matajoh/libnpy/releases/tag/v1.4.0)
+
+Improvements:
+- Further minor CMake changes to improve ease of use
+- NPZ streams now have `is_open` methods to check for successful file opening
+- Minor code style changes
+
+Bug fixes:
+- NPZ files will now correctly handle PKZIP versions after 2.0, both for reading and writing
+
 ## [2021-05-21 - Version 1.3.1](https://github.com/matajoh/libnpy/releases/tag/v1.3.1)
 
-New Features:
+Improvements:
 - Updated CMake integration to make the library easier to use via `FetchContent`
 
 ## [2021-02-10 - Version 1.3.0](https://github.com/matajoh/libnpy/releases/tag/v1.3.0)

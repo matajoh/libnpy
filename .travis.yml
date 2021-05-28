@@ -17,6 +17,6 @@ before_install:
 script:
   - mkdir build
   - cd build
-  - /usr/bin/cmake -DCMAKE_BUILD_TYPE=RelWithDebInfo ..
+  - /usr/bin/cmake -DCMAKE_BUILD_TYPE=RelWithDebInfo -DBUILD_TESTS=1 ..
   - /usr/bin/cmake --build .
   - /usr/bin/ctest -C RelWithDebInfo
