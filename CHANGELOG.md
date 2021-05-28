@@ -1,5 +1,10 @@
 # Changelog
 
+## [2021-05-28 - Version 1.4.1](https://github.com/matajoh/libnpy/releases/tag/v1.4.1)
+
+Bug fixes:
+- Fixed a bug with integer shifting
+
 ## [2021-05-28 - Version 1.4.0](https://github.com/matajoh/libnpy/releases/tag/v1.4.0)
 
 Improvements:
