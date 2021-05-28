@@ -84,7 +84,7 @@ class tensor
     template<typename... Indices>
     const T &operator()(Indices... index) const
     {        
-        return this->m_values[this->ravel(std::vector<std::int32_t>({index...}))];
+        return m_values[ravel(std::vector<std::int32_t>({index...}))];
     }
 
     /** Index function.
@@ -93,7 +93,7 @@ class tensor
      */
     const T &operator()(const std::vector<std::size_t> &multi_index) const
     {
-        return this->m_values[this->ravel(multi_index)];
+        return m_values[ravel(multi_index)];
     }
 
     /** Variable parameter index function.
@@ -103,7 +103,7 @@ class tensor
     template<typename... Indices>
     T &operator()(Indices... index)
     {
-        return this->m_values[this->ravel(std::vector<std::int32_t>({index...}))];
+        return m_values[ravel(std::vector<std::int32_t>({index...}))];
     }
 
     /** Index function.
@@ -112,31 +112,31 @@ class tensor
      */
     T &operator()(const std::vector<std::size_t> &multi_index)
     {
-        return this->m_values[this->ravel(multi_index)];
+        return m_values[ravel(multi_index)];
     }
 
     /** Iterator pointing at the beginning of the tensor in memory. */
     typename std::vector<T>::iterator begin()
     {
-        return this->m_values.begin();
+        return m_values.begin();
     }
 
     /** Iterator pointing at the beginning of the tensor in memory. */
     typename std::vector<T>::const_iterator begin() const
     {
-        return this->m_values.begin();
+        return m_values.begin();
     }
 
     /** Iterator pointing at the end of the tensor in memory. */
     typename std::vector<T>::iterator end()
     {
-        return this->m_values.end();
+        return m_values.end();
     }
 
     /** Iterator pointing at the end of the tensor in memory. */
     typename std::vector<T>::const_iterator end() const
     {
-        return this->m_values.end();
+        return m_values.end();
     }
 
     /** Sets the value at the provided index.
@@ -145,7 +145,7 @@ class tensor
      */
     void set(const std::vector<std::int32_t> &multi_index, const T &value)
     {
-        this->m_values[this->ravel(multi_index)] = value;
+        m_values[ravel(multi_index)] = value;
     }
 
     /** Gets the value at the provided index.
@@ -154,19 +154,19 @@ class tensor
      */
     const T &get(const std::vector<std::int32_t> &multi_index) const
     {
-        return this->m_values[this->ravel(multi_index)];
+        return m_values[ravel(multi_index)];
     }
 
     /** The data type of the tensor. */
     const data_type_t dtype() const
     {
-        return this->m_dtype;
+        return m_dtype;
     }
 
     /** The underlying values buffer. */
     const std::vector<T> &values() const
     {
-        return this->m_values;
+        return m_values;
     }
 
     /** Copy values from the source to this tensor.
@@ -175,12 +175,12 @@ class tensor
      */
     void copy_from(const T *source, size_t nitems)
     {
-        if (nitems != this->size())
+        if (nitems != size())
         {
             throw std::invalid_argument("nitems");
         }
 
-        std::copy(source, source + nitems, this->m_values.begin());
+        std::copy(source, source + nitems, m_values.begin());
     }
 
     /** Copy values from the provided vector.
@@ -188,12 +188,12 @@ class tensor
      */
     void copy_from(const std::vector<T> &source)
     {
-        if (source.size() != this->size())
+        if (source.size() != size())
         {
             throw std::invalid_argument("source.size");
         }
 
-        std::copy(source.begin(), source.end(), this->m_values.begin());
+        std::copy(source.begin(), source.end(), m_values.begin());
     }
 
     /** Move values from the provided vector.
@@ -201,37 +201,37 @@ class tensor
      */
     void move_from(std::vector<T> &&source)
     {
-        if (source.size() != this->size)
+        if (source.size() != size)
         {
             throw std::invalid_argument("source.size");
         }
 
-        this->m_values = std::move(source);
+        m_values = std::move(source);
     }
 
     /** A pointer to the start of the underlying values buffer. */
     T *data()
     {
-        return this->m_values.data();
+        return m_values.data();
     }
 
     /** A pointer to the start of the underlying values buffer. */
     const T *data() const
     {
-        return this->m_values.data();
+        return m_values.data();
     }
 
     /** The number of elements in the tensor. */
     size_t size() const
     {
-        return this->m_values.size();
+        return m_values.size();
     }
 
     /** The shape of the vector. Each element is the size of the 
      *  corresponding dimension. */
     const std::vector<size_t> &shape() const
     {
-        return this->m_shape;
+        return m_shape;
     }
 
     /** Returns the dimensionality of the tensor at the specified index.
@@ -240,34 +240,34 @@ class tensor
      */
     const size_t shape(int index) const
     {
-        return this->m_shape[index];
+        return m_shape[index];
     }
 
     /** Whether the tensor data is stored in FORTRAN, or column-major, order. */
     bool fortran_order() const
     {
-        return this->m_fortran_order;
+        return m_fortran_order;
     }
 
     /** Copy assignment operator. */
     tensor<T> &operator=(const tensor<T> &other)
     {
-        this->m_shape = other.m_shape;
-        this->m_ravel_strides = other.m_ravel_strides;
-        this->m_fortran_order = other.m_fortran_order;
-        this->m_dtype = other.m_dtype;
-        this->m_values = other.m_values;
+        m_shape = other.m_shape;
+        m_ravel_strides = other.m_ravel_strides;
+        m_fortran_order = other.m_fortran_order;
+        m_dtype = other.m_dtype;
+        m_values = other.m_values;
         return *this;
     }
 
     /** Move assignment operator. */
     tensor<T> &operator=(tensor<T> &&other)
     {
-        this->m_shape = std::move(other.m_shape);
-        this->m_ravel_strides = std::move(other.m_ravel_strides);
-        this->m_fortran_order = other.m_fortran_order;
-        this->m_dtype = other.m_dtype;
-        this->m_values = std::move(other.m_values);
+        m_shape = std::move(other.m_shape);
+        m_ravel_strides = std::move(other.m_ravel_strides);
+        m_fortran_order = other.m_fortran_order;
+        m_dtype = other.m_dtype;
+        m_values = std::move(other.m_values);
         return *this;
     }
 
@@ -291,8 +291,8 @@ class tensor
     size_t ravel(INDEX_IT index, SHAPE_IT shape) const
     {
         std::size_t ravel = 0;
-        for (auto stride = this->m_ravel_strides.begin();
-             stride < this->m_ravel_strides.end();
+        for (auto stride = m_ravel_strides.begin();
+             stride < m_ravel_strides.end();
              ++index, ++shape, ++stride)
         {
             if (*index >= *shape)
@@ -312,13 +312,13 @@ class tensor
      */
     size_t ravel(const std::vector<std::int32_t> &multi_index) const
     {
-        if (multi_index.size() != this->m_shape.size())
+        if (multi_index.size() != m_shape.size())
         {
             throw std::invalid_argument("multi_index");
         }
 
         std::vector<std::size_t> abs_multi_index(multi_index.size());
-        std::transform(multi_index.begin(), multi_index.end(), this->m_shape.begin(), abs_multi_index.begin(),
+        std::transform(multi_index.begin(), multi_index.end(), m_shape.begin(), abs_multi_index.begin(),
                        [](std::int32_t index, std::size_t shape) -> std::size_t{
                            if(index < 0)
                            {
@@ -328,7 +328,7 @@ class tensor
                            return static_cast<std::size_t>(index);
                        });
 
-        return this->ravel(abs_multi_index);
+        return ravel(abs_multi_index);
     }
 
     /** Ravels a multi-index into a single value indexing the buffer.
@@ -337,12 +337,12 @@ class tensor
      */
     size_t ravel(const std::vector<std::size_t> &abs_multi_index) const
     {
-        if (this->m_fortran_order)
+        if (m_fortran_order)
         {
-            return this->ravel(abs_multi_index.rbegin(), this->m_shape.rbegin());
+            return ravel(abs_multi_index.rbegin(), m_shape.rbegin());
         }
 
-        return this->ravel(abs_multi_index.begin(), this->m_shape.begin());
+        return ravel(abs_multi_index.begin(), m_shape.begin());
     }
 
   private:

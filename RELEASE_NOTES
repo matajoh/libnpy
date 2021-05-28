@@ -1,2 +1,7 @@
-New Features:
-- Updated CMake integration to make the library easier to use via `FetchContent`
+Improvements:
+- Further minor CMake changes to improve ease of use
+- NPZ streams now have `is_open` methods to check for successful file opening
+- Minor code style changes
+
+Bug fixes:
+- NPZ files will now correctly handle PKZIP versions after 2.0, both for reading and writing

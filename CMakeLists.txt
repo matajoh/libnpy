@@ -20,6 +20,8 @@ project( libnpy VERSION ${LIBNPY_VERSION} LANGUAGES CXX)
 
 # -------------------- Options --------------------------------
 
+option( BUILD_TESTS "Specifies whether to build the tests" OFF )
+option( BUILD_SAMPLES "Specifies whether to build the samples" OFF )
 option( BUILD_DOCUMENTATION "Specifies whether to build the documentation for the API and XML" OFF )
 option( INCLUDE_CSHARP  "Specifies whether to build libnpy with C# bindings" OFF )
 
@@ -89,19 +91,13 @@ if( BUILD_DOCUMENTATION )
   find_package( Doxygen REQUIRED )
 endif()
 
-# -------------------- Testing ------------------------------------
-
-include( CTest )
-
-if( MSVC )
-  set( LIBNPY_CSHARP_DIR ${CMAKE_BINARY_DIR}/CSharpWrapper/$<CONFIG> )
-endif()
-
 # -------------------- Walk the subdirectories --------------------
 
 add_subdirectory( src )
-add_subdirectory( test )
-add_subdirectory( samples )
+
+if( BUILD_SAMPLES )
+  add_subdirectory( samples )
+endif()
 
 if( BUILD_DOCUMENTATION )
   add_subdirectory( doc )
@@ -118,6 +114,18 @@ target_include_directories(npy
   PRIVATE
     ${CMAKE_CURRENT_SOURCE_DIR}/src
 )
+
+# -------------------- Testing ------------------------------------
+
+if( BUILD_TESTS )
+  if( MSVC )
+    set( LIBNPY_CSHARP_DIR ${CMAKE_BINARY_DIR}/CSharpWrapper/$<CONFIG> )
+  endif()
+
+  include( CTest )
+  add_subdirectory( test )
+endif()
+
 
 # -------------------- Build settings -----------------------------
 
@@ -182,7 +190,6 @@ install( FILES ${PROJECT_FILES} DESTINATION "." )
 
 if( MSVC )
   # NuGet files
-  set( CMAKE_INSTALL_PREFIX "${CMAKE_CURRENT_BINARY_DIR}/nuget" CACHE PATH "..." FORCE )
   set( LIBNPY_NUGET_NAME "npy-${SYSTEM_TOOLKIT}-${SYSTEM_BITS}-${CMAKE_BUILD_TYPE}" CACHE STRING "npy NuGet Name" FORCE )
   file( READ RELEASE_NOTES LIBNPY_RELEASE_NOTES )
 

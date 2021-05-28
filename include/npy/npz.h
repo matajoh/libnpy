@@ -75,6 +75,9 @@ class onpzstream
                compression_method_t compression = compression_method_t::STORED,
                endian_t endianness = npy::endian_t::NATIVE);
 
+    /** Whether the underlying stream has successfully been opened. */
+    bool is_open() const;
+
     /** Closes this stream. This will write the directory and close 
      *  the underlying stream as well. */
     void close();
@@ -89,7 +92,7 @@ class onpzstream
               template <typename> class TENSOR>
     void write(const std::string &filename, const TENSOR<T> &tensor)
     {
-        if (this->m_closed)
+        if (m_closed)
         {
             throw std::logic_error("Stream is closed");
         }
@@ -104,7 +107,7 @@ class onpzstream
             name += ".npy";
         }
 
-        this->write_file(name, std::move(output.buf()));
+        write_file(name, std::move(output.buf()));
     }
 
     /** Write a tensor to the NPZ archive.
@@ -115,7 +118,7 @@ class onpzstream
     template <typename T>
     void write(const std::string &filename, const tensor<T> &tensor)
     {
-        this->write<T, npy::tensor>(filename, tensor);
+        write<T, npy::tensor>(filename, tensor);
     }
 
     /** Destructor. This will call
@@ -147,6 +150,9 @@ class inpzstream
      */
     inpzstream(const std::string &path);
 
+    /** Whether the underlying stream has successfully been opened. */
+    bool is_open() const;
+
     /** Closes the underlying stream. */
     void close();
 
@@ -175,7 +181,7 @@ class inpzstream
               template <typename> class TENSOR>
     TENSOR<T> read(const std::string &filename)
     {
-        imemstream stream(this->read_file(filename));
+        imemstream stream(read_file(filename));
         return load<T, TENSOR>(stream);
     }
 
@@ -188,7 +194,7 @@ class inpzstream
     template <typename T>
     tensor<T> read(const std::string &filename)
     {
-        return this->read<T, npy::tensor>(filename);
+        return read<T, npy::tensor>(filename);
     }
 
   private:
