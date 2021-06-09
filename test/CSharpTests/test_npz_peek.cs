@@ -24,6 +24,11 @@ namespace Testing
                 tag += "_compressed";
             }
 
+            StringList keys = stream.Keys();
+            Test.AssertEqual(keys[0], "color.npy", ref result, tag + " keys");
+            Test.AssertEqual(keys[1], "depth.npy", ref result, tag + " keys");
+            Test.AssertEqual(keys[2], "unicode.npy", ref result, tag + " keys");
+
             Test.AssertEqual(false, stream.Contains("not_there.npy"), ref result, tag + " contains not_there");
             Test.AssertEqual(true, stream.Contains("color.npy"), ref result, tag + " contains color");
             Test.AssertEqual(true, stream.Contains("depth.npy"), ref result, tag + " contains depth");

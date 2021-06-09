@@ -456,7 +456,15 @@ void inpzstream::read_entries()
     {
         file_entry entry = read_central_directory_header(m_input);
         m_entries[entry.filename] = entry;
+        m_keys.push_back(entry.filename);
     }
+
+    std::sort(m_keys.begin(), m_keys.end());
+}
+
+const std::vector<std::string>& inpzstream::keys() const
+{
+    return m_keys;
 }
 
 std::vector<std::uint8_t> inpzstream::read_file(const std::string &temp_filename)
