@@ -1,5 +1,10 @@
 # Changelog
 
+## [2021-06-09 - Version 1.5.0](https://github.com/matajoh/libnpy/releases/tag/v1.5.0)
+
+Improvements:
+- Added a `keys` member to `inpzstream` so it is possible to query the keys of the tensors
+
 ## [2021-05-28 - Version 1.4.1](https://github.com/matajoh/libnpy/releases/tag/v1.4.1)
 
 Bug fixes:

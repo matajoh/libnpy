@@ -156,6 +156,9 @@ class inpzstream
     /** Closes the underlying stream. */
     void close();
 
+    /** The keys of the tensors in the NPZ */
+    const std::vector<std::string>& keys() const;
+
     /** Returns whether this NPZ contains the specified tensor
      *  \param filename the name of the tensor in the archive
      *  \return whether the tensor is in the archive
@@ -209,6 +212,7 @@ class inpzstream
 
     std::ifstream m_input;
     std::map<std::string, file_entry> m_entries;
+    std::vector<std::string> m_keys;
 };
 } // namespace npy
 

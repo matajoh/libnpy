@@ -1,2 +1,2 @@
-Bug fixes:
-- Fixed a bug with integer shifting
+Improvements:
+- Added a `keys` member to `inpzstream` so it is possible to query the keys of the tensors

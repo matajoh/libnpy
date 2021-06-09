@@ -64,6 +64,7 @@ enum class compression_method_t : std::uint16_t {
 %template(Float64Buffer) std::vector<double>;
 %apply const std::wstring & {std::wstring &};
 %template(UnicodeStringBuffer) std::vector<std::wstring>;
+%template(StringList) std::vector<std::string>;
 
 %template(Shape) std::vector<size_t>;
 
@@ -121,7 +122,9 @@ public:
 
     explicit tensor(const std::string& path);
 
-    tensor(const std::vector<size_t>& shape, bool fortran_order=false);
+    tensor(const std::vector<size_t>& shape);
+
+    tensor(const std::vector<size_t>& shape, bool fortran_order);
 
     %exception save(const std::string& path, endian_t endian = endian_t::NATIVE) %{
         try{
@@ -282,6 +285,9 @@ public:
     %}
 
     inpzstream(const std::string& path);
+
+    %rename(Keys) keys;
+    const std::vector<std::string>& keys() const;
 
     %rename(Contains) contains;
     bool contains(const std::string& filename);

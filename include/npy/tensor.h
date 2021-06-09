@@ -46,16 +46,23 @@ class tensor
      */
     explicit tensor(const std::string &path) : tensor(npy::load<T, npy::tensor>(path)) {}
 
+    /** Constructor. This will allocate a data buffer of the appropriate size in row-major order.
+     *  \param shape the shape of the tensor
+     */
+    tensor(const std::vector<size_t> &shape) : tensor(shape, false)
+    {
+    }
+
     /** Constructor. This will allocate a data buffer of the appropriate size.
      *  \param shape the shape of the tensor
      *  \param fortran_order whether the data is stored in FORTRAN, or column major, order
      */
     tensor(const std::vector<size_t> &shape,
-           bool fortran_order = false) : m_shape(shape),
-                                         m_ravel_strides(tensor<T>::get_ravel_strides(shape, fortran_order)),
-                                         m_fortran_order(fortran_order),
-                                         m_dtype(tensor<T>::get_dtype()),
-                                         m_values(tensor<T>::get_size(shape))
+           bool fortran_order) : m_shape(shape),
+                                 m_ravel_strides(tensor<T>::get_ravel_strides(shape, fortran_order)),
+                                 m_fortran_order(fortran_order),
+                                 m_dtype(tensor<T>::get_dtype()),
+                                 m_values(tensor<T>::get_size(shape))
     {
     }
 
