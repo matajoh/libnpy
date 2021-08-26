@@ -1,2 +1,5 @@
 Improvements:
-- Added a `keys` member to `inpzstream` so it is possible to query the keys of the tensors
+- CMake build now uses the highest compiler warning/error setting
+
+Bugfixes:
+- Fixed some bugs exposed by heightened compiler warnings

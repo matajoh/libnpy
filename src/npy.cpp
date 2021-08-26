@@ -111,16 +111,16 @@ header_info::header_info(const std::string &dictionary)
         skip_whitespace(input);
         if (key == "descr")
         {
-            std::string dtype = read_string(input);
-            if(dtype[1] == 'U')
+            std::string dtype_code = read_string(input);
+            if(dtype_code[1] == 'U')
             {
                 this->dtype = npy::data_type_t::UNICODE_STRING;
-                endianness = dtype[0] == '>' ? npy::endian_t::BIG : npy::endian_t::LITTLE;
-                max_element_length = std::stoi(dtype.substr(2));
+                endianness = dtype_code[0] == '>' ? npy::endian_t::BIG : npy::endian_t::LITTLE;
+                max_element_length = std::stoi(dtype_code.substr(2));
             }
             else
             {
-                std::tie(this->dtype, endianness) = from_dtype(dtype);
+                std::tie(this->dtype, endianness) = from_dtype(dtype_code);
                 max_element_length = 0;
             }
 

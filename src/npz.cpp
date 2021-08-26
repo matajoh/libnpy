@@ -21,7 +21,6 @@ const std::array<std::uint8_t, 4> TIME = {0x00, 0x00, 0x21, 0x00};
 const int CD_END_SIZE = 22;
 const std::uint16_t STANDARD_VERSION = 20;       // 2.0 File is encrypted using traditional PKWARE encryption
 const std::uint16_t ZIP64_VERSION = 45;          // 4.5 File uses ZIP64 format extensions
-const int CHUNK = 128 * 1024;
 
 const std::uint16_t ZIP64_TAG = 1;
 const std::uint64_t ZIP64_LIMIT = 0x8FFFFFFF;
@@ -65,8 +64,8 @@ void write(std::ostream &stream, std::uint64_t value)
 
 std::uint16_t read16(std::istream &stream)
 {
-    std::uint16_t low = stream.get();
-    std::uint16_t high = stream.get();
+    std::uint16_t low = static_cast<std::uint16_t>(stream.get());
+    std::uint16_t high = static_cast<std::uint16_t>(stream.get());
     return low | (high << 8);
 }
 
@@ -360,10 +359,10 @@ bool file_entry::check(const file_entry &other) const
 
 onpzstream::onpzstream(const std::string &path,
                        compression_method_t method,
-                       endian_t endianness) : m_output(path, std::ios::out | std::ios::binary),
+                       endian_t endianness) : m_closed(false),
+                                              m_output(path, std::ios::out | std::ios::binary),
                                               m_compression_method(method),
-                                              m_endianness(endianness),
-                                              m_closed(false)
+                                              m_endianness(endianness)                                              
 {
 }
 
