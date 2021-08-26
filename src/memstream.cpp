@@ -15,7 +15,7 @@ membuf::membuf() : membuf(BUFFER_SIZE)
 
 membuf::membuf(size_t n)
 {
-    m_buffer.reserve(BUFFER_SIZE);
+    m_buffer.reserve(n);
     seekpos(0);
 }
 

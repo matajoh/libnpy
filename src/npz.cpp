@@ -64,8 +64,8 @@ void write(std::ostream &stream, std::uint64_t value)
 
 std::uint16_t read16(std::istream &stream)
 {
-    std::uint16_t low = stream.get();
-    std::uint16_t high = stream.get();
+    std::uint16_t low = static_cast<std::uint16_t>(stream.get());
+    std::uint16_t high = static_cast<std::uint16_t>(stream.get());
     return low | (high << 8);
 }
 
