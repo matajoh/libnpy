@@ -1,5 +1,7 @@
 #include "npy/core.h"
 
+#include <iostream>
+
 namespace {
     const int BUFFER_SIZE = 64 * 1024;
 }
@@ -53,6 +55,10 @@ membuf::pos_type membuf::seekoff(membuf::off_type off, std::ios_base::seekdir wa
         case std::ios_base::cur:
             m_posg += off;
             break;
+        
+        default:
+            std::cerr << "Unsupported seek direction." << std::endl;
+            break;
         }
 
         result = static_cast<membuf::pos_type>(m_posg - m_buffer.begin());
@@ -72,6 +78,10 @@ membuf::pos_type membuf::seekoff(membuf::off_type off, std::ios_base::seekdir wa
 
         case std::ios_base::cur:
             m_posp += off;
+            break;
+
+        default:
+            std::cerr << "Unsupported seek direction." << std::endl;
             break;
         }
 
@@ -181,13 +191,13 @@ const std::vector<std::uint8_t> &membuf::buf() const
     return m_buffer;
 }
 
-imemstream::imemstream(const std::vector<std::uint8_t> &buffer) : m_buffer(buffer),
-                                                                  std::basic_istream<std::uint8_t>(&m_buffer)
+imemstream::imemstream(const std::vector<std::uint8_t> &buffer) : std::basic_istream<std::uint8_t>(&m_buffer),
+                                                                  m_buffer(buffer)
 {
 }
 
-imemstream::imemstream(std::vector<std::uint8_t> &&buffer) : m_buffer(std::move(buffer)),
-                                                             std::basic_istream<std::uint8_t>(&m_buffer)
+imemstream::imemstream(std::vector<std::uint8_t> &&buffer) : std::basic_istream<std::uint8_t>(&m_buffer),
+                                                             m_buffer(std::move(buffer))
 {
 }
 
@@ -205,13 +215,13 @@ omemstream::omemstream() : std::basic_ostream<std::uint8_t>(&m_buffer)
 {
 }
 
-omemstream::omemstream(std::vector<std::uint8_t> &&buffer) : m_buffer(std::move(buffer)),
-                                                             std::basic_ostream<std::uint8_t>(&m_buffer)
+omemstream::omemstream(std::vector<std::uint8_t> &&buffer) : std::basic_ostream<std::uint8_t>(&m_buffer),
+                                                             m_buffer(std::move(buffer))
 {
 }
 
-omemstream::omemstream(std::streamsize capacity) : m_buffer(capacity),
-                                                   std::basic_ostream<std::uint8_t>(&m_buffer)
+omemstream::omemstream(std::streamsize capacity) : std::basic_ostream<std::uint8_t>(&m_buffer),
+                                                   m_buffer(capacity)
 {
 }
 

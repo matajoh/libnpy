@@ -208,7 +208,7 @@ class tensor
      */
     void move_from(std::vector<T> &&source)
     {
-        if (source.size() != size)
+        if (source.size() != size())
         {
             throw std::invalid_argument("source.size");
         }
