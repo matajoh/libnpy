@@ -1,5 +1,13 @@
 # Changelog
 
+## [2021-08-26 - Version 1.5.1](https://github.com/matajoh/libnpy/releases/tag/v1.5.1)
+
+Improvements:
+- CMake build now uses the highest compiler warning/error setting
+
+Bugfixes:
+- Fixed some bugs exposed by heightened compiler warnings
+
 ## [2021-06-09 - Version 1.5.0](https://github.com/matajoh/libnpy/releases/tag/v1.5.0)
 
 Improvements:
