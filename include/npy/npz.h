@@ -26,8 +26,6 @@
 #include "npy.h"
 #include "tensor.h"
 
-using namespace std;
-
 namespace npy
 {
 /** Enumeration indicating the compression method to use for data in the NPZ archive. */
