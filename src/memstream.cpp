@@ -91,7 +91,7 @@ membuf::pos_type membuf::seekoff(membuf::off_type off, std::ios_base::seekdir wa
     return result;
 }
 
-membuf::pos_type membuf::seekpos(membuf::pos_type pos, ios_base::openmode which)
+membuf::pos_type membuf::seekpos(membuf::pos_type pos, std::ios_base::openmode which)
 {
     membuf::pos_type result(membuf::off_type(-1));
     if (which & std::ios_base::in)

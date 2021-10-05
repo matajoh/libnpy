@@ -16,8 +16,6 @@
 #include <iostream>
 #include <vector>
 
-using namespace std;
-
 namespace npy
 {
 /** Enumeration which represents a type of endianness */

@@ -1,5 +1,9 @@
 # Changelog
 
+## [2021-10-05 - Version 1.5.2](https://github.com/matajoh/libnpy/releases/tag/v1.5.2)
+
+Removing `using namespace std` to simplify library use
+
 ## [2021-08-26 - Version 1.5.1](https://github.com/matajoh/libnpy/releases/tag/v1.5.1)
 
 Improvements:

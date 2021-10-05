@@ -25,8 +25,6 @@
 
 #include "core.h"
 
-using namespace std;
-
 const int STATIC_HEADER_LENGTH = 10;
 
 namespace npy
