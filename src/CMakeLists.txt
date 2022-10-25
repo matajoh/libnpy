@@ -14,7 +14,7 @@ add_library( npy STATIC ${SOURCES} )
 add_library( npy::npy ALIAS npy )
 
 if ( CMAKE_COMPILER_IS_GNUCC )
-  target_compile_options(npy PRIVATE "-Wall -Wextra")
+  target_compile_options(npy PRIVATE "-Wall" "-Wextra")
 elseif( MSVC )
   target_compile_options(npy PRIVATE "/W4")
 endif()
