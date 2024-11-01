@@ -36,3 +36,4 @@
 build*
 assets/test/*_large*.npz
 .cache
+.env

@@ -102,6 +102,7 @@ if(CLANG_FORMAT_NOT_FOUND)
 else()
   file(GLOB ALL_SOURCE_FILES CONFIGURE_DEPENDS
         src/*.cpp
+        src/*.h
         include/libnpy/*.h
         tests/*.cpp
         tests/*.h

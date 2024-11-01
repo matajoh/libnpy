@@ -11,11 +11,10 @@
 #ifndef _ZIP_H_
 #define _ZIP_H_
 
-#include <vector>
 #include <cstdint>
+#include <vector>
 
-namespace npy
-{
+namespace npy {
 /** Deflate the bytes and return the compressed result.
  *  \param bytes the raw bytes
  *  \return the compressed bytes

@@ -1,5 +1,15 @@
 # Changelog
 
+## [2024-11-01 - Version 1.5.3](https://github.com/matajoh/libnpy/releases/tag/v1.5.3)
+
+Improvements:
+- Increased CHUNK size as per miniz instructions
+- Added tests for very large arrays in NPZ files
+- Added some CI tests to catch issues across platforms
+
+Bugfixes:
+- Fixed an issue where very large arrays in NPZ files would throw an error
+
 ## [2021-10-05 - Version 1.5.2](https://github.com/matajoh/libnpy/releases/tag/v1.5.2)
 
 Removing `using namespace std` to simplify library use
