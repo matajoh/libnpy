@@ -118,9 +118,9 @@ protected:
   std::streamsize showmanyc() override;
   std::streamsize xsgetn(std::uint8_t *s, std::streamsize n) override;
   int_type underflow() override;
-  int_type pbackfail(int_type c = traits_type::eof()) override;
+  int_type pbackfail(int_type c = std::char_traits<char>::eof()) override;
   std::streamsize xsputn(const std::uint8_t *s, std::streamsize n) override;
-  int_type overflow(int_type c = traits_type::eof()) override;
+  int_type overflow(int_type c = std::char_traits<char>::eof()) override;
 
 private:
   std::vector<std::uint8_t> m_buffer;
