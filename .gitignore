@@ -34,3 +34,5 @@
 # Misc
 .vscode
 build*
+assets/test/*_large*.npz
+.cache

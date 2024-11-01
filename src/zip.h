@@ -12,7 +12,6 @@
 #define _ZIP_H_
 
 #include <vector>
-#include <iostream>
 #include <cstdint>
 
 namespace npy

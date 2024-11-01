@@ -20,10 +20,11 @@ project( libnpy VERSION ${LIBNPY_VERSION} LANGUAGES CXX)
 
 # -------------------- Options --------------------------------
 
-option( BUILD_TESTS "Specifies whether to build the tests" OFF )
-option( BUILD_SAMPLES "Specifies whether to build the samples" OFF )
-option( BUILD_DOCUMENTATION "Specifies whether to build the documentation for the API and XML" OFF )
-option( INCLUDE_CSHARP  "Specifies whether to build libnpy with C# bindings" OFF )
+option( LIBNPY_BUILD_TESTS "Specifies whether to build the tests" OFF )
+option( LIBNPY_BUILD_SAMPLES "Specifies whether to build the samples" OFF )
+option( LIBNPY_BUILD_DOCUMENTATION "Specifies whether to build the documentation for the API and XML" OFF )
+option( LIBNPY_INCLUDE_CSHARP  "Specifies whether to build libnpy with C# bindings" OFF )
+set( LIBNPY_SANITIZE "" CACHE STRING "Argument to pass to sanitize (disabled by default)")
 
 # ------------------- Detect the system -----------------------
 
@@ -65,6 +66,8 @@ else()
   set( SYSTEM_BITS "x86" )
 endif()
 
+set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
+
 # -------------------- Find packages --------------------------
 
 if ( WIN32 AND INCLUDE_CSHARP )
@@ -91,19 +94,40 @@ if( BUILD_DOCUMENTATION )
   find_package( Doxygen REQUIRED )
 endif()
 
+find_program(CLANG_FORMAT NAMES clang-format-10 clang-format-14 clang-format-18 )
+
+string(COMPARE EQUAL ${CLANG_FORMAT} "CLANG_FORMAT-NOTFOUND" CLANG_FORMAT_NOT_FOUND)
+if(CLANG_FORMAT_NOT_FOUND)
+  message("libnpy_format target not defined: no clang-format tool found")
+else()
+  file(GLOB ALL_SOURCE_FILES CONFIGURE_DEPENDS
+        src/*.cpp
+        include/libnpy/*.h
+        tests/*.cpp
+        tests/*.h
+        examples/*.cpp
+  )
+
+  add_custom_target(libnpy_format
+                    WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+                    COMMAND ${CLANG_FORMAT}
+                    -i
+                    ${ALL_SOURCE_FILES})
+endif()
+
 # -------------------- Walk the subdirectories --------------------
 
 add_subdirectory( src )
 
-if( BUILD_SAMPLES )
+if( LIBNPY_BUILD_SAMPLES )
   add_subdirectory( samples )
 endif()
 
-if( BUILD_DOCUMENTATION )
+if( LIBNPY_BUILD_DOCUMENTATION )
   add_subdirectory( doc )
 endif()
 
-if( INCLUDE_CSHARP )
+if( LIBNPY_INCLUDE_CSHARP )
   add_subdirectory( CSharpWrapper )
 endif()
 
@@ -117,7 +141,7 @@ target_include_directories(npy
 
 # -------------------- Testing ------------------------------------
 
-if( BUILD_TESTS )
+if( LIBNPY_BUILD_TESTS )
   if( MSVC )
     set( LIBNPY_CSHARP_DIR ${CMAKE_BINARY_DIR}/CSharpWrapper/$<CONFIG> )
   endif()

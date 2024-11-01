@@ -12,18 +12,16 @@
 #define _CORE_H_
 
 #include <cstdint>
-#include <string>
 #include <iostream>
+#include <string>
 #include <vector>
 
-namespace npy
-{
+namespace npy {
 /** Enumeration which represents a type of endianness */
-enum class endian_t : std::uint8_t
-{
-  /** Indicates that the native endianness should be used. Native in this case means
-         *  that of the hardware the program is currently running on.
-         */
+enum class endian_t : std::uint8_t {
+  /** Indicates that the native endianness should be used. Native in this case
+   * means that of the hardware the program is currently running on.
+   */
   NATIVE,
   /** Indicates the use of big-endian encoding */
   BIG,
@@ -32,8 +30,7 @@ enum class endian_t : std::uint8_t
 };
 
 /** This function will return the endianness of the current hardware. */
-inline endian_t native_endian()
-{
+inline endian_t native_endian() {
   union {
     std::uint32_t i;
     char c[4];
@@ -42,9 +39,9 @@ inline endian_t native_endian()
   return endian_test.c[0] == 1 ? endian_t::BIG : endian_t::LITTLE;
 };
 
-/** This enum represents the different types of tensor data that can be stored. */
-enum class data_type_t : std::uint8_t
-{
+/** This enum represents the different types of tensor data that can be stored.
+ */
+enum class data_type_t : std::uint8_t {
   /** 8 bit signed integer */
   INT8,
   /** 8 bit unsigned integer */
@@ -71,10 +68,11 @@ enum class data_type_t : std::uint8_t
 
 /** Convert a data type and endianness to a NPY dtype string.
  *  \param dtype the data type
- *  \param endian the endianness. Defaults to the current endianness of the caller.
- *  \return the NPY dtype string
+ *  \param endian the endianness. Defaults to the current endianness of the
+ * caller. \return the NPY dtype string
  */
-const std::string &to_dtype(data_type_t dtype, endian_t endian = endian_t::NATIVE);
+const std::string &to_dtype(data_type_t dtype,
+                            endian_t endian = endian_t::NATIVE);
 
 /** Converts from an NPY dtype string to a data type and endianness.
  *  \param dtype the NPY dtype string
@@ -83,25 +81,24 @@ const std::string &to_dtype(data_type_t dtype, endian_t endian = endian_t::NATIV
 const std::pair<data_type_t, endian_t> &from_dtype(const std::string &dtype);
 
 /** Implementation of an in-memory stream buffer that can be moved */
-class membuf : public std::basic_streambuf<std::uint8_t>
-{
+class membuf : public std::basic_streambuf<std::uint8_t> {
 public:
   /** Default Constructor. */
   membuf();
 
   /** Constructor.
-     *  \param n the default starting capacity for the buffer
-     */
+   *  \param n the default starting capacity for the buffer
+   */
   membuf(size_t n);
 
   /** Copy constructor.
-     *  \param buffer the values copied and used for the buffer
-     */
+   *  \param buffer the values copied and used for the buffer
+   */
   membuf(const std::vector<std::uint8_t> &buffer);
 
   /** Move constructor.
-     *  \param buffer the values moved and used for the buffer
-     */
+   *  \param buffer the values moved and used for the buffer
+   */
   membuf(std::vector<std::uint8_t> &&buffer);
 
   /** Returns a reference to the internal buffer object. */
@@ -112,8 +109,12 @@ public:
 
 protected:
   membuf *setbuf(std::uint8_t *s, std::streamsize n) override;
-  pos_type seekoff(off_type off, std::ios_base::seekdir way, std::ios_base::openmode which = std::ios_base::in | std::ios_base::out) override;
-  pos_type seekpos(pos_type pos, std::ios_base::openmode which = std::ios_base::in | std::ios_base::out) override;
+  pos_type seekoff(off_type off, std::ios_base::seekdir way,
+                   std::ios_base::openmode which = std::ios_base::in |
+                                                   std::ios_base::out) override;
+  pos_type seekpos(pos_type pos,
+                   std::ios_base::openmode which = std::ios_base::in |
+                                                   std::ios_base::out) override;
   std::streamsize showmanyc() override;
   std::streamsize xsgetn(std::uint8_t *s, std::streamsize n) override;
   int_type underflow() override;
@@ -128,17 +129,16 @@ private:
 };
 
 /** An input stream which uses a moveable, in-memory buffer */
-class imemstream : public std::basic_istream<std::uint8_t>
-{
+class imemstream : public std::basic_istream<std::uint8_t> {
 public:
   /** Copy constructor.
-     *  \param buffer the buffer copied and used for the stream
-     */
+   *  \param buffer the buffer copied and used for the stream
+   */
   imemstream(const std::vector<std::uint8_t> &buffer);
 
   /** Move constructor.
-     *  \param buffer the buffer moved and used for the stream
-     */
+   *  \param buffer the buffer moved and used for the stream
+   */
   imemstream(std::vector<std::uint8_t> &&buffer);
 
   /** Returns a reference to the underlying byte vector */
@@ -152,20 +152,20 @@ private:
 };
 
 /** An output stream which uses a moveable, in-memory byte vector */
-class omemstream : public std::basic_ostream<std::uint8_t>
-{
+class omemstream : public std::basic_ostream<std::uint8_t> {
 public:
   /** Default constructor */
   omemstream();
 
   /** Move constructor.
-     *  \param buffer the buffer to use for writing. Values in the buffer will be overwritten
-     */
+   *  \param buffer the buffer to use for writing. Values in the buffer will be
+   * overwritten
+   */
   omemstream(std::vector<std::uint8_t> &&buffer);
 
   /** Constructor.
-     *  \param capacity the initial capacity for the output buffer
-     */
+   *  \param capacity the initial capacity for the output buffer
+   */
   omemstream(std::streamsize capacity);
 
   /** Returns a reference to the underlying byte vector */

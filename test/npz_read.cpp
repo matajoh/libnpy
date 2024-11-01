@@ -19,6 +19,20 @@ void _test(int &result, const std::string &filename, bool compressed)
     test::assert_equal(expected_depth, actual_depth, result, "npz_read_depth" + suffix);
     test::assert_equal(expected_unicode, actual_unicode, result, "npz_read_unicode" + suffix);
 }
+
+void _test_large(int &result, const std::string &filename, bool compressed)
+{
+    auto expected_int = test::test_tensor<std::int32_t>({200, 5, 1000});
+    auto expected_float = test::test_tensor<float>({1000, 5, 20, 10});
+
+    npy::inpzstream stream(test::asset_path(filename));
+    auto actual_int = stream.read<std::int32_t, npy::tensor>("test_int");
+    auto actual_float = stream.read<float, npy::tensor>("test_float");
+
+    std::string suffix = compressed ? "_compressed" : "";
+    test::assert_equal(expected_int, actual_int, result, "npz_read_large_int" + suffix);
+    test::assert_equal(expected_float, actual_float, result, "npz_read_large_float" + suffix);
+}
 } // namespace
 
 int test_npz_read()
@@ -27,6 +41,8 @@ int test_npz_read()
 
     _test(result, "test.npz", false);
     _test(result, "test_compressed.npz", true);
+    _test_large(result, "test_large.npz", false);
+    _test_large(result, "test_large_compressed.npz", true);
 
     return result;
 }
