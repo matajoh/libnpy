@@ -13,14 +13,14 @@ const int MEM_LEVEL = 8;
 
 namespace npy {
 
-std::uint32_t npy_crc32(const std::vector<char> &bytes) {
+std::uint32_t npy_crc32(const std::string &bytes) {
   uLong crc = ::crc32(0L, Z_NULL, 0);
   const Bytef *buf = reinterpret_cast<const Bytef *>(bytes.data());
   uInt len = static_cast<uInt>(bytes.size());
   return ::crc32(crc, buf, len);
 }
 
-std::vector<char> npy_deflate(std::vector<char> &&bytes) {
+std::string npy_deflate(std::string &&bytes) {
   int ret, flush;
   unsigned have;
   z_stream strm;
@@ -37,7 +37,8 @@ std::vector<char> npy_deflate(std::vector<char> &&bytes) {
     throw std::logic_error("Unable to initialize deflate algorithm");
   }
 
-  imemstream input(std::move(bytes));
+  std::string str(bytes.begin(), bytes.end());
+  imemstream input(std::move(str));
   omemstream output;
 
   /* compress until end of file */
@@ -79,10 +80,10 @@ std::vector<char> npy_deflate(std::vector<char> &&bytes) {
   /* clean up and return */
   (void)deflateEnd(&strm);
 
-  return std::move(output.buf());
+  return output.str();
 }
 
-std::vector<char> npy_inflate(std::vector<char> &&bytes) {
+std::string npy_inflate(std::string &&bytes) {
   int ret;
   unsigned have;
   z_stream strm;
@@ -99,12 +100,12 @@ std::vector<char> npy_inflate(std::vector<char> &&bytes) {
     throw std::logic_error("Unable to initialize inflate algorithm");
   }
 
-  imemstream input(std::move(bytes));
+  std::string str(bytes.begin(), bytes.end());
+  imemstream input(std::move(str));
   omemstream output;
 
   /* decompress until deflate stream ends or end of file */
   do {
-    std::cout << "Reading chunk at" << input.tellg() << std::endl;
     input.read(reinterpret_cast<char *>(in.data()), CHUNK);
     strm.avail_in = static_cast<uInt>(input.gcount());
     if ((input.fail() && !input.eof()) || input.bad()) {
@@ -148,7 +149,7 @@ std::vector<char> npy_inflate(std::vector<char> &&bytes) {
   (void)inflateEnd(&strm);
 
   if (ret == Z_STREAM_END) {
-    return std::move(output.buf());
+    return output.str();
   }
 
   throw std::logic_error("Error inflating stream");

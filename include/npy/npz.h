@@ -14,9 +14,9 @@
 #define _NPZ_H_
 
 #include <cstdint>
-#include <fstream>
 #include <iostream>
 #include <map>
+#include <memory>
 #include <stdexcept>
 #include <string>
 #include <vector>
@@ -60,6 +60,15 @@ struct file_entry {
 /** Class representing an output stream for an NPZ archive file */
 class onpzstream {
 public:
+  /** Constructor
+   *  \param output the output stream to write to
+   *  \param compression how the entries should be compressed
+   *  \param endianness the endianness to use in writing the entries
+   */   
+  onpzstream(const std::shared_ptr<std::ostream> &output,
+             compression_method_t compression = compression_method_t::STORED,
+             endian_t endianness = npy::endian_t::NATIVE);
+
   /** Constructor.
    *  \param path the path to the file on disk
    *  \param compression how the entries should be compressed
@@ -98,7 +107,7 @@ public:
       name += ".npy";
     }
 
-    write_file(name, std::move(output.buf()));
+    write_file(name, output.str());
   }
 
   /** Write a tensor to the NPZ archive.
@@ -121,10 +130,10 @@ private:
    *  \param filename the name of the file
    *  \param bytes the file data
    */
-  void write_file(const std::string &filename, std::vector<char> &&bytes);
+  void write_file(const std::string &filename, std::string &&bytes);
 
   bool m_closed;
-  std::ofstream m_output;
+  std::shared_ptr<std::ostream> m_output;
   compression_method_t m_compression_method;
   endian_t m_endianness;
   std::vector<file_entry> m_entries;
@@ -133,6 +142,11 @@ private:
 /** Class representing an input stream from an NPZ archive file */
 class inpzstream {
 public:
+  /** Constructor.
+   *  \param stream the input stream to read from
+   */
+  inpzstream(const std::shared_ptr<std::istream> &stream);
+
   /** Constructor.
    *  \param path the path to the NPZ file on the disk
    */
@@ -185,12 +199,12 @@ private:
    *  \param filename the name of the file
    *  \return the raw file bytes
    */
-  std::vector<char> read_file(const std::string &filename);
+  std::string read_file(const std::string &filename);
 
   /** Read all entries from the directory. */
   void read_entries();
 
-  std::ifstream m_input;
+  std::shared_ptr<std::istream> m_input;
   std::map<std::string, file_entry> m_entries;
   std::vector<std::string> m_keys;
 };

@@ -1,6 +1,4 @@
-#include <cstdint>
 #include <fstream>
-#include <sstream>
 
 #include "libnpy_tests.h"
 #include "zip.h"
@@ -12,7 +10,7 @@ int test_crc32() {
   std::ifstream stream(test::asset_path("float32.npy"),
                        std::ios_base::in | std::ios_base::binary);
   char buffer[BUF_SIZE];
-  std::vector<char> bytes;
+  std::string bytes;
   while (stream.good()) {
     stream.read(buffer, BUF_SIZE);
     std::copy(buffer, buffer + stream.gcount(), std::back_inserter(bytes));

@@ -65,8 +65,8 @@ else()
         src/*.cpp
         src/*.h
         include/libnpy/*.h
-        tests/*.cpp
-        tests/*.h
+        test/*.cpp
+        test/*.h
         examples/*.cpp
   )
 

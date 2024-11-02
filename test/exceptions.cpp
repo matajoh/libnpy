@@ -85,8 +85,8 @@ int test_exceptions() {
                                              "save_invalid_path");
   test::assert_throws<std::invalid_argument>(load_invalid_path, result,
                                              "load_invalid_path");
-  test::assert_throws<std::invalid_argument>(inpzstream_invalid_path, result,
-                                             "inpzstream_invalid_path");
+  test::assert_throws<std::logic_error>(inpzstream_invalid_path, result,
+                                        "inpzstream_invalid_path");
   test::assert_throws<std::invalid_argument>(
       inpzstream_read_invalid_filename, result,
       "inpzstream_read_invalid_filename");

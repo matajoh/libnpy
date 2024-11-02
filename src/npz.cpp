@@ -317,9 +317,15 @@ bool file_entry::check(const file_entry &other) const {
            other.uncompressed_size != this->uncompressed_size);
 }
 
+onpzstream::onpzstream(const std::shared_ptr<std::ostream> &output,
+                       compression_method_t compression, endian_t endianness)
+    : m_closed(false), m_output(output), m_compression_method(compression),
+      m_endianness(endianness) {}
+
 onpzstream::onpzstream(const std::string &path, compression_method_t method,
                        endian_t endianness)
-    : m_closed(false), m_output(path, std::ios::out | std::ios::binary),
+    : m_closed(false), m_output(std::make_shared<std::ofstream>(
+                           path, std::ios::out | std::ios::binary)),
       m_compression_method(method), m_endianness(endianness) {}
 
 onpzstream::~onpzstream() {
@@ -328,11 +334,10 @@ onpzstream::~onpzstream() {
   }
 }
 
-void onpzstream::write_file(const std::string &filename,
-                            std::vector<char> &&bytes) {
+void onpzstream::write_file(const std::string &filename, std::string &&bytes) {
   std::uint32_t uncompressed_size = static_cast<std::uint32_t>(bytes.size());
   std::uint32_t compressed_size = 0;
-  std::vector<char> compressed_bytes;
+  std::string compressed_bytes;
   std::uint32_t checksum = npy_crc32(bytes);
   if (m_compression_method == compression_method_t::STORED) {
     compressed_bytes = bytes;
@@ -349,50 +354,65 @@ void onpzstream::write_file(const std::string &filename,
                       compressed_size,
                       uncompressed_size,
                       static_cast<std::uint16_t>(m_compression_method),
-                      static_cast<std::uint32_t>(m_output.tellp())};
+                      static_cast<std::uint32_t>(m_output->tellp())};
 
   bool zip64 = uncompressed_size > ZIP64_LIMIT || compressed_size > ZIP64_LIMIT;
-  write_local_header(m_output, entry, zip64);
-  m_output.write(reinterpret_cast<char *>(compressed_bytes.data()),
-                 compressed_size);
+  write_local_header(*m_output, entry, zip64);
+  m_output->write(compressed_bytes.data(), compressed_size);
   m_entries.push_back(std::move(entry));
 }
 
-bool onpzstream::is_open() const { return m_output.is_open(); }
+bool onpzstream::is_open() const {
+  std::shared_ptr<std::ofstream> output =
+      std::dynamic_pointer_cast<std::ofstream>(m_output);
+  if (output) {
+    return output->is_open();
+  }
+
+  return true;
+}
 
 void onpzstream::close() {
   if (!m_closed) {
     CentralDirectory dir;
-    dir.offset = static_cast<std::uint32_t>(m_output.tellp());
+    dir.offset = static_cast<std::uint32_t>(m_output->tellp());
     for (auto &header : m_entries) {
-      write_central_directory_header(m_output, header);
+      write_central_directory_header(*m_output, header);
     }
 
-    dir.size = static_cast<std::uint32_t>(m_output.tellp()) - dir.offset;
+    dir.size = static_cast<std::uint32_t>(m_output->tellp()) - dir.offset;
     dir.num_entries = static_cast<std::uint16_t>(m_entries.size());
-    write_end_of_central_directory(m_output, dir);
-    m_output.close();
+    write_end_of_central_directory(*m_output, dir);
+
+    std::shared_ptr<std::ofstream> output =
+        std::dynamic_pointer_cast<std::ofstream>(m_output);
+    if (output) {
+      output->close();
+    }
+
     m_closed = true;
   }
 }
 
-inpzstream::inpzstream(const std::string &path)
-    : m_input(path, std::ios::out | std::ios::binary) {
+inpzstream::inpzstream(const std::shared_ptr<std::istream> &stream)
+    : m_input(stream) {
+  read_entries();
+}
+
+inpzstream::inpzstream(const std::string &path) {
+  m_input =
+      std::make_shared<std::ifstream>(path, std::ios::in | std::ios::binary);
   read_entries();
 }
 
 void inpzstream::read_entries() {
-  if (!m_input.is_open()) {
-    throw std::invalid_argument("path");
-  }
+  m_input->seekg(-CD_END_SIZE, std::ios::end);
+  CentralDirectory dir = read_end_of_central_directory(*m_input);
 
-  m_input.seekg(-CD_END_SIZE, std::ios::end);
-  CentralDirectory dir = read_end_of_central_directory(m_input);
-
-  m_input.seekg(dir.offset, std::ios::beg);
+  m_input->seekg(dir.offset, std::ios::beg);
 
   for (size_t i = 0; i < dir.num_entries; ++i) {
-    file_entry entry = read_central_directory_header(m_input);
+    file_entry entry = read_central_directory_header(*m_input);
     m_entries[entry.filename] = entry;
     m_keys.push_back(entry.filename);
   }
@@ -402,7 +422,7 @@ void inpzstream::read_entries() {
 
 const std::vector<std::string> &inpzstream::keys() const { return m_keys; }
 
-std::vector<char> inpzstream::read_file(const std::string &temp_filename) {
+std::string inpzstream::read_file(const std::string &temp_filename) {
   std::string filename = temp_filename;
   if (m_entries.count(filename) == 0) {
     filename += ".npy";
@@ -412,16 +432,17 @@ std::vector<char> inpzstream::read_file(const std::string &temp_filename) {
   }
 
   const file_entry &entry = m_entries[filename];
-  m_input.seekg(entry.offset, std::ios::beg);
+  m_input->seekg(entry.offset, std::ios::beg);
 
-  file_entry local = read_local_header(m_input);
+  file_entry local = read_local_header(*m_input);
   if (!entry.check(local)) {
     throw std::logic_error("Central directory and local headers disagree");
   }
 
-  std::vector<char> uncompressed_bytes(entry.compressed_size);
-  m_input.read(reinterpret_cast<char *>(uncompressed_bytes.data()),
-               uncompressed_bytes.size());
+  std::string uncompressed_bytes;
+  uncompressed_bytes.resize(entry.compressed_size);
+  m_input->read(reinterpret_cast<char *>(uncompressed_bytes.data()),
+                uncompressed_bytes.size());
   compression_method_t cmethod =
       static_cast<compression_method_t>(entry.compression_method);
   if (cmethod == compression_method_t::DEFLATED) {
@@ -436,9 +457,23 @@ std::vector<char> inpzstream::read_file(const std::string &temp_filename) {
   return uncompressed_bytes;
 }
 
-bool inpzstream::is_open() const { return m_input.is_open(); }
+bool inpzstream::is_open() const {
+  std::shared_ptr<std::ifstream> input =
+      std::dynamic_pointer_cast<std::ifstream>(m_input);
+  if (input) {
+    return input->is_open();
+  }
 
-void inpzstream::close() { m_input.close(); }
+  return true;
+}
+
+void inpzstream::close() {
+  std::shared_ptr<std::ifstream> input =
+      std::dynamic_pointer_cast<std::ifstream>(m_input);
+  if (input) {
+    input->close();
+  }
+}
 
 bool inpzstream::contains(const std::string &filename) {
   return m_entries.count(filename);
