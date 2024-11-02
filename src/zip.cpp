@@ -24,8 +24,8 @@ std::vector<char> npy_deflate(std::vector<char> &&bytes) {
   int ret, flush;
   unsigned have;
   z_stream strm;
-  unsigned char in[CHUNK];
-  unsigned char out[CHUNK];
+  std::vector<unsigned char> in(CHUNK);
+  std::vector<unsigned char> out(CHUNK);
 
   /* allocate deflate state */
   strm.zalloc = Z_NULL;
@@ -42,7 +42,7 @@ std::vector<char> npy_deflate(std::vector<char> &&bytes) {
 
   /* compress until end of file */
   do {
-    input.read(reinterpret_cast<char *>(in), CHUNK);
+    input.read(reinterpret_cast<char *>(in.data()), CHUNK);
     strm.avail_in = static_cast<uInt>(input.gcount());
     if (input.eof()) {
       flush = Z_FINISH;
@@ -55,17 +55,17 @@ std::vector<char> npy_deflate(std::vector<char> &&bytes) {
       flush = Z_NO_FLUSH;
     }
 
-    strm.next_in = in;
+    strm.next_in = in.data();
 
     /* run deflate() on input until output buffer not full, finish
        compression if all of source has been read in */
     do {
       strm.avail_out = CHUNK;
-      strm.next_out = out;
+      strm.next_out = out.data();
       ret = deflate(&strm, flush);
       assert(ret != Z_STREAM_ERROR); /* state not clobbered */
       have = CHUNK - strm.avail_out;
-      output.write(reinterpret_cast<char *>(out), have);
+      output.write(reinterpret_cast<char *>(out.data()), have);
       if (output.fail() || output.bad()) {
         (void)deflateEnd(&strm);
         throw std::logic_error("Error writing to output stream");
@@ -86,8 +86,8 @@ std::vector<char> npy_inflate(std::vector<char> &&bytes) {
   int ret;
   unsigned have;
   z_stream strm;
-  unsigned char in[CHUNK];
-  unsigned char out[CHUNK];
+  std::vector<unsigned char> in(CHUNK);
+  std::vector<unsigned char> out(CHUNK);
   /* allocate inflate state */
   strm.zalloc = Z_NULL;
   strm.zfree = Z_NULL;
@@ -105,7 +105,7 @@ std::vector<char> npy_inflate(std::vector<char> &&bytes) {
   /* decompress until deflate stream ends or end of file */
   do {
     std::cout << "Reading chunk at" << input.tellg() << std::endl;
-    input.read(reinterpret_cast<char *>(in), CHUNK);
+    input.read(reinterpret_cast<char *>(in.data()), CHUNK);
     strm.avail_in = static_cast<uInt>(input.gcount());
     if ((input.fail() && !input.eof()) || input.bad()) {
       (void)inflateEnd(&strm);
@@ -116,12 +116,12 @@ std::vector<char> npy_inflate(std::vector<char> &&bytes) {
       break;
     }
 
-    strm.next_in = in;
+    strm.next_in = in.data();
 
     /* run inflate() on input until output buffer not full */
     do {
       strm.avail_out = CHUNK;
-      strm.next_out = out;
+      strm.next_out = out.data();
       ret = inflate(&strm, Z_NO_FLUSH);
       assert(ret != Z_STREAM_ERROR); /* state not clobbered */
       switch (ret) {
@@ -134,7 +134,7 @@ std::vector<char> npy_inflate(std::vector<char> &&bytes) {
       }
 
       have = CHUNK - strm.avail_out;
-      output.write(reinterpret_cast<char *>(out), have);
+      output.write(reinterpret_cast<char *>(out.data()), have);
       if (output.fail() || output.bad()) {
         (void)inflateEnd(&strm);
         throw std::logic_error("Error writing to output stream");
