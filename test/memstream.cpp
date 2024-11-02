@@ -1,56 +1,54 @@
 #include <algorithm>
 
 #include "libnpy_tests.h"
-#include "zip.h"
 
 namespace {
-    const size_t SIZE = 50;
+const size_t SIZE = 50;
 
-    void test_read(int& result)
-    {
-        std::vector<std::uint8_t> expected(SIZE);
-        std::iota(expected.begin(), expected.end(), 0);
-        
-        npy::imemstream stream(expected);
-        std::vector<std::uint8_t> actual(SIZE);
-        stream.read(actual.data(), SIZE);
+void test_read(int &result) {
+  std::vector<char> values(SIZE);
+  std::iota(values.begin(), values.end(), 0);
+  std::string expected(values.begin(), values.end());
 
-        test::assert_equal(expected, actual, result, "memstream_test_copy_read");
+  npy::imemstream stream(expected);
+  stream.read(values.data(), SIZE);
+  std::string actual(values.begin(), values.end());
 
-        stream = npy::imemstream(std::move(expected));
-        std::fill(actual.begin(), actual.end(), 0);
-        stream.read(actual.data(), SIZE);
+  test::assert_equal(expected, actual, result, "memstream_test_copy_read");
 
-        expected = std::move(stream.buf());
+  stream = npy::imemstream(std::move(expected));
+  std::fill(actual.begin(), actual.end(), 0);
+  stream.read(actual.data(), SIZE);
 
-        test::assert_equal(expected, actual, result, "memstream_test_move_read");        
-    }
+  expected = std::move(stream.str());
 
-    void test_write(int& result)
-    {
-        std::vector<std::uint8_t> expected(SIZE);
-        std::iota(expected.begin(), expected.end(), 0);
-
-        npy::omemstream stream;
-        stream.write(expected.data(), SIZE);
-
-        std::vector<std::uint8_t> actual = stream.buf();
-        test::assert_equal(expected, actual, result, "memstream_test_copy_write");
-
-        std::fill(actual.begin(), actual.end(), 0);
-        stream = npy::omemstream(std::move(actual));
-        stream.write(expected.data(), SIZE);
-        actual = std::move(stream.buf());
-
-        test::assert_equal(expected, actual, result, "memstream_test_move_write");
-    }
+  test::assert_equal(expected, actual, result, "memstream_test_move_read");
 }
 
-int test_memstream()
-{
-    int result = EXIT_SUCCESS;
+void test_write(int &result) {
+  std::vector<char> values(SIZE);
+  std::iota(values.begin(), values.end(), 0);
+  std::string expected(values.begin(), values.end());
 
-    test_read(result);
+  npy::omemstream stream;
+  stream.write(expected.data(), SIZE);
 
-    return result;
+  std::string actual = stream.str();
+  test::assert_equal(expected, actual, result, "memstream_test_copy_write");
+
+  std::fill(actual.begin(), actual.end(), 0);
+  stream = npy::omemstream(std::move(actual));
+  stream.write(expected.data(), SIZE);
+  actual = std::move(stream.str());
+
+  test::assert_equal(expected, actual, result, "memstream_test_move_write");
+}
+} // namespace
+
+int test_memstream() {
+  int result = EXIT_SUCCESS;
+
+  test_read(result);
+
+  return result;
 }

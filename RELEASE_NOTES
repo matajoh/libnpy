@@ -1,5 +1,10 @@
 Improvements:
-- CMake build now uses the highest compiler warning/error setting
+- Increased CHUNK size as per miniz instructions
+- Added tests for very large arrays in NPZ files
+- Added some CI tests to catch issues across platforms
+- Removed the internal IO streams in favor of just using stringstream
+- NPZs can now be read from and written to memory
 
 Bugfixes:
-- Fixed some bugs exposed by heightened compiler warnings
+- Fixed an issue where very large arrays in NPZ files would throw an error
+- Fixed a bug with mac builds due to deprecated APIs

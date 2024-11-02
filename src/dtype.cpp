@@ -1,34 +1,15 @@
-#include <map>
 #include <array>
+#include <map>
 #include <string>
 
 #include "npy/core.h"
 
-namespace
-{
+namespace {
 std::array<std::string, 11> BIG_ENDIAN_DTYPES = {
-    "|i1",
-    "|u1",
-    ">i2",
-    ">u2",
-    ">i4",
-    ">u4",
-    ">i8",
-    ">u8",
-    ">f4",
-    ">f8"};
+    "|i1", "|u1", ">i2", ">u2", ">i4", ">u4", ">i8", ">u8", ">f4", ">f8"};
 
 std::array<std::string, 11> LITTLE_ENDIAN_DTYPES = {
-    "|i1",
-    "|u1",
-    "<i2",
-    "<u2",
-    "<i4",
-    "<u4",
-    "<i8",
-    "<u8",
-    "<f4",
-    "<f8"};
+    "|i1", "|u1", "<i2", "<u2", "<i4", "<u4", "<i8", "<u8", "<f4", "<f8"};
 
 std::map<std::string, std::pair<npy::data_type_t, npy::endian_t>> DTYPE_MAP = {
     {"|u1", {npy::data_type_t::UINT8, npy::endian_t::NATIVE}},
@@ -52,38 +33,31 @@ std::map<std::string, std::pair<npy::data_type_t, npy::endian_t>> DTYPE_MAP = {
 };
 } // namespace
 
-namespace npy
-{
-const std::string &to_dtype(data_type_t dtype, endian_t endianness)
-{
-    if (endianness == npy::endian_t::NATIVE)
-    {
-        endianness = native_endian();
-    }
+namespace npy {
+const std::string &to_dtype(data_type_t dtype, endian_t endianness) {
+  if (endianness == npy::endian_t::NATIVE) {
+    endianness = native_endian();
+  }
 
-    if (endianness == npy::endian_t::BIG)
-    {
-        return BIG_ENDIAN_DTYPES[static_cast<size_t>(dtype)];
-    }
+  if (endianness == npy::endian_t::BIG) {
+    return BIG_ENDIAN_DTYPES[static_cast<size_t>(dtype)];
+  }
 
-    return LITTLE_ENDIAN_DTYPES[static_cast<size_t>(dtype)];
+  return LITTLE_ENDIAN_DTYPES[static_cast<size_t>(dtype)];
 }
 
-const std::pair<data_type_t, endian_t> &from_dtype(const std::string &dtype)
-{
-    return DTYPE_MAP[dtype];
+const std::pair<data_type_t, endian_t> &from_dtype(const std::string &dtype) {
+  return DTYPE_MAP[dtype];
 }
 
-std::ostream &operator<<(std::ostream &os, const data_type_t &value)
-{
-    os << static_cast<int>(value);
-    return os;
+std::ostream &operator<<(std::ostream &os, const data_type_t &value) {
+  os << static_cast<int>(value);
+  return os;
 }
 
-std::ostream &operator<<(std::ostream &os, const endian_t &value)
-{
-    os << static_cast<int>(value);
-    return os;
+std::ostream &operator<<(std::ostream &os, const endian_t &value) {
+  os << static_cast<int>(value);
+  return os;
 }
 
 } // namespace npy

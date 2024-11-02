@@ -1,7 +1,5 @@
 # libnpy
 
-[![Build Status](https://travis-ci.com/matajoh/libnpy.svg?token=mQKh8ae3m6BDSeGHqxyY&branch=main)](https://travis-ci.com/matajoh/libnpy)
-
 `libnpy` is a multi-platform C++ library for reading and writing NPY and
 NPZ files, with an additional .NET interface. It was built with the 
 intention of making it easier for multi-language projects to use NPZ and
@@ -18,98 +16,34 @@ format documents:
 
 ## Getting Started
 
-There are two main ways to use the library: as a statically linked C++
-library, and as a .NET DLL (on Windows using Visual Studio). In this
-guide we will walk through how to compile the library and run the tests
-on our currently supported platforms. These directions will likely
-work for other platforms as well (the codebase is written to be clean,
-portable C++ 11). If you have problems on your platform, please raise
-it as an [issue](https://github.com/matajoh/libnpy/issues).
+Start by installing [CMake](https://cmake.org/) in the way appropriate for your
+environment.
 
+### Linux
 
-### Ubuntu 18.04 [gcc 7.3.0], Ubuntu 16.04 [gcc 5.4.0]
+Create a build directory and initialize the cmake project:
 
-First, install all of the necessary dependencies:
+    mkdir build
+    cd build
+    cmake .. --preset release
 
-    sudo apt-get install git cmake build-essential
+You can then build and run the tests using:
 
-If you want to build the documentation, you will also need:
+    make
+    ctest
 
-    sudo apt-get install doxygen
+### Windows
 
-You may also find that `cmake` is easier to use via the curses GUI:
+Create a build directory and initialize the cmake project:
 
-    sudo apt-get install cmake-curses-gui
+    mkdir build
+    cd build
+    cmake .. --preset release
 
-Once everything is in place, you can clone the repository and generate the
-makefiles:
+You can then build and run the tests using:
 
-    git clone https://github.com/matajoh/libnpy.git
-    mkdir libnpy/build
-    cd libnpy/build
-    cmake -DCMAKE_BUILD_TYPE=Debug ..
-
-Your other build options are `Release` and `RelWithDebInfo`.
-
-### Windows 10
-
-On Windows, you can download and install the dependencies from the following
-locations:
-
-#### Install CMake
-Download and run e.g. `v3.19/cmake-3.19.0-win64-x64.msi` from
-https://cmake.org/files/.
-
-#### Install git and Visual Studio.
-Get the latest Windows git from https://git-scm.com/downloads. Download a
-version of Visual Studio from https://visualstudio.microsoft.com/vs/. You
-will need the C++ compiler (and C# compiler if needed).
-
-#### Install SWIG (optional, only for C#)
-Browse to http://swig.org/download.html and download the latest version of
-`swigwin`. Unzip the directory and copy it to your `C:\` drive. Add (e.g.)
-`C:\swigwin-4.0.2` to your PATH. CMake should then find swig automatically.
-
-#### Download and install Doxygen (optional)
-If you want to build the documentation, you should also download
-[Doxygen](http://www.doxygen.nl/). 
-
-#### Generate MSBuild
-Now that everything is ready, cmake can generate the MSBuild files necessary
-for the project. Run the following commands in a command prompt once you have
-navigated to your desired source code folder:
-
-    git clone https://github.com/matajoh/libnpy.git
-    mkdir libnpy\build
-    cd libnpy\build
-    cmake ..
-
-If building the C# library, you will also need to do the following:
-
-    cmake --build . --target NumpyIONative
-    cmake ..
-
-The reason for the above is that SWIG autogenerates the C# files for the
-interface in the first pass, after which CMake needs to scan the generated
-directory to build the wrapper library.
-
-### Build and Test
-You are now able to build the test the library. Doing so is the same
-regardless of your platform. First, navigate to the `build` folder you
-created above. Then run the following commands:
-
-    cmake --build . --config <CONFIG>
-
-Where `<CONFIG>` is one of `Release|Debug|RelWithDebInfo`. This will build
-the project, including the tests and (if selected) the documentation. You
-can then do the following:
-
-    ctest -C <CONFIG>
-
-Where again you replace `<CONFIG>` as above will run all of the tests.
-If you want to install the library, run:
-
-    cmake --build . --config <CONFIG> --target INSTALL
+    cmake --build . --config Release
+    ctest -C Release
 
 ## Sample code
 
