@@ -16,7 +16,7 @@
 
 %rename(DataType) data_type_t;
 %typemap(csbase) data_type_t "byte";
-enum class data_type_t : std::uint8_t {
+enum class data_type_t : char {
     INT8,
     UINT8,
     INT16,
@@ -32,7 +32,7 @@ enum class data_type_t : std::uint8_t {
 
 %rename(Endian) endian_t;
 %typemap(csbase) endian_t "byte";
-enum class endian_t : std::uint8_t {
+enum class endian_t : char {
     NATIVE,
     BIG,
     LITTLE

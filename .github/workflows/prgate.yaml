@@ -1,0 +1,156 @@
+name: PR Gate
+
+on:
+  pull_request:
+    branches: ["main"]
+  workflow_dispatch:
+
+jobs:
+  cpp-format:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        path: 
+          - check: src
+            exclude: (/miniz/)
+          - check: test
+            exclude: ''
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Run clang-format style check
+        uses: jidicula/clang-format-action@v4.8.0
+        with:
+          clang-format-version: '18'
+          check-path: ${{matrix.path['check']}}
+          exclude-regex: ${{matrix.path['exclude']}}
+
+  linux:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Get dependencies
+        run: |
+          sudo apt-get install ninja-build
+
+      - name: CMake config
+        run: cmake -B ${{github.workspace}}/build --preset release-clang
+
+      - name: CMake build
+        working-directory: ${{github.workspace}}/build
+        run: ninja
+
+      - name: Use Python 3.11
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.11"
+
+      - name: Generate large NPZ files
+        working-directory: ${{github.workspace}}/
+        run: |
+          pip install numpy
+          python ${{github.workspace}}/test/generate_large_test.py
+
+      - name: CMake test
+        working-directory: ${{github.workspace}}/build
+        run: ctest -V --build-config Release --timeout 120 --output-on-failure -T Test
+
+  linux-asan:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Get dependencies
+        run: |
+          sudo apt-get install ninja-build
+
+      - name: CMake config
+        run: cmake -B ${{github.workspace}}/build --preset release-clang -DLIBNPY_SANITIZE=address
+
+      - name: CMake build
+        working-directory: ${{github.workspace}}/build
+        run: ninja
+
+      - name: Use Python 3.11
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.11"
+
+      - name: Generate large NPZ files
+        working-directory: ${{github.workspace}}/
+        run: |
+          pip install numpy
+          python ${{github.workspace}}/test/generate_large_test.py
+
+      - name: CMake test
+        working-directory: ${{github.workspace}}/build
+        run: ctest -V --build-config Release --timeout 120 --output-on-failure -T Test
+
+  windows:
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      
+      - name: CMake config
+        run: |
+          cmake -B ${{github.workspace}}/build --preset release
+      
+      - name: CMake build
+        working-directory: ${{github.workspace}}/build
+        run: cmake --build . --config Release
+
+      - name: Use Python 3.11
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.11"
+
+      - name: Generate large NPZ files
+        working-directory: ${{github.workspace}}/
+        run: |
+          pip install numpy
+          python ${{github.workspace}}/test/generate_large_test.py
+
+      - name: CMake test
+        working-directory: ${{github.workspace}}/build
+        run: ctest -V --build-config Release --timeout 120 --output-on-failure -T Test
+
+  macos:
+    runs-on: macos-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Get dependencies
+        run: |
+          brew update && brew install ninja
+
+      - name: CMake config
+        run: cmake -B ${{github.workspace}}/build --preset release-clang
+
+      - name: CMake build
+        working-directory: ${{github.workspace}}/build
+        run: ninja
+
+      - name: Use Python 3.11
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.11"
+
+      - name: Generate large NPZ files
+        working-directory: ${{github.workspace}}/
+        run: |
+          pip install numpy
+          python ${{github.workspace}}/test/generate_large_test.py
+
+      - name: CMake test
+        working-directory: ${{github.workspace}}/build
+        run: ctest -V --build-config Release --timeout 120 --output-on-failure -T Test
