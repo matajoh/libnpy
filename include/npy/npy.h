@@ -17,7 +17,6 @@
 #include <cassert>
 #include <cstdint>
 #include <fstream>
-#include <iomanip>
 #include <sstream>
 #include <stdexcept>
 #include <string>
@@ -97,12 +96,12 @@ void write_npy_header(std::basic_ostream<CHAR> &output,
     end.back() = '\n';
   }
 
-  std::uint8_t header[STATIC_HEADER_LENGTH] = {
-      0x93, 'N',  'U',
+  const char header[STATIC_HEADER_LENGTH] = {
+      static_cast<char>(0x93), 'N',  'U',
       'M',  'P',  'Y',
-      0x01, 0x00, static_cast<std::uint8_t>(dict_length),
+      0x01, 0x00, static_cast<char>(dict_length),
       0x00};
-  output.write(reinterpret_cast<const CHAR *>(header), STATIC_HEADER_LENGTH);
+  output.write(header, STATIC_HEADER_LENGTH);
   output.write(reinterpret_cast<const CHAR *>(dictionary.data()),
                dictionary.length());
   output.write(reinterpret_cast<const CHAR *>(end.data()), end.length());

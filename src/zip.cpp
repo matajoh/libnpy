@@ -13,14 +13,14 @@ const int MEM_LEVEL = 8;
 
 namespace npy {
 
-std::uint32_t npy_crc32(const std::vector<std::uint8_t> &bytes) {
+std::uint32_t npy_crc32(const std::vector<char> &bytes) {
   uLong crc = ::crc32(0L, Z_NULL, 0);
   const Bytef *buf = reinterpret_cast<const Bytef *>(bytes.data());
   uInt len = static_cast<uInt>(bytes.size());
   return ::crc32(crc, buf, len);
 }
 
-std::vector<std::uint8_t> npy_deflate(std::vector<std::uint8_t> &&bytes) {
+std::vector<char> npy_deflate(std::vector<char> &&bytes) {
   int ret, flush;
   unsigned have;
   z_stream strm;
@@ -42,7 +42,7 @@ std::vector<std::uint8_t> npy_deflate(std::vector<std::uint8_t> &&bytes) {
 
   /* compress until end of file */
   do {
-    input.read(in, CHUNK);
+    input.read(reinterpret_cast<char *>(in), CHUNK);
     strm.avail_in = static_cast<uInt>(input.gcount());
     if (input.eof()) {
       flush = Z_FINISH;
@@ -65,7 +65,7 @@ std::vector<std::uint8_t> npy_deflate(std::vector<std::uint8_t> &&bytes) {
       ret = deflate(&strm, flush);
       assert(ret != Z_STREAM_ERROR); /* state not clobbered */
       have = CHUNK - strm.avail_out;
-      output.write(out, have);
+      output.write(reinterpret_cast<char *>(out), have);
       if (output.fail() || output.bad()) {
         (void)deflateEnd(&strm);
         throw std::logic_error("Error writing to output stream");
@@ -82,7 +82,7 @@ std::vector<std::uint8_t> npy_deflate(std::vector<std::uint8_t> &&bytes) {
   return std::move(output.buf());
 }
 
-std::vector<std::uint8_t> npy_inflate(std::vector<std::uint8_t> &&bytes) {
+std::vector<char> npy_inflate(std::vector<char> &&bytes) {
   int ret;
   unsigned have;
   z_stream strm;
@@ -105,7 +105,7 @@ std::vector<std::uint8_t> npy_inflate(std::vector<std::uint8_t> &&bytes) {
   /* decompress until deflate stream ends or end of file */
   do {
     std::cout << "Reading chunk at" << input.tellg() << std::endl;
-    input.read(in, CHUNK);
+    input.read(reinterpret_cast<char *>(in), CHUNK);
     strm.avail_in = static_cast<uInt>(input.gcount());
     if ((input.fail() && !input.eof()) || input.bad()) {
       (void)inflateEnd(&strm);
@@ -134,7 +134,7 @@ std::vector<std::uint8_t> npy_inflate(std::vector<std::uint8_t> &&bytes) {
       }
 
       have = CHUNK - strm.avail_out;
-      output.write(out, have);
+      output.write(reinterpret_cast<char *>(out), have);
       if (output.fail() || output.bad()) {
         (void)inflateEnd(&strm);
         throw std::logic_error("Error writing to output stream");

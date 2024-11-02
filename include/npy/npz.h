@@ -17,7 +17,6 @@
 #include <fstream>
 #include <iostream>
 #include <map>
-#include <sstream>
 #include <stdexcept>
 #include <string>
 #include <vector>
@@ -122,7 +121,7 @@ private:
    *  \param filename the name of the file
    *  \param bytes the file data
    */
-  void write_file(const std::string &filename, std::vector<uint8_t> &&bytes);
+  void write_file(const std::string &filename, std::vector<char> &&bytes);
 
   bool m_closed;
   std::ofstream m_output;
@@ -186,7 +185,7 @@ private:
    *  \param filename the name of the file
    *  \return the raw file bytes
    */
-  std::vector<uint8_t> read_file(const std::string &filename);
+  std::vector<char> read_file(const std::string &filename);
 
   /** Read all entries from the directory. */
   void read_entries();

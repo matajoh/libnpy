@@ -14,17 +14,16 @@ membuf::membuf(size_t n) {
   seekpos(0);
 }
 
-membuf::membuf(const std::vector<std::uint8_t> &buffer) : m_buffer(buffer) {
+membuf::membuf(const std::vector<char> &buffer) : m_buffer(buffer) {
   seekpos(0);
 }
 
-membuf::membuf(std::vector<std::uint8_t> &&buffer)
-    : m_buffer(std::move(buffer)) {
+membuf::membuf(std::vector<char> &&buffer) : m_buffer(std::move(buffer)) {
   seekpos(0);
 }
 
-membuf *membuf::setbuf(std::uint8_t *s, std::streamsize n) {
-  m_buffer = std::vector<std::uint8_t>(s, s + n);
+membuf *membuf::setbuf(char *s, std::streamsize n) {
+  m_buffer = std::vector<char>(s, s + n);
   m_posg = m_buffer.begin();
   m_posp = m_buffer.begin();
   return this;
@@ -99,7 +98,7 @@ membuf::pos_type membuf::seekpos(membuf::pos_type pos,
 
 std::streamsize membuf::showmanyc() { return m_buffer.end() - m_posg; }
 
-std::streamsize membuf::xsgetn(std::uint8_t *s, std::streamsize n) {
+std::streamsize membuf::xsgetn(char *s, std::streamsize n) {
   std::streamsize bytes_read = showmanyc();
   bytes_read = n < bytes_read ? n : bytes_read;
   auto end = m_posg + bytes_read;
@@ -128,7 +127,7 @@ membuf::int_type membuf::pbackfail(membuf::int_type c) {
   return c;
 }
 
-std::streamsize membuf::xsputn(const std::uint8_t *s, std::streamsize n) {
+std::streamsize membuf::xsputn(const char *s, std::streamsize n) {
   std::streamsize num_copy = m_buffer.end() - m_posp;
   num_copy = n < num_copy ? n : num_copy;
   std::streamsize num_insert = n - num_copy;
@@ -155,36 +154,30 @@ membuf::int_type membuf::overflow(membuf::int_type c) {
   return c;
 }
 
-std::vector<std::uint8_t> &membuf::buf() { return m_buffer; }
+std::vector<char> &membuf::buf() { return m_buffer; }
 
-const std::vector<std::uint8_t> &membuf::buf() const { return m_buffer; }
+const std::vector<char> &membuf::buf() const { return m_buffer; }
 
-imemstream::imemstream(const std::vector<std::uint8_t> &buffer)
-    : std::basic_istream<std::uint8_t>(&m_buffer), m_buffer(buffer) {}
+imemstream::imemstream(const std::vector<char> &buffer)
+    : std::basic_istream<char>(&m_buffer), m_buffer(buffer) {}
 
-imemstream::imemstream(std::vector<std::uint8_t> &&buffer)
-    : std::basic_istream<std::uint8_t>(&m_buffer), m_buffer(std::move(buffer)) {
-}
+imemstream::imemstream(std::vector<char> &&buffer)
+    : std::basic_istream<char>(&m_buffer), m_buffer(std::move(buffer)) {}
 
-std::vector<std::uint8_t> &imemstream::buf() { return m_buffer.buf(); }
+std::vector<char> &imemstream::buf() { return m_buffer.buf(); }
 
-const std::vector<std::uint8_t> &imemstream::buf() const {
-  return m_buffer.buf();
-}
+const std::vector<char> &imemstream::buf() const { return m_buffer.buf(); }
 
-omemstream::omemstream() : std::basic_ostream<std::uint8_t>(&m_buffer) {}
+omemstream::omemstream() : std::basic_ostream<char>(&m_buffer) {}
 
-omemstream::omemstream(std::vector<std::uint8_t> &&buffer)
-    : std::basic_ostream<std::uint8_t>(&m_buffer), m_buffer(std::move(buffer)) {
-}
+omemstream::omemstream(std::vector<char> &&buffer)
+    : std::basic_ostream<char>(&m_buffer), m_buffer(std::move(buffer)) {}
 
 omemstream::omemstream(std::streamsize capacity)
-    : std::basic_ostream<std::uint8_t>(&m_buffer), m_buffer(capacity) {}
+    : std::basic_ostream<char>(&m_buffer), m_buffer(capacity) {}
 
-std::vector<std::uint8_t> &omemstream::buf() { return m_buffer.buf(); }
+std::vector<char> &omemstream::buf() { return m_buffer.buf(); }
 
-const std::vector<std::uint8_t> &omemstream::buf() const {
-  return m_buffer.buf();
-}
+const std::vector<char> &omemstream::buf() const { return m_buffer.buf(); }
 
 } // namespace npy

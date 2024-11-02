@@ -12,7 +12,7 @@ int test_crc32() {
   std::ifstream stream(test::asset_path("float32.npy"),
                        std::ios_base::in | std::ios_base::binary);
   char buffer[BUF_SIZE];
-  std::vector<std::uint8_t> bytes;
+  std::vector<char> bytes;
   while (stream.good()) {
     stream.read(buffer, BUF_SIZE);
     std::copy(buffer, buffer + stream.gcount(), std::back_inserter(bytes));

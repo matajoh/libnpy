@@ -329,10 +329,10 @@ onpzstream::~onpzstream() {
 }
 
 void onpzstream::write_file(const std::string &filename,
-                            std::vector<std::uint8_t> &&bytes) {
+                            std::vector<char> &&bytes) {
   std::uint32_t uncompressed_size = static_cast<std::uint32_t>(bytes.size());
   std::uint32_t compressed_size = 0;
-  std::vector<std::uint8_t> compressed_bytes;
+  std::vector<char> compressed_bytes;
   std::uint32_t checksum = npy_crc32(bytes);
   if (m_compression_method == compression_method_t::STORED) {
     compressed_bytes = bytes;
@@ -402,8 +402,7 @@ void inpzstream::read_entries() {
 
 const std::vector<std::string> &inpzstream::keys() const { return m_keys; }
 
-std::vector<std::uint8_t>
-inpzstream::read_file(const std::string &temp_filename) {
+std::vector<char> inpzstream::read_file(const std::string &temp_filename) {
   std::string filename = temp_filename;
   if (m_entries.count(filename) == 0) {
     filename += ".npy";
@@ -420,7 +419,7 @@ inpzstream::read_file(const std::string &temp_filename) {
     throw std::logic_error("Central directory and local headers disagree");
   }
 
-  std::vector<std::uint8_t> uncompressed_bytes(entry.compressed_size);
+  std::vector<char> uncompressed_bytes(entry.compressed_size);
   m_input.read(reinterpret_cast<char *>(uncompressed_bytes.data()),
                uncompressed_bytes.size());
   compression_method_t cmethod =
