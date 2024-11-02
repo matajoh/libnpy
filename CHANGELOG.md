@@ -6,9 +6,12 @@ Improvements:
 - Increased CHUNK size as per miniz instructions
 - Added tests for very large arrays in NPZ files
 - Added some CI tests to catch issues across platforms
+- Removed the internal IO streams in favor of just using stringstream
+- NPZs can now be read from and written to memory
 
 Bugfixes:
 - Fixed an issue where very large arrays in NPZ files would throw an error
+- Fixed a bug with mac builds due to deprecated APIs
 
 ## [2021-10-05 - Version 1.5.2](https://github.com/matajoh/libnpy/releases/tag/v1.5.2)
 
