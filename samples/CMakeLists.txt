@@ -5,3 +5,6 @@ if( INCLUDE_CSHARP )
   add_executable( npy_images_net images_net.cs )
   target_link_libraries( npy_images_net NumpyIO ${SWIG_MODULE_NumpyIONative_REAL_NAME} )
 endif()
+
+add_executable( npy_info info.cpp )
+target_link_libraries( npy_info npy::npy )
