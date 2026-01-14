@@ -1,5 +1,27 @@
 # Changelog
 
+## [2026-01-14 - Version 2.0.0](https://github.com/matajoh/libnpy/releases/tag/v2.0.0)
+
+Major version with breaking changes.
+
+**Breaking Changes**:
+- `onpzstream` has been split into `npzfilewriter` and `npzstringwriter`
+- `inpzstream` has been split into `npzfilereader` and `npzstringreader`
+- The library interface has been merged into a single `npy.h` header
+- The C# wrapper has been removed. A more up-to-date wrapper will be added in a
+  future release.
+
+Improvements:
+- Support for complex numbers has been added
+- The library design has been greatly simplified
+- The example projects have been broken out into self-contained projects (which fetch
+  the main project using `FetchContent`) and a `custom_tensors` example has been added
+  showing a non-trivial custom tensor implementation
+- Custom tensor support is greatly improved, and is now fully featured
+
+Bugfixes:
+- Fixed an issue with broken CRC checks on Windows
+
 ## [2024-11-01 - Version 1.5.3](https://github.com/matajoh/libnpy/releases/tag/v1.5.3)
 
 Improvements:

@@ -13,7 +13,7 @@ configure_file(
   ${CMAKE_CURRENT_BINARY_DIR}/Doxyfile @ONLY 
 )
 
-add_custom_target( npy_doc
+add_custom_target( libnpy_doc
   ALL
   ${DOXYGEN_EXECUTABLE} 
   ${CMAKE_CURRENT_BINARY_DIR}/Doxyfile

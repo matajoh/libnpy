@@ -6,7 +6,6 @@ set( CPP_TEST_SOURCES
 set( TESTS
    crc32
    exceptions
-   memstream
    npy_peek
    npy_read
    npy_write
@@ -14,6 +13,7 @@ set( TESTS
    npz_read
    npz_write
    tensor
+   custom_tensor
 )
 
 foreach( test ${TESTS} )
@@ -30,8 +30,3 @@ add_test( NAME ${test}
         COMMAND ${TEST_DRIVER} ${test}
         WORKING_DIRECTORY ${CMAKE_HOME_DIRECTORY} )
 endforeach()
-
-
-if( INCLUDE_CSHARP )
-  add_subdirectory( CSharpTests )
-endif()

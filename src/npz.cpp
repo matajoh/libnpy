@@ -5,10 +5,12 @@
 #include <stdexcept>
 #include <string>
 
-#include "npy/npz.h"
+#include "npy/npy.h"
 #include "zip.h"
 
 namespace {
+using namespace npy;
+
 const std::array<std::uint8_t, 4> LOCAL_HEADER_SIG = {0x50, 0x4B, 0x03, 0x04};
 const std::array<std::uint8_t, 4> CD_HEADER_SIG = {0x50, 0x4B, 0x01, 0x02};
 const std::array<std::uint8_t, 4> CD_END_SIG = {0x50, 0x4B, 0x05, 0x06};
@@ -80,11 +82,17 @@ std::uint64_t read64(std::istream &stream) {
 }
 
 void assert_sig(std::istream &stream,
-                const std::array<std::uint8_t, 4> &expected) {
+                const std::array<std::uint8_t, 4> &expected,
+                const char *entity) {
   std::array<std::uint8_t, 4> actual;
   stream.read(reinterpret_cast<char *>(actual.data()), actual.size());
   if (actual != expected) {
-    throw std::logic_error("Invalid signature (Not a valid NPZ file)");
+    printf("Invalid signature when reading %s:\n", entity);
+    printf("actual: [%d, %d, %d, %d]\n", actual[0], actual[1], actual[2],
+           actual[3]);
+    printf("expected: [%d, %d, %d, %d]\n", expected[0], expected[1],
+           expected[2], expected[3]);
+    throw std::runtime_error("Invalid signature (Not a valid NPZ file)");
   }
 }
 
@@ -132,7 +140,7 @@ void read_zip64_extra(std::istream &stream, npy::file_entry &header,
                       bool include_offset) {
   std::uint16_t tag = read16(stream);
   if (tag != ZIP64_TAG) {
-    throw std::logic_error("Invalid tag (expected ZIP64)");
+    throw std::runtime_error("Invalid tag (expected ZIP64)");
   }
 
   std::uint16_t actual_size = read16(stream);
@@ -154,7 +162,7 @@ void read_zip64_extra(std::istream &stream, npy::file_entry &header,
   }
 
   if (actual_size < expected_size) {
-    throw std::logic_error("ZIP64 extra info missing");
+    throw std::runtime_error("ZIP64 extra info missing");
   }
 
   if (actual_size > expected_size) {
@@ -200,10 +208,10 @@ void write_local_header(std::ostream &stream, const npy::file_entry &header,
 }
 
 npy::file_entry read_local_header(std::istream &stream) {
-  assert_sig(stream, LOCAL_HEADER_SIG);
+  assert_sig(stream, LOCAL_HEADER_SIG, "local_header");
   std::uint16_t version = read16(stream);
   if (version > ZIP64_VERSION) {
-    throw std::logic_error("Unsupported NPZ version");
+    throw std::runtime_error("Unsupported NPZ version");
   }
 
   npy::file_entry entry;
@@ -246,11 +254,11 @@ void write_central_directory_header(std::ostream &stream,
 }
 
 npy::file_entry read_central_directory_header(std::istream &stream) {
-  assert_sig(stream, CD_HEADER_SIG);
+  assert_sig(stream, CD_HEADER_SIG, "central_directory");
   read16(stream); // version made by
   std::uint16_t version = read16(stream);
   if (version > ZIP64_VERSION) {
-    throw std::logic_error("Unsupported NPZ version");
+    throw std::runtime_error("Unsupported NPZ version");
   }
 
   npy::file_entry entry;
@@ -295,7 +303,7 @@ void write_end_of_central_directory(std::ostream &stream,
 }
 
 CentralDirectory read_end_of_central_directory(std::istream &stream) {
-  assert_sig(stream, CD_END_SIG);
+  assert_sig(stream, CD_END_SIG, "end_of_central_directory");
 
   CentralDirectory result;
   read16(stream); // number of this disk
@@ -305,6 +313,115 @@ CentralDirectory read_end_of_central_directory(std::istream &stream) {
   result.size = read32(stream);
   result.offset = read32(stream);
   return result;
+}
+
+void read_entries(std::istream &input,
+                  std::map<std::string, file_entry> &entries,
+                  std::vector<std::string> &keys) {
+  input.seekg(-CD_END_SIZE, std::ios::end);
+  CentralDirectory dir = read_end_of_central_directory(input);
+
+  input.seekg(dir.offset, std::ios::beg);
+
+  for (size_t i = 0; i < dir.num_entries; ++i) {
+    file_entry entry = read_central_directory_header(input);
+    entries[entry.filename] = entry;
+    keys.push_back(entry.filename);
+  }
+
+  std::sort(keys.begin(), keys.end());
+}
+
+void close(std::ostream &output, const std::vector<file_entry> &entries) {
+  CentralDirectory dir;
+  dir.offset = static_cast<std::uint32_t>(output.tellp());
+  for (auto &header : entries) {
+    write_central_directory_header(output, header);
+  }
+
+  dir.size = static_cast<std::uint32_t>(output.tellp()) - dir.offset;
+  dir.num_entries = static_cast<std::uint16_t>(entries.size());
+  write_end_of_central_directory(output, dir);
+}
+
+void write_file(std::ostream &output, std::vector<file_entry> &entries,
+                const std::string &filename,
+                compression_method_t compression_method, std::string &&bytes) {
+  std::uint32_t uncompressed_size = static_cast<std::uint32_t>(bytes.size());
+  std::uint32_t compressed_size = 0;
+  std::string compressed_bytes;
+  std::uint32_t checksum = npy_crc32(bytes);
+  if (compression_method == compression_method_t::STORED) {
+    compressed_bytes = bytes;
+    compressed_size = uncompressed_size;
+  } else if (compression_method == compression_method_t::DEFLATED) {
+    compressed_bytes = npy_deflate(std::move(bytes));
+    compressed_size = static_cast<std::uint32_t>(compressed_bytes.size());
+  } else {
+    throw std::invalid_argument("Unsupported compression method");
+  }
+
+  file_entry entry = {filename,
+                      checksum,
+                      compressed_size,
+                      uncompressed_size,
+                      static_cast<std::uint16_t>(compression_method),
+                      static_cast<std::uint32_t>(output.tellp())};
+
+  bool zip64 = uncompressed_size > ZIP64_LIMIT || compressed_size > ZIP64_LIMIT;
+  write_local_header(output, entry, zip64);
+  output.write(compressed_bytes.data(), compressed_size);
+  entries.push_back(std::move(entry));
+}
+
+typedef union crcbytes_u {
+  std::uint32_t value;
+  std::uint8_t bytes[4];
+} CRCBytes;
+
+std::string read_file(std::istream &input,
+                      const std::map<std::string, file_entry> &entries,
+                      const std::string &temp_filename) {
+  std::string filename = temp_filename;
+  if (entries.count(filename) == 0) {
+    filename += ".npy";
+    if (entries.count(filename) == 0) {
+      throw std::invalid_argument("filename");
+    }
+  }
+
+  const file_entry &entry = entries.at(filename);
+  input.seekg(entry.offset, std::ios::beg);
+
+  file_entry local = read_local_header(input);
+  if (!entry.check(local)) {
+    throw std::runtime_error("Central directory and local headers disagree");
+  }
+
+  std::string uncompressed_bytes;
+  uncompressed_bytes.resize(entry.compressed_size);
+  input.read(reinterpret_cast<char *>(uncompressed_bytes.data()),
+             uncompressed_bytes.size());
+  compression_method_t cmethod =
+      static_cast<compression_method_t>(entry.compression_method);
+  if (cmethod == compression_method_t::DEFLATED) {
+    uncompressed_bytes = npy_inflate(std::move(uncompressed_bytes));
+  }
+
+  std::uint32_t actual_crc32 = npy_crc32(uncompressed_bytes);
+  if (actual_crc32 != entry.crc32) {
+    CRCBytes actual_bytes{actual_crc32};
+    CRCBytes expected_bytes{entry.crc32};
+    printf("CRC mismatch when reading %s:\n", filename.c_str());
+    printf("actual: [0x%x, 0x%x, 0x%x, 0x%x]\n", actual_bytes.bytes[0],
+           actual_bytes.bytes[1], actual_bytes.bytes[2], actual_bytes.bytes[3]);
+    printf("expected: [0x%x, 0x%x, 0x%x, 0x%x]\n", expected_bytes.bytes[0],
+           expected_bytes.bytes[1], expected_bytes.bytes[2],
+           expected_bytes.bytes[3]);
+    throw std::runtime_error("CRC mismatch");
+  }
+
+  return uncompressed_bytes;
 }
 
 } // namespace
@@ -317,170 +434,147 @@ bool file_entry::check(const file_entry &other) const {
            other.uncompressed_size != this->uncompressed_size);
 }
 
-onpzstream::onpzstream(const std::shared_ptr<std::ostream> &output,
-                       compression_method_t compression, endian_t endianness)
-    : m_closed(false), m_output(output), m_compression_method(compression),
+npzstringwriter::npzstringwriter(compression_method_t compression,
+                                 endian_t endianness)
+    : m_closed(false), m_compression_method(compression),
       m_endianness(endianness) {}
 
-onpzstream::onpzstream(const std::string &path, compression_method_t method,
-                       endian_t endianness)
-    : m_closed(false), m_output(std::make_shared<std::ofstream>(
-                           path, std::ios::out | std::ios::binary)),
-      m_compression_method(method), m_endianness(endianness) {}
-
-onpzstream::~onpzstream() {
+npzstringwriter::~npzstringwriter() {
   if (!m_closed) {
     close();
   }
 }
 
-void onpzstream::write_file(const std::string &filename, std::string &&bytes) {
-  std::uint32_t uncompressed_size = static_cast<std::uint32_t>(bytes.size());
-  std::uint32_t compressed_size = 0;
-  std::string compressed_bytes;
-  std::uint32_t checksum = npy_crc32(bytes);
-  if (m_compression_method == compression_method_t::STORED) {
-    compressed_bytes = bytes;
-    compressed_size = uncompressed_size;
-  } else if (m_compression_method == compression_method_t::DEFLATED) {
-    compressed_bytes = npy_deflate(std::move(bytes));
-    compressed_size = static_cast<std::uint32_t>(compressed_bytes.size());
-  } else {
-    throw std::invalid_argument("m_compression_method");
+std::string npzstringwriter::str() const { return m_output.str(); }
+
+void npzstringwriter::write_file(const std::string &filename,
+                                 std::string &&bytes) {
+  if (m_closed) {
+    throw std::runtime_error("NPZ file has been closed");
   }
 
-  file_entry entry = {filename,
-                      checksum,
-                      compressed_size,
-                      uncompressed_size,
-                      static_cast<std::uint16_t>(m_compression_method),
-                      static_cast<std::uint32_t>(m_output->tellp())};
-
-  bool zip64 = uncompressed_size > ZIP64_LIMIT || compressed_size > ZIP64_LIMIT;
-  write_local_header(*m_output, entry, zip64);
-  m_output->write(compressed_bytes.data(), compressed_size);
-  m_entries.push_back(std::move(entry));
+  ::write_file(m_output, m_entries, filename, m_compression_method,
+               std::move(bytes));
 }
 
-bool onpzstream::is_open() const {
-  std::shared_ptr<std::ofstream> output =
-      std::dynamic_pointer_cast<std::ofstream>(m_output);
-  if (output) {
-    return output->is_open();
-  }
-
-  return true;
-}
-
-void onpzstream::close() {
+void npzstringwriter::close() {
   if (!m_closed) {
-    CentralDirectory dir;
-    dir.offset = static_cast<std::uint32_t>(m_output->tellp());
-    for (auto &header : m_entries) {
-      write_central_directory_header(*m_output, header);
-    }
-
-    dir.size = static_cast<std::uint32_t>(m_output->tellp()) - dir.offset;
-    dir.num_entries = static_cast<std::uint16_t>(m_entries.size());
-    write_end_of_central_directory(*m_output, dir);
-
-    std::shared_ptr<std::ofstream> output =
-        std::dynamic_pointer_cast<std::ofstream>(m_output);
-    if (output) {
-      output->close();
-    }
-
+    ::close(m_output, m_entries);
     m_closed = true;
   }
 }
 
-inpzstream::inpzstream(const std::shared_ptr<std::istream> &stream)
-    : m_input(stream) {
+npzfilewriter::npzfilewriter(const std::string &path,
+                             compression_method_t compression,
+                             endian_t endianness)
+    : m_closed(false), m_output(path, std::ios::binary),
+      m_compression_method(compression), m_endianness(endianness) {}
+
+npzfilewriter::npzfilewriter(const std::filesystem::path &path,
+                             compression_method_t compression,
+                             endian_t endianness)
+    : m_closed(false), m_output(path, std::ios::binary),
+      m_compression_method(compression), m_endianness(endianness) {}
+
+npzfilewriter::npzfilewriter(const char *path, compression_method_t compression,
+                             endian_t endianness)
+    : m_closed(false), m_output(path, std::ios::binary),
+      m_compression_method(compression), m_endianness(endianness) {}
+
+npzfilewriter::~npzfilewriter() {
+  if (!m_closed) {
+    close();
+  }
+}
+
+bool npzfilewriter::is_open() const { return m_output.is_open(); }
+
+void npzfilewriter::write_file(const std::string &filename,
+                               std::string &&bytes) {
+  if (m_closed) {
+    throw std::runtime_error("NPZ file has been closed");
+  }
+
+  ::write_file(m_output, m_entries, filename, m_compression_method,
+               std::move(bytes));
+}
+
+void npzfilewriter::close() {
+  if (!m_closed) {
+    ::close(m_output, m_entries);
+    m_closed = true;
+    m_output.close();
+  }
+}
+
+npzstringreader::npzstringreader(const std::string &bytes) : m_input(bytes) {
   read_entries();
 }
 
-inpzstream::inpzstream(const std::string &path) {
-  m_input =
-      std::make_shared<std::ifstream>(path, std::ios::in | std::ios::binary);
+npzstringreader::npzstringreader(std::string &&bytes)
+    : m_input(std::move(bytes)) {
   read_entries();
 }
 
-void inpzstream::read_entries() {
-  m_input->seekg(-CD_END_SIZE, std::ios::end);
-  CentralDirectory dir = read_end_of_central_directory(*m_input);
-
-  m_input->seekg(dir.offset, std::ios::beg);
-
-  for (size_t i = 0; i < dir.num_entries; ++i) {
-    file_entry entry = read_central_directory_header(*m_input);
-    m_entries[entry.filename] = entry;
-    m_keys.push_back(entry.filename);
-  }
-
-  std::sort(m_keys.begin(), m_keys.end());
+void npzstringreader::read_entries() {
+  ::read_entries(m_input, m_entries, m_keys);
 }
 
-const std::vector<std::string> &inpzstream::keys() const { return m_keys; }
+const std::vector<std::string> &npzstringreader::keys() const { return m_keys; }
 
-std::string inpzstream::read_file(const std::string &temp_filename) {
-  std::string filename = temp_filename;
-  if (m_entries.count(filename) == 0) {
-    filename += ".npy";
-    if (m_entries.count(filename) == 0) {
-      throw std::invalid_argument("filename");
-    }
-  }
-
-  const file_entry &entry = m_entries[filename];
-  m_input->seekg(entry.offset, std::ios::beg);
-
-  file_entry local = read_local_header(*m_input);
-  if (!entry.check(local)) {
-    throw std::logic_error("Central directory and local headers disagree");
-  }
-
-  std::string uncompressed_bytes;
-  uncompressed_bytes.resize(entry.compressed_size);
-  m_input->read(reinterpret_cast<char *>(uncompressed_bytes.data()),
-                uncompressed_bytes.size());
-  compression_method_t cmethod =
-      static_cast<compression_method_t>(entry.compression_method);
-  if (cmethod == compression_method_t::DEFLATED) {
-    uncompressed_bytes = npy_inflate(std::move(uncompressed_bytes));
-  }
-
-  std::uint32_t actual_crc32 = npy_crc32(uncompressed_bytes);
-  if (actual_crc32 != entry.crc32) {
-    throw std::logic_error("CRC mismatch");
-  }
-
-  return uncompressed_bytes;
+std::string npzstringreader::read_file(const std::string &filename) {
+  return ::read_file(m_input, m_entries, filename);
 }
 
-bool inpzstream::is_open() const {
-  std::shared_ptr<std::ifstream> input =
-      std::dynamic_pointer_cast<std::ifstream>(m_input);
-  if (input) {
-    return input->is_open();
-  }
-
-  return true;
-}
-
-void inpzstream::close() {
-  std::shared_ptr<std::ifstream> input =
-      std::dynamic_pointer_cast<std::ifstream>(m_input);
-  if (input) {
-    input->close();
-  }
-}
-
-bool inpzstream::contains(const std::string &filename) {
+bool npzstringreader::contains(const std::string &filename) {
   return m_entries.count(filename);
 }
 
-header_info inpzstream::peek(const std::string &filename) {
-  imemstream stream(read_file(filename));
+header_info npzstringreader::peek(const std::string &filename) {
+  std::istringstream stream(read_file(filename));
   return npy::peek(stream);
 }
+
+npzfilereader::npzfilereader(const std::string &path)
+    : m_input(path, std::ios::binary) {
+  read_entries();
+}
+
+npzfilereader::npzfilereader(const char *path)
+    : m_input(path, std::ios::binary) {
+  read_entries();
+}
+
+npzfilereader::npzfilereader(const std::filesystem::path &path)
+    : m_input(path, std::ios::binary) {
+  read_entries();
+}
+
+void npzfilereader::read_entries() {
+  if (!m_input.is_open()) {
+    throw std::invalid_argument("File not found");
+  }
+
+  ::read_entries(m_input, m_entries, m_keys);
+}
+
+const std::vector<std::string> &npzfilereader::keys() const { return m_keys; }
+
+std::string npzfilereader::read_file(const std::string &filename) {
+  return ::read_file(m_input, m_entries, filename);
+}
+
+bool npzfilereader::contains(const std::string &filename) {
+  return m_entries.count(filename);
+}
+
+header_info npzfilereader::peek(const std::string &filename) {
+  std::istringstream stream(read_file(filename));
+  return npy::peek(stream);
+}
+
+bool npzfilereader::is_open() const { return m_input.is_open(); }
+
+void npzfilereader::close() { m_input.close(); }
+
 } // namespace npy

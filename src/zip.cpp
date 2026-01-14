@@ -1,9 +1,8 @@
+#include "zip.h"
 #include "miniz/miniz.h"
 #include <cassert>
+#include <cstdint>
 #include <stdexcept>
-
-#include "npy/core.h"
-#include "zip.h"
 
 namespace {
 const size_t CHUNK = 1024 * 1024;
@@ -34,12 +33,12 @@ std::string npy_deflate(std::string &&bytes) {
   ret = deflateInit2(&strm, Z_DEFAULT_COMPRESSION, Z_DEFLATED, WINDOW_BITS,
                      MEM_LEVEL, Z_DEFAULT_STRATEGY);
   if (ret != Z_OK) {
-    throw std::logic_error("Unable to initialize deflate algorithm");
+    throw std::runtime_error("Unable to initialize deflate algorithm");
   }
 
   std::string str(bytes.begin(), bytes.end());
-  imemstream input(std::move(str));
-  omemstream output;
+  std::istringstream input(std::move(str));
+  std::ostringstream output;
 
   /* compress until end of file */
   do {
@@ -50,7 +49,7 @@ std::string npy_deflate(std::string &&bytes) {
     } else {
       if (input.fail() || input.bad()) {
         (void)deflateEnd(&strm);
-        throw std::logic_error("Error reading from input stream");
+        throw std::runtime_error("Error reading from input stream");
       }
 
       flush = Z_NO_FLUSH;
@@ -69,7 +68,7 @@ std::string npy_deflate(std::string &&bytes) {
       output.write(reinterpret_cast<char *>(out.data()), have);
       if (output.fail() || output.bad()) {
         (void)deflateEnd(&strm);
-        throw std::logic_error("Error writing to output stream");
+        throw std::runtime_error("Error writing to output stream");
       }
     } while (strm.avail_out == 0);
     assert(strm.avail_in == 0); /* all input will be used */
@@ -97,12 +96,12 @@ std::string npy_inflate(std::string &&bytes) {
   strm.next_in = Z_NULL;
   ret = inflateInit2(&strm, WINDOW_BITS);
   if (ret != Z_OK) {
-    throw std::logic_error("Unable to initialize inflate algorithm");
+    throw std::runtime_error("Unable to initialize inflate algorithm");
   }
 
   std::string str(bytes.begin(), bytes.end());
-  imemstream input(std::move(str));
-  omemstream output;
+  std::istringstream input(std::move(str));
+  std::ostringstream output;
 
   /* decompress until deflate stream ends or end of file */
   do {
@@ -110,7 +109,7 @@ std::string npy_inflate(std::string &&bytes) {
     strm.avail_in = static_cast<uInt>(input.gcount());
     if ((input.fail() && !input.eof()) || input.bad()) {
       (void)inflateEnd(&strm);
-      throw std::logic_error("Error reading from input stream");
+      throw std::runtime_error("Error reading from input stream");
     }
 
     if (strm.avail_in == 0) {
@@ -131,14 +130,14 @@ std::string npy_inflate(std::string &&bytes) {
       case Z_DATA_ERROR:
       case Z_MEM_ERROR:
         (void)inflateEnd(&strm);
-        throw std::logic_error("Error inflating stream");
+        throw std::runtime_error("Error inflating stream");
       }
 
       have = CHUNK - strm.avail_out;
       output.write(reinterpret_cast<char *>(out.data()), have);
       if (output.fail() || output.bad()) {
         (void)inflateEnd(&strm);
-        throw std::logic_error("Error writing to output stream");
+        throw std::runtime_error("Error writing to output stream");
       }
     } while (strm.avail_out == 0);
 
@@ -152,7 +151,7 @@ std::string npy_inflate(std::string &&bytes) {
     return output.str();
   }
 
-  throw std::logic_error("Error inflating stream");
+  throw std::runtime_error("Error inflating stream");
 }
 
 } // namespace npy
