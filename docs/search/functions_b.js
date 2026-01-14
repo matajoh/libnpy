@@ -1,0 +1,9 @@
+var searchData=
+[
+  ['native_5fendian_0',['native_endian',['../namespacenpy.html#a24b1626f2566733cf09d60144c592f46',1,'npy']]],
+  ['ndim_1',['ndim',['../classnpy_1_1tensor.html#ad3832b2cb1c9314abdfcaac2323967ae',1,'npy::tensor']]],
+  ['npzfilereader_2',['npzfilereader',['../classnpy_1_1npzfilereader.html#af7b038a903f86a357d125672a4a50756',1,'npy::npzfilereader::npzfilereader(const std::string &amp;path)'],['../classnpy_1_1npzfilereader.html#ab29173dcf97776c2cce89e162237eaf6',1,'npy::npzfilereader::npzfilereader(const char *path)'],['../classnpy_1_1npzfilereader.html#a4e2505dfcedd329f71b74e34834dede1',1,'npy::npzfilereader::npzfilereader(const std::filesystem::path &amp;path)']]],
+  ['npzfilewriter_3',['npzfilewriter',['../classnpy_1_1npzfilewriter.html#a775248d2574efda0c190da4ac2955022',1,'npy::npzfilewriter::npzfilewriter(const std::string &amp;path, compression_method_t compression=compression_method_t::STORED, endian_t endianness=npy::endian_t::NATIVE)'],['../classnpy_1_1npzfilewriter.html#ab643d08ffcbd16abf9f9aa05c5cf06b6',1,'npy::npzfilewriter::npzfilewriter(const char *path, compression_method_t compression=compression_method_t::STORED, endian_t endianness=npy::endian_t::NATIVE)'],['../classnpy_1_1npzfilewriter.html#ab8a4c5cb7bebe5fdfa7037b991df585f',1,'npy::npzfilewriter::npzfilewriter(const std::filesystem::path &amp;path, compression_method_t compression=compression_method_t::STORED, endian_t endianness=npy::endian_t::NATIVE)']]],
+  ['npzstringreader_4',['npzstringreader',['../classnpy_1_1npzstringreader.html#a5f4909d0601f4d8f485b4fbd6bfedab7',1,'npy::npzstringreader::npzstringreader(const std::string &amp;bytes)'],['../classnpy_1_1npzstringreader.html#a852c00b3e3c8ef9c099fc7e44ad01e53',1,'npy::npzstringreader::npzstringreader(std::string &amp;&amp;bytes)']]],
+  ['npzstringwriter_5',['npzstringwriter',['../classnpy_1_1npzstringwriter.html#ac4af99c5336f2036abab13ed374a02bd',1,'npy::npzstringwriter']]]
+];

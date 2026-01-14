@@ -1,0 +1,23 @@
+<map id="include/npy/npy.h" name="include/npy/npy.h">
+<area shape="rect" id="Node000001" title="Definitions for reading and writing NPY and NPZ files The libnpy library provides a means to read and..." alt="" coords="426,5,561,31"/>
+<area shape="rect" id="Node000002" title=" " alt="" coords="5,79,91,104"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="426,31,105,81,104,76,425,26"/>
+<area shape="rect" id="Node000003" title=" " alt="" coords="115,79,184,104"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="433,33,198,81,197,76,432,28"/>
+<area shape="rect" id="Node000004" title=" " alt="" coords="208,79,275,104"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="454,33,289,79,287,74,452,28"/>
+<area shape="rect" id="Node000005" title=" " alt="" coords="299,79,389,104"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="470,33,382,75,380,70,468,28"/>
+<area shape="rect" id="Node000006" title=" " alt="" coords="414,79,487,104"/>
+<area shape="poly" id="edge5_Node000001_Node000006" title=" " alt="" coords="489,32,467,68,462,66,484,30"/>
+<area shape="rect" id="Node000007" title=" " alt="" coords="512,79,563,104"/>
+<area shape="poly" id="edge6_Node000001_Node000007" title=" " alt="" coords="503,30,525,66,521,68,498,32"/>
+<area shape="rect" id="Node000008" title=" " alt="" coords="587,79,661,104"/>
+<area shape="poly" id="edge7_Node000001_Node000008" title=" " alt="" coords="516,28,592,70,590,74,513,33"/>
+<area shape="rect" id="Node000009" title=" " alt="" coords="686,79,773,104"/>
+<area shape="poly" id="edge8_Node000001_Node000009" title=" " alt="" coords="532,28,679,72,677,77,530,33"/>
+<area shape="rect" id="Node000010" title=" " alt="" coords="797,79,856,104"/>
+<area shape="poly" id="edge9_Node000001_Node000010" title=" " alt="" coords="556,28,784,76,783,81,555,33"/>
+<area shape="rect" id="Node000011" title=" " alt="" coords="881,79,943,104"/>
+<area shape="poly" id="edge10_Node000001_Node000011" title=" " alt="" coords="561,25,698,46,868,76,867,81,697,51,560,31"/>
+</map>

@@ -1,0 +1,4 @@
+var searchData=
+[
+  ['load_0',['load',['../classnpy_1_1tensor.html#af3dcdd9973eb737eb3d7767fe218f194',1,'npy::tensor::load()'],['../namespacenpy.html#ad148c7b2221003f191e2bd702dea80bb',1,'npy::load(std::basic_istream&lt; CHAR &gt; &amp;input)'],['../namespacenpy.html#a1565fcb28c1366a0a1f7bb2bfc66399b',1,'npy::load(const std::string &amp;path)'],['../namespacenpy.html#aaf2637461706271cf4535f037ebdb9c9',1,'npy::load(const std::string &amp;path)']]]
+];
