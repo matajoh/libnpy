@@ -4,6 +4,7 @@ include(FetchContent)
 
 project( npy_images VERSION 0.1.0 LANGUAGES CXX )
 
+set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 if (DEFINED ENV{LIBNPY_REPO})
