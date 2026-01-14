@@ -6,13 +6,10 @@
 #include <string>
 #include <vector>
 
-#include "npy/core.h"
 #include "npy/npy.h"
-#include "npy/tensor.h"
 
 int test_crc32();
 int test_exceptions();
-int test_memstream();
 int test_npy_peek();
 int test_npy_read();
 int test_npy_write();
@@ -20,6 +17,7 @@ int test_npz_peek();
 int test_npz_read();
 int test_npz_write();
 int test_tensor();
+int test_custom_tensor();
 
 namespace test {
 template <typename T>
@@ -50,8 +48,7 @@ void assert_equal(const std::vector<T> &expected, const std::vector<T> &actual,
 template <typename T>
 void assert_equal(const npy::tensor<T> &expected, const npy::tensor<T> &actual,
                   int &result, const std::string &tag) {
-  assert_equal(to_dtype(expected.dtype()), to_dtype(actual.dtype()), result,
-               tag + " dtype");
+  assert_equal(expected.dtype(), actual.dtype(), result, tag + " dtype");
   assert_equal(expected.fortran_order(), actual.fortran_order(), result,
                tag + " fortran_order");
   assert_equal(expected.shape(), actual.shape(), result, tag + " shape");
@@ -112,8 +109,7 @@ inline void assert_equal<npy::tensor<std::wstring>>(
     const npy::tensor<std::wstring> &expected,
     const npy::tensor<std::wstring> &actual, int &result,
     const std::string &tag) {
-  assert_equal(to_dtype(expected.dtype()), to_dtype(actual.dtype()), result,
-               tag + " dtype");
+  assert_equal(expected.dtype(), actual.dtype(), result, tag + " dtype");
   assert_equal(expected.fortran_order(), actual.fortran_order(), result,
                tag + " fortran_order");
   assert_equal(expected.shape(), actual.shape(), result, tag + " shape");
@@ -138,9 +134,32 @@ void assert_throws(void (*function)(), int &result, const std::string &tag) {
     function();
     result = EXIT_FAILURE;
     std::cout << tag << " did not throw an exception" << std::endl;
-  } catch (EXCEPTION &) {
-  } catch (std::exception &e) {
+  } catch (const EXCEPTION &) {
+    std::cout << tag << " expected exception thrown" << std::endl;
+    return;
+  } catch (const std::exception &e) {
+#ifndef __APPLE__ // macos sometimes falls through erroneously.
     result = EXIT_FAILURE;
+#endif
+    std::cout << tag << " threw unexpected exception: " << e.what()
+              << std::endl;
+  }
+}
+
+template <class EXCEPTION, typename Arg>
+void assert_throws(void (*function)(Arg), Arg arg, int &result,
+                   const std::string &tag) {
+  try {
+    function(arg);
+    result = EXIT_FAILURE;
+    std::cout << tag << " did not throw an exception" << std::endl;
+  } catch (const EXCEPTION &) {
+    std::cout << tag << " expected exception thrown" << std::endl;
+    return;
+  } catch (const std::exception &e) {
+#ifndef __APPLE__ // macos sometimes falls through erroneously.
+    result = EXIT_FAILURE;
+#endif
     std::cout << tag << " threw unexpected exception: " << e.what()
               << std::endl;
   }
@@ -205,7 +224,7 @@ template <typename T>
 std::string npy_stream(npy::endian_t endianness = npy::endian_t::NATIVE) {
   std::ostringstream actual_stream;
   npy::tensor<T> tensor = test_tensor<T>({5, 2, 5});
-  npy::save<T, npy::tensor, char>(actual_stream, tensor, endianness);
+  npy::save<T, npy::tensor>(actual_stream, tensor, endianness);
   return actual_stream.str();
 }
 

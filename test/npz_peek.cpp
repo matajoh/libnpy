@@ -1,5 +1,4 @@
 #include "libnpy_tests.h"
-#include "npy/npz.h"
 
 namespace {
 void _test(int &result, const std::string &filename, bool compressed) {
@@ -8,7 +7,7 @@ void _test(int &result, const std::string &filename, bool compressed) {
   npy::header_info expected_depth(npy::data_type_t::FLOAT32,
                                   npy::endian_t::LITTLE, false, {5, 5});
 
-  npy::inpzstream stream(test::asset_path(filename));
+  npy::npzfilereader stream(test::asset_path(filename));
   const auto &keys = stream.keys();
 
   test::assert_equal(keys[0], std::string("color.npy"), result,

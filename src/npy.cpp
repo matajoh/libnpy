@@ -57,12 +57,12 @@ bool read_bool(std::istream &input) {
     return false;
   }
 
-  throw std::logic_error("Dictionary value is not a boolean");
+  throw std::runtime_error("Dictionary value is not a boolean");
 }
 
 std::vector<size_t> read_shape(std::istream &input) {
   read(input, '(');
-  std::stringstream tuple(read_to(input, ')'));
+  std::istringstream tuple(read_to(input, ')'));
   read(input, ')');
 
   std::vector<size_t> shape;
@@ -107,7 +107,7 @@ header_info::header_info(const std::string &dictionary) {
     } else if (key == "shape") {
       shape = read_shape(input);
     } else {
-      throw std::logic_error("Unsupported key: " + key);
+      throw std::runtime_error("Unsupported key: " + key);
     }
 
     read(input, ',');

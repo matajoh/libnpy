@@ -1,4 +1,4 @@
-cmake_minimum_required( VERSION 3.13...3.16 FATAL_ERROR )
+cmake_minimum_required( VERSION 3.15 )
 
 # -------------------- Version --------------------------------
 
@@ -16,14 +16,12 @@ set( LIBNPY_VERSION ${LIBNPY_VERSION_MAJOR}.${LIBNPY_VERSION_MINOR}.${LIBNPY_VER
 
 message("Configure LIBNPY_VERSION at ${LIBNPY_VERSION}")
 
-project( libnpy VERSION ${LIBNPY_VERSION} LANGUAGES CXX)
+project( npy VERSION ${LIBNPY_VERSION} LANGUAGES CXX)
 
 # -------------------- Options --------------------------------
 
 option( LIBNPY_BUILD_TESTS "Specifies whether to build the tests" OFF )
-option( LIBNPY_BUILD_SAMPLES "Specifies whether to build the samples" OFF )
 option( LIBNPY_BUILD_DOCUMENTATION "Specifies whether to build the documentation for the API and XML" OFF )
-option( LIBNPY_INCLUDE_CSHARP  "Specifies whether to build libnpy with C# bindings" OFF )
 set( LIBNPY_SANITIZE "" CACHE STRING "Argument to pass to sanitize (disabled by default)")
 
 set(CMAKE_CXX_STANDARD 17)
@@ -31,29 +29,7 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 # -------------------- Find packages --------------------------
 
-if ( WIN32 AND INCLUDE_CSHARP )
-    enable_language( CSharp )
-else()
-    set( INCLUDE_CSHARP OFF )
-endif()
-
 set( CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${CMAKE_CURRENT_SOURCE_DIR}/cmake )
-
-if( INCLUDE_CSHARP )
-  find_package( SWIG REQUIRED )
-
-  # Select the .NET architecture
-  set( CSHARP_PLATFORM_DESC "C# target platform: x86, x64, anycpu, or itanium" )
-  if( CMAKE_SIZEOF_VOID_P EQUAL 8 )
-    set( CSHARP_PLATFORM "x64" CACHE STRING ${CSHARP_PLATFORM_DESC})
-  else()
-    set( CSHARP_PLATFORM "x86" CACHE STRING ${CSHARP_PLATFORM_DESC})
-  endif()
-endif()
-
-if( BUILD_DOCUMENTATION )
-  find_package( Doxygen REQUIRED )
-endif()
 
 find_program(CLANG_FORMAT NAMES clang-format-10 clang-format-14 clang-format-18 )
 
@@ -67,7 +43,7 @@ else()
         include/libnpy/*.h
         test/*.cpp
         test/*.h
-        examples/*.cpp
+        examples/**/*.cpp
   )
 
   add_custom_target(libnpy_format
@@ -86,11 +62,8 @@ if( LIBNPY_BUILD_SAMPLES )
 endif()
 
 if( LIBNPY_BUILD_DOCUMENTATION )
+  find_package( Doxygen REQUIRED )
   add_subdirectory( doc )
-endif()
-
-if( LIBNPY_INCLUDE_CSHARP )
-  add_subdirectory( CSharpWrapper )
 endif()
 
 target_include_directories(npy
@@ -104,65 +77,58 @@ target_include_directories(npy
 # -------------------- Testing ------------------------------------
 
 if( LIBNPY_BUILD_TESTS )
-  if( MSVC )
-    set( LIBNPY_CSHARP_DIR ${CMAKE_BINARY_DIR}/CSharpWrapper/$<CONFIG> )
-  endif()
-
   include( CTest )
   add_subdirectory( test )
 endif()
 
 
-# -------------------- Build settings -----------------------------
-
-# use C++11
-target_compile_features(npy PRIVATE cxx_std_11)
-
 # -------------------- INSTALL ------------------------------------
 
-set(INSTALL_CONFIGDIR "cmake")
+set(INSTALL_CONFIGDIR cmake)
+set(INSTALL_LIBDIR lib)
+set(INSTALL_INCLUDEDIR include)
+set(LIBNPY_INSTALL_TARGETS npy)
 
-install(TARGETS npy 
-  EXPORT npy-targets
-  ARCHIVE DESTINATION "build/native/lib"
-  LIBRARY DESTINATION "build/native/lib"
+install(TARGETS ${LIBNPY_INSTALL_TARGETS}
+  EXPORT ${PROJECT_NAME}_Targets
+  ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
+  LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
+  RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
 )
 
-install(DIRECTORY include/ DESTINATION "build/native/include")
-
-install(EXPORT npy-targets
-  FILE
-    npyTargets.cmake
-  NAMESPACE
-    npy::
-  DESTINATION
-    ${INSTALL_CONFIGDIR}
-)
-
+# Create a ConfigVersion.cmake file
 include(CMakePackageConfigHelpers)
 write_basic_package_version_file(
-  ${CMAKE_CURRENT_BINARY_DIR}/npyConfigVersion.cmake
+  ${PROJECT_BINARY_DIR}/${PROJECT_NAME}ConfigVersion.cmake
   VERSION ${PROJECT_VERSION}
   COMPATIBILITY AnyNewerVersion
 )
 
-configure_package_config_file(${CMAKE_CURRENT_LIST_DIR}/cmake/npyConfig.cmake.in
-  ${CMAKE_CURRENT_BINARY_DIR}/npyConfig.cmake
-  INSTALL_DESTINATION ${INSTALL_CONFIGDIR}
+configure_package_config_file(${PROJECT_SOURCE_DIR}/cmake/${PROJECT_NAME}Config.cmake.in
+  ${PROJECT_BINARY_DIR}/${PROJECT_NAME}Config.cmake
+  INSTALL_DESTINATION
+  ${CMAKE_INSTALL_PREFIX}/${PROJECT_NAME}/cmake
 )
 
-install(FILES
-  ${CMAKE_CURRENT_BINARY_DIR}/npyConfig.cmake
-  ${CMAKE_CURRENT_BINARY_DIR}/npyConfigVersion.cmake
-  DESTINATION ${INSTALL_CONFIGDIR}
-)
+install(EXPORT ${PROJECT_NAME}_Targets
+  FILE ${PROJECT_NAME}Targets.cmake
+  NAMESPACE ${PROJECT_NAME}::
+  DESTINATION ${CMAKE_INSTALL_PREFIX}/${PROJECT_NAME}/cmake)
 
-export(EXPORT npy-targets
-  FILE ${CMAKE_CURRENT_BINARY_DIR}/npyTargets.cmake
-  NAMESPACE npy::
-)
+install(FILES ${PROJECT_BINARY_DIR}/${PROJECT_NAME}Config.cmake
+  ${PROJECT_BINARY_DIR}/${PROJECT_NAME}ConfigVersion.cmake
+  DESTINATION ${CMAKE_INSTALL_PREFIX}/${PROJECT_NAME}/cmake)
 
-export(PACKAGE npy)
+export(EXPORT ${PROJECT_NAME}_Targets
+  FILE ${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}Targets.cmake
+  NAMESPACE ${PROJECT_NAME}::)
+
+export(PACKAGE ${PROJECT_NAME})
+
+install(DIRECTORY include/ DESTINATION ${INSTALL_INCLUDEDIR})
+install(FILES 
+  DESTINATION ${INSTALL_INCLUDEDIR}/npy
+)
 
 # -------------------- Package ------------------------------------
 
@@ -171,22 +137,9 @@ set( PROJECT_FILES
   CHANGELOG.md
 )
 
-# copy these files into the root of the distribution zip
-install( FILES ${PROJECT_FILES} DESTINATION "." )
-
-if( MSVC )
-  # NuGet files
-  set( LIBNPY_NUGET_NAME "npy-${SYSTEM_TOOLKIT}-${SYSTEM_BITS}-${CMAKE_BUILD_TYPE}" CACHE STRING "npy NuGet Name" FORCE )
-  file( READ RELEASE_NOTES LIBNPY_RELEASE_NOTES )
-
-  configure_file("${CMAKE_CURRENT_SOURCE_DIR}/nuget/template.nuspec.in" "${CMAKE_CURRENT_BINARY_DIR}/nuget/${LIBNPY_NUGET_NAME}.nuspec" @ONLY )
-  configure_file("${CMAKE_CURRENT_SOURCE_DIR}/nuget/template.targets.in"
-                "${CMAKE_CURRENT_BINARY_DIR}/nuget/build/native/${LIBNPY_NUGET_NAME}.targets" @ONLY )
-else()
-  set( CPACK_SYSTEM_NAME ${SYSTEM_NAME} )
-  set( CPACK_PACKAGE_VERSION "${LIBNPY_VERSION}" )
-  set( CPACK_GENERATOR "ZIP" )
-  set( CPACK_SOURCE_GENERATOR "ZIP" )
-  set( CPACK_INCLUDE_TOPLEVEL_DIRECTORY 0 )
-  include( CPack )
-endif()
+set( CPACK_SYSTEM_NAME ${SYSTEM_NAME} )
+set( CPACK_PACKAGE_VERSION "${LIBNPY_VERSION}" )
+set( CPACK_GENERATOR "ZIP" )
+set( CPACK_SOURCE_GENERATOR "ZIP" )
+set( CPACK_INCLUDE_TOPLEVEL_DIRECTORY 0 )
+include( CPack )
