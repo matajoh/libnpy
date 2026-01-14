@@ -174,6 +174,58 @@ jobs:
         working-directory: ${{github.workspace}}/build
         run: ctest -V --build-config Release --timeout 120 --output-on-failure -T Test
 
+  windows-examples-images:
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Git config for fetching pull requests
+        run: |
+          git config --global --add remote.origin.fetch +refs/pull/*/merge:refs/remotes/pull/*
+
+      - name: CMake config
+        working-directory: ${{github.workspace}}/examples/images
+        run: cmake -B ${{github.workspace}}/examples/images/build
+        env:
+          LIBNPY_REPO: https://github.com/${{github.repository}}
+          LIBNPY_TAG: ${{github.sha}}
+
+      - name: CMake build
+        working-directory: ${{github.workspace}}/examples/images/build
+        run: cmake --build . --config Release
+
+      - name: CMake test
+        working-directory: ${{github.workspace}}/examples/images/build
+        run: ctest -V --build-config Release --timeout 120 --output-on-failure -T Test
+
+  windows-examples-custom_tensors:
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Git config for fetching pull requests
+        run: |
+          git config --global --add remote.origin.fetch +refs/pull/*/merge:refs/remotes/pull/*
+
+      - name: CMake config
+        working-directory: ${{github.workspace}}/examples/custom_tensors
+        run: cmake -B ${{github.workspace}}/examples/custom_tensors/build
+        env:
+          LIBNPY_REPO: https://github.com/${{github.repository}}
+          LIBNPY_TAG: ${{github.sha}}
+
+      - name: CMake build
+        working-directory: ${{github.workspace}}/examples/custom_tensors/build
+        run: cmake --build . --config Release
+
+      - name: CMake test
+        working-directory: ${{github.workspace}}/examples/custom_tensors/build
+        run: ctest -V --build-config Release --timeout 120 --output-on-failure -T Test -L npy
+
   macos:
     runs-on: macos-latest
 
@@ -207,6 +259,58 @@ jobs:
         working-directory: ${{github.workspace}}/build
         run: ctest -V --build-config Release --timeout 120 --output-on-failure -T Test
 
+  macos-examples-images:
+    runs-on: macos-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Git config for fetching pull requests
+        run: |
+          git config --global --add remote.origin.fetch +refs/pull/*/merge:refs/remotes/pull/*
+
+      - name: CMake config
+        working-directory: ${{github.workspace}}/examples/images
+        run: cmake -B ${{github.workspace}}/examples/images/build
+        env:
+          LIBNPY_REPO: https://github.com/${{github.repository}}
+          LIBNPY_TAG: ${{github.sha}}
+
+      - name: CMake build
+        working-directory: ${{github.workspace}}/examples/images/build
+        run: make
+
+      - name: CMake test
+        working-directory: ${{github.workspace}}/examples/images/build
+        run: ctest -V --build-config Release --timeout 120 --output-on-failure -T Test
+
+  macos-examples-custom_tensors:
+    runs-on: macos-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Git config for fetching pull requests
+        run: |
+          git config --global --add remote.origin.fetch +refs/pull/*/merge:refs/remotes/pull/*
+
+      - name: CMake config
+        working-directory: ${{github.workspace}}/examples/custom_tensors
+        run: cmake -B ${{github.workspace}}/examples/custom_tensors/build
+        env:
+          LIBNPY_REPO: https://github.com/${{github.repository}}
+          LIBNPY_TAG: ${{github.sha}}
+
+      - name: CMake build
+        working-directory: ${{github.workspace}}/examples/custom_tensors/build
+        run: make
+
+      - name: CMake test
+        working-directory: ${{github.workspace}}/examples/custom_tensors/build
+        run: ctest -V --build-config Release --timeout 120 --output-on-failure -T Test -L npy
+
   macos-x86_64:
     runs-on: macos-15-intel
 
@@ -239,3 +343,55 @@ jobs:
       - name: CMake test
         working-directory: ${{github.workspace}}/build
         run: ctest -V --build-config Release --timeout 120 --output-on-failure -T Test
+
+  macos-x86_64-examples-images:
+    runs-on: macos-15-intel
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Git config for fetching pull requests
+        run: |
+          git config --global --add remote.origin.fetch +refs/pull/*/merge:refs/remotes/pull/*
+
+      - name: CMake config
+        working-directory: ${{github.workspace}}/examples/images
+        run: cmake -B ${{github.workspace}}/examples/images/build
+        env:
+          LIBNPY_REPO: https://github.com/${{github.repository}}
+          LIBNPY_TAG: ${{github.sha}}
+
+      - name: CMake build
+        working-directory: ${{github.workspace}}/examples/images/build
+        run: make
+
+      - name: CMake test
+        working-directory: ${{github.workspace}}/examples/images/build
+        run: ctest -V --build-config Release --timeout 120 --output-on-failure -T Test
+
+  macos-x86_64-examples-custom_tensors:
+    runs-on: macos-15-intel
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Git config for fetching pull requests
+        run: |
+          git config --global --add remote.origin.fetch +refs/pull/*/merge:refs/remotes/pull/*
+
+      - name: CMake config
+        working-directory: ${{github.workspace}}/examples/custom_tensors
+        run: cmake -B ${{github.workspace}}/examples/custom_tensors/build
+        env:
+          LIBNPY_REPO: https://github.com/${{github.repository}}
+          LIBNPY_TAG: ${{github.sha}}
+
+      - name: CMake build
+        working-directory: ${{github.workspace}}/examples/custom_tensors/build
+        run: make
+
+      - name: CMake test
+        working-directory: ${{github.workspace}}/examples/custom_tensors/build
+        run: ctest -V --build-config Release --timeout 120 --output-on-failure -T Test -L npy
