@@ -1,4 +1,5 @@
-#include "npy/tensor.h"
+#include "npy/npy.h"
+#include <complex>
 
 namespace npy {
 template <> data_type_t tensor<std::int8_t>::get_dtype() {
@@ -40,6 +41,14 @@ template <> data_type_t tensor<float>::get_dtype() {
 template <> data_type_t tensor<double>::get_dtype() {
   return data_type_t::FLOAT64;
 };
+
+template <> data_type_t tensor<std::complex<float>>::get_dtype() {
+  return data_type_t::COMPLEX64;
+}
+
+template <> data_type_t tensor<std::complex<double>>::get_dtype() {
+  return data_type_t::COMPLEX128;
+}
 
 template <> data_type_t tensor<std::wstring>::get_dtype() {
   return data_type_t::UNICODE_STRING;

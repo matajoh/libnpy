@@ -38,11 +38,11 @@ namespace npy {
  */
 template <typename T> class tensor {
 public:
-  /** Constructor.
-   *  \param path the path to an NPY file on the disk
-   */
-  explicit tensor(const std::string &path)
-      : tensor(npy::load<T, npy::tensor>(path)) {}
+  typedef T value_type;
+  typedef value_type &reference;
+  typedef const value_type &const_reference;
+  typedef value_type *pointer;
+  typedef const value_type *const_pointer;
 
   /** Constructor. This will allocate a data buffer of the appropriate size in
    * row-major order. \param shape the shape of the tensor
@@ -72,6 +72,28 @@ public:
         m_ravel_strides(std::move(other.m_ravel_strides)),
         m_fortran_order(other.m_fortran_order), m_dtype(other.m_dtype),
         m_values(std::move(other.m_values)) {}
+
+  static tensor<T> from_file(const std::string& path)
+  {
+    return npy::load<tensor<T>>(path);
+  }
+
+  static tensor<T> load(std::basic_istream<char>& input, const header_info& info)
+  {
+    tensor<T> result(info.shape, info.fortran_order);
+    if(info.dtype != result.dtype()){
+      throw std::runtime_error("requested dtype does not match stream's dtype");
+    }
+
+    read_values(input, result.m_values.data(), result.m_values.size(), info);
+
+    return result;
+  }
+
+  void save(std::basic_ostream<char>& output, endian_t endianness) const
+  {
+    write_values(output, m_values.data(), m_values.size(), endianness);
+  }
 
   /** Variable parameter index function.
    *  \param index an index into the tensor. Can be negative (in which case it
@@ -136,7 +158,11 @@ public:
   }
 
   /** The data type of the tensor. */
-  const data_type_t dtype() const { return m_dtype; }
+  std::string dtype(endian_t endianness) const {
+    return to_dtype(m_dtype, endianness);
+  }
+
+  data_type_t dtype() const { return m_dtype; };
 
   /** The underlying values buffer. */
   const std::vector<T> &values() const { return m_values; }
@@ -197,6 +223,8 @@ public:
    */
   const size_t shape(int index) const { return m_shape[index]; }
 
+  const size_t ndim() const { return m_shape.size(); }
+
   /** Whether the tensor data is stored in FORTRAN, or column-major, order. */
   bool fortran_order() const { return m_fortran_order; }
 
@@ -242,7 +270,7 @@ public:
     for (auto stride = m_ravel_strides.begin(); stride < m_ravel_strides.end();
          ++index, ++shape, ++stride) {
       if (*index >= *shape) {
-        throw std::out_of_range("multi_index");
+        throw std::invalid_argument("multi_index");
       }
 
       ravel += *index * *stride;

@@ -2,7 +2,6 @@
 #include <cstdio>
 
 #include "libnpy_tests.h"
-#include "npy/tensor.h"
 
 namespace {
 const char *TEMP_NPY = "temp.npy";
@@ -25,7 +24,7 @@ int test_tensor() {
 
   fortran.save(TEMP_NPY);
 
-  npy::tensor<std::uint8_t> from_file(TEMP_NPY);
+  auto from_file = npy::tensor<std::uint8_t>::from_file(TEMP_NPY);
   npy::tensor<std::uint8_t> standard(from_file.shape(), false);
   for (int i = 0; i < 3; ++i) {
     for (int j = 0; j < 4; ++j) {
