@@ -49,21 +49,20 @@ You can then build and run the tests using:
 
 Once the library has been built and installed, you can begin to use it
 in your code. We have provided some
-[sample programs](https://github.com/matajoh/libnpy/tree/main/samples)
-(and naturally the [tests](https://github.com/matajoh/libnpy/tree/main/test)
-as well) which show how to use the library, but the basic concepts are as follows.
-For the purpose of this sample code we will use the built-in [tensor](src/tensor.h)
-class, but you should use your own tensor class as appropriate.
+[example programs](https://github.com/matajoh/libnpy/tree/main/examples/)
+(and naturally the [tests](https://github.com/matajoh/libnpy/tree/main/test) as well) which show how to use the library,
+but the basic concepts are as follows.
+For the purpose of this sample code we will use the built-in [tensor](https://github.com/matajoh/libnpy/tree/main/src/tensor.h)
+class, but you should use your own tensor class as appropriate (see
+the [custom tensor example](https://github.com/matajoh/libnpy/tree/main/examples/custom_tensors) for details.)
 
 ```C++
-#include "tensor.h"
-#include "npy.h"
-#include "npz.h"
+#include "npy/npy.h"
 
-...
+int main()
+{
     // create a tensor object
-    std::vector<size_t> shape({32, 32, 3});
-    npy::tensor<std::uint8_t> color(shape);
+    npy::tensor<std::uint8_t> color({32, 32, 3});
 
     // fill it with some data
     for (int row = 0; row < color.shape(0); ++row)
@@ -92,8 +91,7 @@ class, but you should use your own tensor class as appropriate.
     color = npy::load<std::uint8_t, npy::tensor>("color.npy");
 
     // let's create a second tensor as well
-    shape = {32, 32};
-    npy::tensor<float> gray(shape);
+    npy::tensor<float> gray({32, 32});
 
     for (int row = 0; row < gray.shape(0); ++row)
     {
@@ -107,14 +105,14 @@ class, but you should use your own tensor class as appropriate.
 
     // we can write them to an NPZ file
     {
-        npy::onpzstream output("test.npz");
+        npy::npzfilewriter output("test.npz");
         output.write("color.npy", color);
         output.write("gray.npy", gray);
     }
 
     // and we can read them back out again
     {
-        npy::inpzstream input("test.npz");
+        npy::npzfilereader input("test.npz");
 
         // we can test to see if the archive contains a file
         if (input.contains("color.npy"))
@@ -123,9 +121,12 @@ class, but you should use your own tensor class as appropriate.
             header = input.peek("color.npy");
         }
 
-        color = input.read<std::uint8_t>("color.npy");
-        gray = input.read<float>("gray.npy");
+        color = input.read<npy::tensor<std::uint8_t>>("color.npy");
+        gray = input.read<npy::tensor<float>>("gray.npy");
     }
+
+    return 0;
+}
 ```
 
 The generated documentation contains more details on all of the functionality.

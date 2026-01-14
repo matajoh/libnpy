@@ -1,6 +1,5 @@
 #include "libnpy_tests.h"
-#include "npy/npy.h"
-#include "npy/tensor.h"
+#include <complex>
 
 int test_npy_write() {
   int result = EXIT_SUCCESS;
@@ -66,6 +65,14 @@ int test_npy_write() {
   expected = test::read_asset("float64.npy");
   actual = test::npy_stream<double>(npy::endian_t::LITTLE);
   test::assert_equal(expected, actual, result, "npy_write_float64");
+
+  expected = test::read_asset("complex64.npy");
+  actual = test::npy_stream<std::complex<float>>(npy::endian_t::LITTLE);
+  test::assert_equal(expected, actual, result, "npy_write_complex64");
+
+  expected = test::read_asset("complex128.npy");
+  actual = test::npy_stream<std::complex<double>>(npy::endian_t::LITTLE);
+  test::assert_equal(expected, actual, result, "npy_write_complex128");
 
   expected = test::read_asset("unicode.npy");
   actual = test::npy_stream<std::wstring>(npy::endian_t::LITTLE);

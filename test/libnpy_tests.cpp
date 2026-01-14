@@ -21,7 +21,7 @@ inline char sep() {
 namespace test {
 
 std::string path_join(const std::vector<std::string> &parts) {
-  std::stringstream result;
+  std::ostringstream result;
   result << parts.front();
 
   for (auto it = parts.begin() + 1; it < parts.end(); ++it) {
@@ -59,7 +59,6 @@ int main(int argc, char **argv) {
 
   tests["crc32"] = test_crc32;
   tests["exceptions"] = test_exceptions;
-  tests["memstream"] = test_memstream;
   tests["npy_peek"] = test_npy_peek;
   tests["npy_read"] = test_npy_read;
   tests["npy_write"] = test_npy_write;
@@ -67,6 +66,7 @@ int main(int argc, char **argv) {
   tests["npz_read"] = test_npz_read;
   tests["npz_write"] = test_npz_write;
   tests["tensor"] = test_tensor;
+  tests["custom_tensor"] = test_custom_tensor;
 
   if (argc == 2) {
     std::string test(argv[1]);
