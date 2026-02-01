@@ -85,6 +85,8 @@ enum class data_type_t : char {
   COMPLEX64,
   /// 128-bit complex number (std::complex<double>)
   COMPLEX128,
+  /// Boolean value
+  BOOL,
   /// Unicode string (std::wstring)
   UNICODE_STRING
 };
@@ -1010,6 +1012,38 @@ inline std::string tensor<std::wstring>::dtype(endian_t endianness) const {
   }
 
   return ">U" + std::to_string(max_length);
+}
+
+/// @brief Specialization of load for bool tensors.
+/// @details std::vector<bool> is a special case in C++ that doesn't provide
+/// a data() method, so we need to read elements one at a time.
+template <>
+inline tensor<bool> tensor<bool>::load(std::basic_istream<char> &input,
+                                       const header_info &info) {
+  tensor<bool> result(info.shape, info.fortran_order);
+  if (info.dtype != result.dtype()) {
+    throw std::runtime_error("requested dtype does not match stream's dtype");
+  }
+
+  for (size_t i = 0; i < result.m_values.size(); ++i) {
+    char byte;
+    input.read(&byte, 1);
+    result.m_values[i] = (byte != 0);
+  }
+
+  return result;
+}
+
+/// @brief Specialization of save for bool tensors.
+/// @details std::vector<bool> is a special case in C++ that doesn't provide
+/// a data() method, so we need to write elements one at a time.
+template <>
+inline void tensor<bool>::save(std::basic_ostream<char> &output,
+                               endian_t) const {
+  for (size_t i = 0; i < m_values.size(); ++i) {
+    char byte = m_values[i] ? 1 : 0;
+    output.write(&byte, 1);
+  }
 }
 
 } // namespace npy
