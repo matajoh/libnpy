@@ -78,5 +78,9 @@ int test_npy_write() {
   actual = test::npy_stream<std::wstring>(npy::endian_t::LITTLE);
   test::assert_equal(expected, actual, result, "npy_write_unicode");
 
+  expected = test::read_asset("bool.npy");
+  actual = test::npy_stream<bool>();
+  test::assert_equal(expected, actual, result, "npy_write_bool");
+
   return result;
 };
