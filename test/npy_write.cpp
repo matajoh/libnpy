@@ -79,7 +79,7 @@ int test_npy_write() {
   test::assert_equal(expected, actual, result, "npy_write_unicode");
 
   expected = test::read_asset("bool.npy");
-  actual = test::npy_stream<bool>();
+  actual = test::npy_stream<npy::boolean>();
   test::assert_equal(expected, actual, result, "npy_write_bool");
 
   return result;

@@ -54,7 +54,7 @@ template <> data_type_t tensor<std::wstring>::get_dtype() {
   return data_type_t::UNICODE_STRING;
 }
 
-template <> data_type_t tensor<bool>::get_dtype() {
+template <> data_type_t tensor<boolean>::get_dtype() {
   return data_type_t::BOOL;
 }
 

@@ -22,7 +22,7 @@ int test_npy_read() {
   test_read<std::complex<float>>(result, "complex64");
   test_read<std::complex<double>>(result, "complex128");
   test_read<std::wstring>(result, "unicode");
-  test_read<bool>(result, "bool");
+  test_read<npy::boolean>(result, "bool");
 
   return result;
 }

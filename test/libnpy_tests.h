@@ -191,11 +191,11 @@ inline npy::tensor<std::wstring> test_tensor(const std::vector<size_t> &shape) {
 }
 
 template <>
-inline npy::tensor<bool> test_tensor(const std::vector<size_t> &shape) {
-  npy::tensor<bool> tensor(shape);
+inline npy::tensor<npy::boolean> test_tensor(const std::vector<size_t> &shape) {
+  npy::tensor<npy::boolean> tensor(shape);
   int i = 0;
   for (auto it = tensor.begin(); it != tensor.end(); ++it, ++i) {
-    *it = (i % 2) == 1;  // Alternating false, true, false, true, ...
+    *it = (i % 2) == 1; // Alternating false, true, false, true, ...
   }
 
   return tensor;
@@ -231,12 +231,12 @@ template <> inline npy::tensor<std::wstring> test_fortran_tensor() {
   return tensor;
 }
 
-template <> inline npy::tensor<bool> test_fortran_tensor() {
+template <> inline npy::tensor<npy::boolean> test_fortran_tensor() {
   std::vector<int> values = {0,  10, 20, 30, 40, 5,  15, 25, 35, 45, 1,  11, 21,
                              31, 41, 6,  16, 26, 36, 46, 2,  12, 22, 32, 42, 7,
                              17, 27, 37, 47, 3,  13, 23, 33, 43, 8,  18, 28, 38,
                              48, 4,  14, 24, 34, 44, 9,  19, 29, 39, 49};
-  npy::tensor<bool> tensor({5, 2, 5}, true);
+  npy::tensor<npy::boolean> tensor({5, 2, 5}, true);
   auto dst = tensor.begin();
   auto src = values.begin();
   for (; dst != tensor.end(); ++src, ++dst) {

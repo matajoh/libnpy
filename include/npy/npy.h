@@ -91,6 +91,40 @@ enum class data_type_t : char {
   UNICODE_STRING
 };
 
+/// @brief Boolean datatype which uses 1-byte storage
+/// @details std::vector<bool> uses bitfields to store boolean values, which
+/// makes it inefficient for reading and copying data from numpy, which stores
+/// boolean values as bytes. This struct mimics this scheme while remaining
+/// implicitly convertable to and from boolean values and expressions.
+struct boolean {
+  /// @brief The storage of the boolean, either 1 (true) or 0 (false)
+  std::uint8_t value;
+
+  /// @brief Default constructor, sets value to false.
+  boolean() { value = 0; }
+
+  /// @brief Templated constructor, allowing conversion from any type that can
+  /// be interpreted as a boolean.
+  /// @param v The value to convert into a boolean
+  /// @tparam T Must be implicitly convertable to bool
+  template <typename T> boolean(const T &v) { value = v > 0 ? 1 : 0; }
+
+  /// @brief Constructor from boolean values.
+  /// @param b The bool to store
+  boolean(bool b) { value = b ? 1 : 0; }
+
+  /// @brief Implicit cast operator to bool
+  operator bool() const { return value != 0; }
+
+  /// @brief Assignment operator
+  /// @param v The value to convert into a boolean
+  /// @tparam T Must be implicitly convertable to bool
+  template <typename T> boolean &operator=(const T &v) {
+    value = v ? 1 : 0;
+    return *this;
+  }
+};
+
 /// @brief Convert a data type and endianness to a NPY dtype string.
 /// @param dtype the data type
 /// @param endian the endianness. Defaults to the current endianness of the
@@ -379,8 +413,8 @@ public:
       compression_method_t compression = compression_method_t::STORED,
       endian_t endianness = npy::endian_t::NATIVE);
 
-  /// @brief Destructor. This will call @ref npy::npzstringwriter::close, if it has
-  /// not been called already.
+  /// @brief Destructor. This will call @ref npy::npzstringwriter::close, if it
+  /// has not been called already.
   ~npzstringwriter();
 
   /// @brief Returns the contents of the string stream as a string.
@@ -454,8 +488,8 @@ public:
                 compression_method_t compression = compression_method_t::STORED,
                 endian_t endianness = npy::endian_t::NATIVE);
 
-  /// @brief Destructor. This will call @ref npy::npzfilewriter::close, if it has
-  /// not been called already.
+  /// @brief Destructor. This will call @ref npy::npzfilewriter::close, if it
+  /// has not been called already.
   ~npzfilewriter();
 
   /// @brief Returns whether the NPZ file is open.
@@ -1012,38 +1046,6 @@ inline std::string tensor<std::wstring>::dtype(endian_t endianness) const {
   }
 
   return ">U" + std::to_string(max_length);
-}
-
-/// @brief Specialization of load for bool tensors.
-/// @details std::vector<bool> is a special case in C++ that doesn't provide
-/// a data() method, so we need to read elements one at a time.
-template <>
-inline tensor<bool> tensor<bool>::load(std::basic_istream<char> &input,
-                                       const header_info &info) {
-  tensor<bool> result(info.shape, info.fortran_order);
-  if (info.dtype != result.dtype()) {
-    throw std::runtime_error("requested dtype does not match stream's dtype");
-  }
-
-  for (size_t i = 0; i < result.m_values.size(); ++i) {
-    char byte;
-    input.read(&byte, 1);
-    result.m_values[i] = (byte != 0);
-  }
-
-  return result;
-}
-
-/// @brief Specialization of save for bool tensors.
-/// @details std::vector<bool> is a special case in C++ that doesn't provide
-/// a data() method, so we need to write elements one at a time.
-template <>
-inline void tensor<bool>::save(std::basic_ostream<char> &output,
-                               endian_t) const {
-  for (size_t i = 0; i < m_values.size(); ++i) {
-    char byte = m_values[i] ? 1 : 0;
-    output.write(&byte, 1);
-  }
 }
 
 } // namespace npy

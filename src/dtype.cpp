@@ -9,15 +9,13 @@
 #define GETC(x) static_cast<char>((x).get())
 
 namespace {
-std::array<std::string, 13> BIG_ENDIAN_DTYPES = {"|i1", "|u1", ">i2", ">u2",
-                                                 ">i4", ">u4", ">i8", ">u8",
-                                                 ">f4", ">f8", ">c8", ">c16",
-                                                 "|b1"};
+std::array<std::string, 13> BIG_ENDIAN_DTYPES = {
+    "|i1", "|u1", ">i2", ">u2", ">i4",  ">u4", ">i8",
+    ">u8", ">f4", ">f8", ">c8", ">c16", "|b1"};
 
 std::array<std::string, 13> LITTLE_ENDIAN_DTYPES = {
-    "|i1", "|u1", "<i2", "<u2", "<i4", "<u4",
-    "<i8", "<u8", "<f4", "<f8", "<c8", "<c16",
-    "|b1"};
+    "|i1", "|u1", "<i2", "<u2", "<i4",  "<u4", "<i8",
+    "<u8", "<f4", "<f8", "<c8", "<c16", "|b1"};
 
 std::map<std::string, std::pair<npy::data_type_t, npy::endian_t>> DTYPE_MAP = {
     {"|u1", {npy::data_type_t::UINT8, npy::endian_t::NATIVE}},
@@ -103,22 +101,16 @@ void read_values<>(std::basic_istream<char> &input, int8_t *data_ptr,
 }
 
 template <>
-void write_values<>(std::basic_ostream<char> &output, const bool *data_ptr,
+void write_values<>(std::basic_ostream<char> &output, const boolean *data_ptr,
                     size_t num_elements, endian_t) {
-  for (size_t i = 0; i < num_elements; ++i) {
-    char byte = data_ptr[i] ? 1 : 0;
-    output.write(&byte, 1);
-  }
+  output.write(reinterpret_cast<const char *>(data_ptr), num_elements);
 }
 
 template <>
-void read_values<>(std::basic_istream<char> &input, bool *data_ptr,
+void read_values<>(std::basic_istream<char> &input, boolean *data_ptr,
                    size_t num_elements, const header_info &) {
-  for (size_t i = 0; i < num_elements; ++i) {
-    char byte;
-    input.read(&byte, 1);
-    data_ptr[i] = (byte != 0);
-  }
+  char *start = reinterpret_cast<char *>(data_ptr);
+  input.read(start, num_elements);
 }
 
 template <>
