@@ -19,6 +19,11 @@ else ()
   set(LIBNPY_TAG "main")
 endif()
 
+if(LIBNPY_REPO STREQUAL LOCAL)
+  set(FETCHCONTENT_SOURCE_DIR_LIBNPY "${CMAKE_SOURCE_DIR}/../..")
+  message("LIBNPY_REPO=LOCAL: Using ${FETCHCONTENT_SOURCE_DIR_LIBNPY} as source directory")
+endif()
+
 FetchContent_Declare(
   libnpy
   GIT_REPOSITORY ${LIBNPY_REPO}

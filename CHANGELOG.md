@@ -1,5 +1,18 @@
 # Changelog
 
+## [2026-02-11 - Version 2.1.0](https://github.com/matajoh/libnpy/releases/tag/v2.1.0)
+
+Minor version adding support for boolean tensors.
+
+Improvements
+- New `boolean` type which acts like a `bool` but is stored in vectors as a byte
+  (instead of a bitmask, see https://cppreference.net/cpp/container/vector_bool.html)
+- Support for numpy boolean tensors (using the above `boolean` type)
+- Updating the CI to deal with intermittent failures on Github
+
+Thanks!!
+- https://github.com/olokobayusuf for this feature suggestion and the PR
+
 ## [2026-01-14 - Version 2.0.0](https://github.com/matajoh/libnpy/releases/tag/v2.0.0)
 
 Major version with breaking changes.
