@@ -9,13 +9,13 @@
 #define GETC(x) static_cast<char>((x).get())
 
 namespace {
-std::array<std::string, 13> BIG_ENDIAN_DTYPES = {"|i1", "|u1", ">i2", ">u2",
-                                                 ">i4", ">u4", ">i8", ">u8",
-                                                 ">f4", ">f8", ">c8", ">c16"};
+std::array<std::string, 13> BIG_ENDIAN_DTYPES = {
+    "|i1", "|u1", ">i2", ">u2", ">i4",  ">u4", ">i8",
+    ">u8", ">f4", ">f8", ">c8", ">c16", "|b1"};
 
 std::array<std::string, 13> LITTLE_ENDIAN_DTYPES = {
-    "|i1", "|u1", "<i2", "<u2", "<i4", "<u4",
-    "<i8", "<u8", "<f4", "<f8", "<c8", "<c16"};
+    "|i1", "|u1", "<i2", "<u2", "<i4",  "<u4", "<i8",
+    "<u8", "<f4", "<f8", "<c8", "<c16", "|b1"};
 
 std::map<std::string, std::pair<npy::data_type_t, npy::endian_t>> DTYPE_MAP = {
     {"|u1", {npy::data_type_t::UINT8, npy::endian_t::NATIVE}},
@@ -39,7 +39,8 @@ std::map<std::string, std::pair<npy::data_type_t, npy::endian_t>> DTYPE_MAP = {
     {"<c8", {npy::data_type_t::COMPLEX64, npy::endian_t::LITTLE}},
     {">c8", {npy::data_type_t::COMPLEX64, npy::endian_t::BIG}},
     {"<c16", {npy::data_type_t::COMPLEX128, npy::endian_t::LITTLE}},
-    {">c16", {npy::data_type_t::COMPLEX128, npy::endian_t::BIG}}};
+    {">c16", {npy::data_type_t::COMPLEX128, npy::endian_t::BIG}},
+    {"|b1", {npy::data_type_t::BOOL, npy::endian_t::NATIVE}}};
 } // namespace
 
 namespace npy {
@@ -94,6 +95,19 @@ void write_values<>(std::basic_ostream<char> &output, const int8_t *data_ptr,
 
 template <>
 void read_values<>(std::basic_istream<char> &input, int8_t *data_ptr,
+                   size_t num_elements, const header_info &) {
+  char *start = reinterpret_cast<char *>(data_ptr);
+  input.read(start, num_elements);
+}
+
+template <>
+void write_values<>(std::basic_ostream<char> &output, const boolean *data_ptr,
+                    size_t num_elements, endian_t) {
+  output.write(reinterpret_cast<const char *>(data_ptr), num_elements);
+}
+
+template <>
+void read_values<>(std::basic_istream<char> &input, boolean *data_ptr,
                    size_t num_elements, const header_info &) {
   char *start = reinterpret_cast<char *>(data_ptr);
   input.read(start, num_elements);

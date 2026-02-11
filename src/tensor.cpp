@@ -54,4 +54,8 @@ template <> data_type_t tensor<std::wstring>::get_dtype() {
   return data_type_t::UNICODE_STRING;
 }
 
+template <> data_type_t tensor<boolean>::get_dtype() {
+  return data_type_t::BOOL;
+}
+
 } // namespace npy
