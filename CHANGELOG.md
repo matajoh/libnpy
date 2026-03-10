@@ -1,5 +1,12 @@
 # Changelog
 
+## [2026-03-12 - Version 2.1.1](https://github.com/matajoh/libnpy/releases/tag/v2.1.1)
+
+Patch release adding vcpkg packaging support.
+
+Improvements:
+- Added vcpkg port files and removed remnants of the old NuGet packaging approach
+
 ## [2026-02-11 - Version 2.1.0](https://github.com/matajoh/libnpy/releases/tag/v2.1.0)
 
 Minor version adding support for boolean tensors.

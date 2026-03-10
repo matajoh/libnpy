@@ -1,7 +1,7 @@
 # libnpy
 
 `libnpy` is a multi-platform C++ library for reading and writing NPY and
-NPZ files, with an additional .NET interface. It was built with the 
+NPZ files. It was built with the 
 intention of making it easier for multi-language projects to use NPZ and
 NPY files for data storage, given their simplicity and support across
 most Python deep learning frameworks.

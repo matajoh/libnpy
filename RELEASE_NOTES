@@ -1,10 +1,4 @@
-Improvements:
-- Increased CHUNK size as per miniz instructions
-- Added tests for very large arrays in NPZ files
-- Added some CI tests to catch issues across platforms
-- Removed the internal IO streams in favor of just using stringstream
-- NPZs can now be read from and written to memory
+Patch release adding vcpkg packaging support.
 
-Bugfixes:
-- Fixed an issue where very large arrays in NPZ files would throw an error
-- Fixed a bug with mac builds due to deprecated APIs
+Improvements:
+- Added vcpkg port files and removed remnants of the old NuGet packaging approach
