@@ -1,10 +1,11 @@
 {
-    "name": "libnpy",
-    "version": "2.1.1",
+    "name": "matajoh-libnpy",
+    "version": "2.1.2",
     "description": "A C++17 library for reading and writing NumPy NPY and NPZ array files",
     "homepage": "https://github.com/matajoh/libnpy",
     "license": "MIT",
     "dependencies": [
+        "miniz",
         {
             "name": "vcpkg-cmake",
             "host": true

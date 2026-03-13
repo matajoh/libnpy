@@ -22,6 +22,7 @@ project( npy VERSION ${LIBNPY_VERSION} LANGUAGES CXX)
 
 option( LIBNPY_BUILD_TESTS "Specifies whether to build the tests" OFF )
 option( LIBNPY_BUILD_DOCUMENTATION "Specifies whether to build the documentation for the API and XML" OFF )
+option( LIBNPY_USE_SYSTEM_MINIZ "Use system-installed miniz instead of vendored copy" OFF )
 set( LIBNPY_SANITIZE "" CACHE STRING "Argument to pass to sanitize (disabled by default)")
 
 set(CMAKE_CXX_STANDARD 17)
@@ -40,7 +41,7 @@ else()
   file(GLOB ALL_SOURCE_FILES CONFIGURE_DEPENDS
         src/*.cpp
         src/*.h
-        include/libnpy/*.h
+        include/npy/*.h
         test/*.cpp
         test/*.h
         examples/**/*.cpp

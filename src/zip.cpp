@@ -1,5 +1,9 @@
 #include "zip.h"
+#ifdef LIBNPY_USE_SYSTEM_MINIZ
+#include <miniz/miniz.h>
+#else
 #include "miniz/miniz.h"
+#endif
 #include <cassert>
 #include <cstdint>
 #include <stdexcept>

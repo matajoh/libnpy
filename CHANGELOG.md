@@ -1,5 +1,18 @@
 # Changelog
 
+## [2026-03-13 - Version 2.1.2](https://github.com/matajoh/libnpy/releases/tag/v2.1.2)
+
+Patch release updating the vcpkg port to match the upstream registry.
+
+Improvements:
+- Renamed vcpkg port from `libnpy` to `matajoh-libnpy` to match the existing vcpkg registry port
+- Added `LIBNPY_USE_SYSTEM_MINIZ` CMake option to allow linking system-installed miniz instead of the vendored copy
+- Updated `npyConfig.cmake.in` to propagate `find_dependency(miniz)` to downstream consumers when system miniz is used
+
+Bugfixes:
+- Fixed clang-format glob pattern referencing non-existent `include/libnpy/` directory
+- Fixed typo in `npyConfig.cmake.in` (`GOCPPset` → `set`)
+
 ## [2026-03-12 - Version 2.1.1](https://github.com/matajoh/libnpy/releases/tag/v2.1.1)
 
 Patch release adding vcpkg packaging support.
