@@ -4,4 +4,4 @@ if(NOT TARGET npy::npy)
     include("${NPY_CMAKE_DIR}/npyTargets.cmake")
 endif()
 
-set(LIBNPY_lIBRARIES npy::npy)
+set(npy_LIBRARIES npy::npy)

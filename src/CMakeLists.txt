@@ -13,8 +13,8 @@ add_library( npy STATIC ${SOURCES} )
 add_library( npy::npy ALIAS npy )
 
 if (LIBNPY_SANITIZE)
-  target_compile_options(npy PUBLIC -g -fsanitize=${REGOCPP_SANITIZE} -fno-omit-frame-pointer)
-  target_link_libraries(npy PUBLIC -fsanitize=${REGOCPP_SANITIZE})
+  target_compile_options(npy PUBLIC -g -fsanitize=${LIBNPY_SANITIZE} -fno-omit-frame-pointer)
+  target_link_libraries(npy PUBLIC -fsanitize=${LIBNPY_SANITIZE})
 endif()
 
 if ( CMAKE_COMPILER_IS_GNUCC )
