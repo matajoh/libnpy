@@ -52,7 +52,7 @@ cmake/              CMake helper files (find-module, install config)
 doc/                Doxygen configuration
 vcpkg.json          vcpkg manifest (consumers who use vcpkg to manage deps)
 ports/
-  libnpy/
+  matajoh-libnpy/
     vcpkg.json      Port manifest (metadata, host deps)
     portfile.cmake  Build/install instructions for vcpkg
     usage           Usage hint shown after vcpkg install
@@ -162,6 +162,7 @@ Key CMake options:
 |--------|---------|-------------|
 | `LIBNPY_BUILD_TESTS` | OFF | Build the CTest test executable |
 | `LIBNPY_BUILD_DOCUMENTATION` | OFF | Run Doxygen to generate API docs |
+| `LIBNPY_USE_SYSTEM_MINIZ` | OFF | Use system-installed miniz instead of vendored copy |
 | `LIBNPY_SANITIZE` | `""` | Pass a sanitizer name (e.g. `address`) |
 
 The library installs CMake package config files (`npyConfig.cmake`, `npyTargets.cmake`) so downstream projects can consume it with `find_package(npy)`. Config files land in `share/npy/` (the standard vcpkg location) and headers in `include/`.
@@ -172,11 +173,11 @@ The library installs CMake package config files (`npyConfig.cmake`, `npyTargets.
 
 ### As a consumer (using vcpkg to pull libnpy into another project)
 
-The root `vcpkg.json` declares the package metadata. No dependencies are listed because miniz is vendored. Add `libnpy` to your own `vcpkg.json` dependencies:
+The root `vcpkg.json` declares the package metadata. Add `matajoh-libnpy` to your own `vcpkg.json` dependencies:
 
 ```json
 {
-  "dependencies": [ "libnpy" ]
+  "dependencies": [ "matajoh-libnpy" ]
 }
 ```
 
@@ -189,10 +190,10 @@ target_link_libraries(my_target PRIVATE npy::npy)
 
 ### As an overlay port (before the port is in the vcpkg registry)
 
-The `ports/libnpy/` directory is a self-contained overlay port:
+The `ports/matajoh-libnpy/` directory is a self-contained overlay port:
 
 ```
-vcpkg install libnpy --overlay-ports=ports
+vcpkg install matajoh-libnpy --overlay-ports=ports
 ```
 
 Or add to `CMakePresets.json` via `VCPKG_OVERLAY_PORTS`.
@@ -202,9 +203,9 @@ Or add to `CMakePresets.json` via `VCPKG_OVERLAY_PORTS`.
 Before submitting a PR to the upstream vcpkg registry:
 1. Create a release tag `v<version>` on GitHub.
 2. Compute the SHA512 of the archive: `vcpkg hash <archive.tar.gz>`.
-3. Replace the placeholder `SHA512 0` in `ports/libnpy/portfile.cmake` with the real hash.
-4. Run `vcpkg install libnpy --overlay-ports=ports` to verify.
-5. Run `vcpkg x-add-version libnpy --overlay-ports=ports` to register the version.
+3. Replace the placeholder `SHA512 0` in `ports/matajoh-libnpy/portfile.cmake` with the real hash.
+4. Run `vcpkg install matajoh-libnpy --overlay-ports=ports` to verify.
+5. Run `vcpkg x-add-version matajoh-libnpy --overlay-ports=ports` to register the version.
 
 ---
 

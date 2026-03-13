@@ -29,7 +29,8 @@ Apply the new version to **all** of the following files. No other files contain 
 |------|---------------|
 | `VERSION` | Replace the entire file content with the new version string (no trailing newline beyond what exists). |
 | `vcpkg.json` (repo root) | Update the `"version"` field value. |
-| `ports/libnpy/vcpkg.json` | Update the `"version"` field value. |
+| `ports/matajoh-libnpy/vcpkg.json` | Update the `"version"` field value. |
+| `test/vcpkg/port/matajoh-libnpy/vcpkg.json` | Update the `"version"` field value. |
 | `include/npy/npy.h` | Update **all four** preprocessor defines: `NPY_VERSION_MAJOR`, `NPY_VERSION_MINOR`, `NPY_VERSION_PATCH`, and `NPY_VERSION_STRING`. |
 
 Do **not** touch `CMakeLists.txt` — it reads the version dynamically from the `VERSION` file.

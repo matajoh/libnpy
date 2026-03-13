@@ -4,13 +4,22 @@ set( SOURCES
    npz.cpp
    tensor.cpp
    zip.cpp
-   miniz/miniz.cpp
 )
+
+if(NOT LIBNPY_USE_SYSTEM_MINIZ)
+  list(APPEND SOURCES miniz/miniz.cpp)
+endif()
 
 add_definitions( -DLIBNPY_VERSION=${LIBNPY_VERSION} )
 
 add_library( npy STATIC ${SOURCES} )
 add_library( npy::npy ALIAS npy )
+
+if(LIBNPY_USE_SYSTEM_MINIZ)
+  find_package(miniz CONFIG REQUIRED)
+  target_link_libraries(npy PRIVATE miniz::miniz)
+  target_compile_definitions(npy PRIVATE LIBNPY_USE_SYSTEM_MINIZ)
+endif()
 
 if (LIBNPY_SANITIZE)
   target_compile_options(npy PUBLIC -g -fsanitize=${LIBNPY_SANITIZE} -fno-omit-frame-pointer)

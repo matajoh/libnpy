@@ -5,6 +5,7 @@ vcpkg_cmake_configure(
     OPTIONS
         -DLIBNPY_BUILD_TESTS=OFF
         -DLIBNPY_BUILD_DOCUMENTATION=OFF
+        -DLIBNPY_USE_SYSTEM_MINIZ=ON
 )
 
 vcpkg_cmake_install()

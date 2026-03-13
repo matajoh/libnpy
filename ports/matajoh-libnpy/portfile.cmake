@@ -6,6 +6,8 @@ vcpkg_from_github(
     HEAD_REF main
 )
 
+file(REMOVE_RECURSE "${SOURCE_PATH}/src/miniz")
+
 vcpkg_check_linkage(ONLY_STATIC_LIBRARY)
 
 vcpkg_cmake_configure(
@@ -13,6 +15,7 @@ vcpkg_cmake_configure(
     OPTIONS
         -DLIBNPY_BUILD_TESTS=OFF
         -DLIBNPY_BUILD_DOCUMENTATION=OFF
+        -DLIBNPY_USE_SYSTEM_MINIZ=ON
 )
 
 vcpkg_cmake_install()
