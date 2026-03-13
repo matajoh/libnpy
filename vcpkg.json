@@ -1,0 +1,7 @@
+{
+    "name": "libnpy",
+    "version": "2.1.1",
+    "description": "A C++17 library for reading and writing NumPy NPY and NPZ array files",
+    "homepage": "https://github.com/matajoh/libnpy",
+    "license": "MIT"
+}

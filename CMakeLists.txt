@@ -68,7 +68,7 @@ endif()
 
 target_include_directories(npy
   PUBLIC
-    $<INSTALL_INTERFACE:build/native/include>
+    $<INSTALL_INTERFACE:include>
     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
   PRIVATE
     ${CMAKE_CURRENT_SOURCE_DIR}/src
@@ -84,16 +84,17 @@ endif()
 
 # -------------------- INSTALL ------------------------------------
 
-set(INSTALL_CONFIGDIR cmake)
-set(INSTALL_LIBDIR lib)
-set(INSTALL_INCLUDEDIR include)
-set(LIBNPY_INSTALL_TARGETS npy)
+include(GNUInstallDirs)
 
-install(TARGETS ${LIBNPY_INSTALL_TARGETS}
+install(TARGETS npy
   EXPORT ${PROJECT_NAME}_Targets
   ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
   LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
   RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
+)
+
+install(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/include/
+  DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
 )
 
 # Create a ConfigVersion.cmake file
@@ -106,29 +107,18 @@ write_basic_package_version_file(
 
 configure_package_config_file(${PROJECT_SOURCE_DIR}/cmake/${PROJECT_NAME}Config.cmake.in
   ${PROJECT_BINARY_DIR}/${PROJECT_NAME}Config.cmake
-  INSTALL_DESTINATION
-  ${CMAKE_INSTALL_PREFIX}/${PROJECT_NAME}/cmake
+  INSTALL_DESTINATION ${CMAKE_INSTALL_DATADIR}/${PROJECT_NAME}
 )
 
 install(EXPORT ${PROJECT_NAME}_Targets
   FILE ${PROJECT_NAME}Targets.cmake
   NAMESPACE ${PROJECT_NAME}::
-  DESTINATION ${CMAKE_INSTALL_PREFIX}/${PROJECT_NAME}/cmake)
+  DESTINATION ${CMAKE_INSTALL_DATADIR}/${PROJECT_NAME})
 
-install(FILES ${PROJECT_BINARY_DIR}/${PROJECT_NAME}Config.cmake
+install(FILES
+  ${PROJECT_BINARY_DIR}/${PROJECT_NAME}Config.cmake
   ${PROJECT_BINARY_DIR}/${PROJECT_NAME}ConfigVersion.cmake
-  DESTINATION ${CMAKE_INSTALL_PREFIX}/${PROJECT_NAME}/cmake)
-
-export(EXPORT ${PROJECT_NAME}_Targets
-  FILE ${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}Targets.cmake
-  NAMESPACE ${PROJECT_NAME}::)
-
-export(PACKAGE ${PROJECT_NAME})
-
-install(DIRECTORY include/ DESTINATION ${INSTALL_INCLUDEDIR})
-install(FILES 
-  DESTINATION ${INSTALL_INCLUDEDIR}/npy
-)
+  DESTINATION ${CMAKE_INSTALL_DATADIR}/${PROJECT_NAME})
 
 # -------------------- Package ------------------------------------
 
